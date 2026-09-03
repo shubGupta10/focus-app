@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["FocusBlockerModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.focusblocker.FocusBlockerModule"]
+  }
+}
