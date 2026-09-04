@@ -9,7 +9,7 @@ interface TimerSelectionModalProps {
     onStartSession: (durationMinutes: number) => void;
 }
 
-const PRESET_TIMES = [15, 30, 45, 60, 90, 120];
+const PRESET_TIMES = [1, 15, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const [selectedMinutes, setSelectedMinutes] = useState<number>(30)
@@ -19,31 +19,29 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
     return (
         <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
             <BlurView intensity={20} tint="dark" style={{ flex: 1, justifyContent: 'flex-end' }}>
-                <View className="bg-gray-900 rounded-t-3xl p-6 border-t border-gray-800">
+                <View className="bg-surface rounded-t-3xl p-6 border-t border-border">
                     <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-white text-2xl font-black tracking-wider">NEW SESSION</Text>
+                        <Text className="text-text text-2xl font-black tracking-wider">NEW SESSION</Text>
 
                         <Pressable className="p-2" onPress={onClose}>
                             <Ionicons name="close" size={24} color="#9CA3AF" />
                         </Pressable>
                     </View>
 
-                    {/* Mode 1: Infinite Focus */}
-                    <Text className="text-gray-400 font-bold mb-3 tracking-widest text-xs uppercase">Casual Focus</Text>
+                    <Text className="text-textSecondary font-bold mb-3 tracking-widest text-xs uppercase">Casual Focus</Text>
 
                     <Pressable
                         onPress={() => onStartSession(-1)}
-                        className="bg-gray-800 rounded-2xl p-5 mb-8 border-b-4 border-gray-950 active:bg-gray-700 flex-row items-center justify-between"
+                        className="bg-background rounded-2xl p-5 mb-8 active:opacity-80 flex-row items-center justify-between"
                     >
                         <View>
-                            <Text className="text-white font-black text-xl mb-1">Infinite Mode</Text>
-                            <Text className="text-gray-400 font-medium">Stopwatch counts up until you quit</Text>
+                            <Text className="text-text font-black text-xl mb-1">Infinite Mode</Text>
+                            <Text className="text-textSecondary font-medium">Stopwatch counts up until you quit</Text>
                         </View>
-                        <Ionicons name="infinite" size={32} color="#8B5CF6" />
+                        <Ionicons name="infinite" size={32} color="#D97A59" />
                     </Pressable>
 
-                    {/* Mode 2: Timed Focus */}
-                    <Text className="text-gray-400 font-bold mb-3 tracking-widest text-xs uppercase">Deep Work (Countdown)</Text>
+                    <Text className="text-textSecondary font-bold mb-3 tracking-widest text-xs uppercase">Deep Work (Countdown)</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
                         {PRESET_TIMES.map((mins) => {
                             const isSelected = selectedMinutes === mins
@@ -51,10 +49,10 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 <Pressable
                                     key={mins}
                                     onPress={() => setSelectedMinutes(mins)}
-                                    className={`mr-3 rounded-2xl px-6 py-4 border-b-4 ${isSelected ? "bg-indigo-600 border-indigo-800" : "bg-gray-800 border-gray-950 active:bg-gray-700"
+                                    className={`mr-3 rounded-2xl px-6 py-4 ${isSelected ? "bg-accent" : "bg-background active:opacity-80"
                                         }`}
                                 >
-                                    <Text className={`font-black text-xl ${isSelected ? "text-white" : "text-gray-400"}`}>
+                                    <Text className={`font-black text-xl ${isSelected ? "text-white" : "text-textSecondary"}`}>
                                         {mins}m
                                     </Text>
                                 </Pressable>
@@ -64,12 +62,12 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
 
                     <Pressable
                         onPress={() => onStartSession(selectedMinutes)}
-                        className="w-full bg-white rounded-2xl p-5 items-center justify-center border-b-4 border-gray-300 active:bg-gray-200"
+                        className="w-full bg-accent rounded-2xl p-5 items-center justify-center active:opacity-80"
                     >
-                        <Text className="text-black font-black text-xl tracking-widest">START {selectedMinutes}m</Text>
+                        <Text className="text-white font-black text-xl tracking-widest">START {selectedMinutes}m</Text>
                     </Pressable>
                 </View>
-            </BlurView >
-        </Modal >
+            </BlurView>
+        </Modal>
     )
 }

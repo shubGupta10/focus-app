@@ -1,5 +1,6 @@
 import { ActiveSessionUI } from "@/components/ActiveSessionUI";
-import { FloatingActionButtons } from "@/components/FloatingActionButtons";
+import { CentralFocusOrb } from "@/components/CentralFocusOrb";
+import { CustomBottomBar } from "@/components/CustomBottomBar";
 import { AppApplicationModal } from "@/components/modals/AppSelectionModal";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
@@ -14,10 +15,14 @@ export default function Index() {
 
   const [showAppList, setShowAppList] = useState(false);
   const [showPermission, setShowPermission] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTimerModalVisible, setIsTimeModalVisible] = useState(false);
 
   const handleFocusPress = () => {
+    if (engine.isSessionActive) {
+      engine.stopSession();
+      return;
+    }
+
     if (engine.selectedApps.length === 0) {
       alert("You must select apps to block first!");
       setShowAppList(true);
@@ -28,37 +33,61 @@ export default function Index() {
     if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
       setShowPermission(true);
     } else {
-      setIsTimeModalVisible(true)
+      setIsTimeModalVisible(true);
     }
-  }
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-950">
-      <StatusBar style="light" />
+    <SafeAreaView className="flex-1 bg-background">
+      <StatusBar style="auto" />
 
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-white text-3xl font-black opacity-10 tracking-[10px] uppercase text-center px-4">
-          Future Background Theme
-        </Text>
+      <View className="flex-row justify-between items-center px-6 pt-4">
+        <View className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border shadow-sm">
+          <Text className="text-xl mr-2">🪙</Text>
+          <Text className="text-text font-black text-lg">1,250</Text>
+        </View>
+
+        <View className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border shadow-sm">
+          <Text className="text-base mr-1.5">🔥</Text>
+          <Text className="text-text font-bold text-sm">3 Days</Text>
+        </View>
       </View>
 
-      {
-        !engine.isSessionActive && (
-          <FloatingActionButtons
-            onFocusPress={handleFocusPress}
-            onAppsPress={() => setShowAppList(true)}
-            selectedCount={engine.selectedApps.length}
-          />
-        )
-      }
+      {!engine.isSessionActive ? (
+        <View className="flex-1 items-center justify-between pb-32 pt-6">
+          <View className="items-center h-20 justify-center">
+            <Text className="text-textSecondary text-xs font-bold tracking-[3px] uppercase text-center">
+              READY TO FOCUS
+            </Text>
+            <Text className="text-text text-3xl font-black tracking-tight text-center mt-1">
+              Start your session
+            </Text>
+          </View>
 
-      {engine.isSessionActive && (
+          <CentralFocusOrb isActive={false} />
+
+          <View className="w-full px-8 items-center h-28 justify-center">
+            <Text className="text-textSecondary text-xs text-center font-medium">
+              Block distractions. Earn coins. Build your streak.
+            </Text>
+          </View>
+        </View>
+      ) : (
         <ActiveSessionUI
           onStopPress={engine.stopSession}
           startTime={engine.sessionStartTime}
           endTime={engine.sessionEndTime}
         />
       )}
+
+      <CustomBottomBar
+        onFocusPress={handleFocusPress}
+        onAppsPress={() => setShowAppList(true)}
+        onPermissionsPress={() => setShowPermission(true)}
+        selectedCount={engine.selectedApps.length}
+        hasAllPermissions={engine.hasUsage && engine.hasOverlay && engine.hasBattery}
+        isSessionActive={engine.isSessionActive}
+      />
 
       <AppApplicationModal
         visible={showAppList}
@@ -72,7 +101,7 @@ export default function Index() {
         visible={isTimerModalVisible}
         onClose={() => setIsTimeModalVisible(false)}
         onStartSession={(durationMinutes) => {
-          engine.startSession(durationMinutes)
+          engine.startSession(durationMinutes);
           setIsTimeModalVisible(false);
         }}
       />
@@ -84,6 +113,6 @@ export default function Index() {
         hasOverlay={engine.hasOverlay}
         hasBattery={engine.hasBattery}
       />
-    </SafeAreaView >
-  )
+    </SafeAreaView>
+  );
 }

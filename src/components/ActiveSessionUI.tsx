@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { CentralFocusOrb } from "./CentralFocusOrb";
 
 interface ActiveSessionUIProps {
     onStopPress: () => void;
@@ -8,8 +9,10 @@ interface ActiveSessionUIProps {
 }
 
 export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessionUIProps) {
-    const [timeLeft, setTimeLeft] = useState<string>("00:00");
+    const [timeLeft, setTimeLeft] = useState("00:00");
     const [isInfinite, setIsInfinite] = useState(false);
+    const [sessionProgress, setSessionProgress] = useState(1);
+    const [minuteProgress, setMinuteProgress] = useState(1);
 
     useEffect(() => {
         if (!startTime) return;
@@ -17,7 +20,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
         const infinite = endTime === -1;
         setIsInfinite(infinite);
 
-        const interval = setInterval(() => {
+        const updateTimer = () => {
             const now = Date.now();
 
             if (infinite) {
@@ -25,43 +28,64 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
                 const totalSeconds = Math.floor(diffMs / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+                setSessionProgress(1);
+                const msInMinute = diffMs % 60000;
+                setMinuteProgress(msInMinute / 60000);
             } else if (endTime && endTime > 0) {
+                const totalDuration = endTime - startTime;
                 const diffMs = endTime - now;
                 if (diffMs <= 0) {
                     setTimeLeft("00:00");
-                    onStopPress(); // Auto-stop the UI when time expires!
+                    setSessionProgress(0);
+                    setMinuteProgress(0);
+                    onStopPress();
                     return;
                 }
                 const totalSeconds = Math.floor(diffMs / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+                setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, diffMs / totalDuration)) : 0);
+
+                const msInMinute = diffMs % 60000;
+                const minProg = msInMinute === 0 && diffMs > 0 ? 1 : msInMinute / 60000;
+                setMinuteProgress(Math.max(0, Math.min(1, minProg)));
             }
-        }, 1000);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 500);
 
         return () => clearInterval(interval);
-    }, [startTime, endTime]);
+    }, [startTime, endTime, onStopPress]);
 
     return (
-        <View className="absolute bottom-12 w-full px-8 items-center">
-
-            {/* The Gorgeous Timer Display */}
-            <View className="mb-12 items-center">
-                <Text className="text-gray-400 font-bold tracking-[5px] text-sm uppercase mb-2">
-                    {isInfinite ? "Focus Time" : "Time Remaining"}
-                </Text>
-                <Text className="text-white text-7xl font-black tabular-nums tracking-tighter">
-                    {timeLeft}
+        <View className="flex-1 items-center justify-between pb-32 pt-6">
+            <View className="items-center h-20 justify-center">
+                <Text className="text-text text-3xl font-black tracking-tight text-center">
+                    {isInfinite ? "Open Focus" : "Deep Work"}
                 </Text>
             </View>
 
-            <Pressable
-                onPress={onStopPress}
-                className="w-full h-16 bg-red-500/10 rounded-2xl items-center justify-center border-2 border-red-500/30 active:bg-red-500/20"
-            >
-                <Text className="text-red-400 font-bold text-lg tracking-wider">END SESSION EARLY</Text>
-            </Pressable>
+            <CentralFocusOrb
+                isActive={true}
+                earnedCoins={38}
+                sessionProgress={sessionProgress}
+                minuteProgress={minuteProgress}
+                isInfinite={isInfinite}
+            />
+
+            <View className="items-center h-28 justify-center">
+                <Text className="text-text text-6xl font-black tracking-tight tabular-nums text-center">
+                    {timeLeft}
+                </Text>
+                <Text className="text-textSecondary text-xs font-bold tracking-[4px] uppercase text-center mt-2">
+                    {isInfinite ? "FOCUS TIME" : "TIME REMAINING"}
+                </Text>
+            </View>
         </View>
     );
 }
+
+

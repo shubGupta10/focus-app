@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --color-background: #F8FAFC;
+    --color-background: #FAF8F5; /* Warm Oat */
     --color-surface: #FFFFFF;
-    --color-text: #1E293B;
-    --color-text-secondary: #64748B;
-    --color-accent: #059669;
-    --color-border: #E2E8F0;
-    --color-icon: #64748B;
+    --color-text: #1F1A17;
+    --color-text-secondary: #6B625B;
+    --color-accent: #D97A59; /* Warm Terracotta */
+    --color-border: #E8E4DF;
+    --color-icon: #6B625B;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-background: #0F172A;
-      --color-surface: #1E293B;
-      --color-text: #F8FAFC;
-      --color-text-secondary: #94A3B8;
-      --color-accent: #10B981;
-      --color-border: #334155;
-      --color-icon: #94A3B8;
+      --color-background: #1F1A17; /* Deep Warm Mocha (No Blue) */
+      --color-surface: #2C2521;
+      --color-text: #FAF8F5;
+      --color-text-secondary: #A39992;
+      --color-accent: #D97A59;
+      --color-border: #3F352F;
+      --color-icon: #A39992;
     }
   }
 }
