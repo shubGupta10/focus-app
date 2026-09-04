@@ -40,9 +40,14 @@
 - [x] Wire up `useFocusEngine.ts` to track and format the MM:SS timer.
 - [x] Update `ActiveSessionUI.tsx` to display the live timer.
 
+## Phase 9: Premium Design System (Calm Nature)
+- [ ] Implement Light/Dark mode via `global.css` and `colors.ts`.
+- [ ] Convert all UI components to use semantic tokens (`bg-background`, `text-text`, etc).
+- [ ] Remove hardcoded colors.
+
 ## What we are yet to do
 - [x] Implement the App Categorization logic (Phase 3).
 - [x] Implement persistent storage (SQLite).
 - [ ] Build the final sleek, premium NativeWind UI (Home Screen, Settings).
-- [ ] Pass the session state and blocked apps list from React Native to the Kotlin Engine.
+- [x] Pass the session state and blocked apps list from React Native to the Kotlin Engine.
 - [ ] Build the final sleek, premium NativeWind UI (Home Screen, Settings).
