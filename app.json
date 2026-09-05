@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Lockout",
-    "slug": "focus",
+    "slug": "lockout",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "focus",
+    "scheme": "lockout",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png"
@@ -15,7 +15,7 @@
         "backgroundColor": "#1F1A17",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "package": "com.shubham720.focus",
+      "package": "com.shubham720.lockout",
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",

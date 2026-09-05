@@ -56,15 +56,15 @@ class FocusService : Service() {
 
             val notification: Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Notification.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Focus Blocker Active")
+                    .setContentTitle("Lockout Active")
                     .setContentText("Monitoring for distracting apps...")
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setSmallIcon(applicationInfo.icon)
                     .build()
             } else {
                 Notification.Builder(this)
-                    .setContentTitle("Focus Blocker Active")
+                    .setContentTitle("Lockout Active")
                     .setContentText("Monitoring for distracting apps...")
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setSmallIcon(applicationInfo.icon)
                     .build()
             }
 
@@ -229,7 +229,7 @@ class FocusService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Focus Blocker Service Channel",
+                "Lockout Service Channel",
                 NotificationManager.IMPORTANCE_LOW
             )
             val manager = getSystemService(NotificationManager::class.java)
