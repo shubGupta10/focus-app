@@ -20,6 +20,13 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             session_date TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         );
+
+            CREATE TABLE IF NOT EXISTS active_session (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            start_time INTEGER NOT NULL,
+            end_time INTEGER NOT NULL
+        );
+
             
         CREATE TABLE IF NOT EXISTS user_stats (
             id INTEGER PRIMARY KEY CHECK (id = 1),

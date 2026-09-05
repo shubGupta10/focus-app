@@ -66,7 +66,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
 
                     <Pressable
                         onPress={onClose}
-                        className={`w-full rounded-2xl p-5 items-center justify-center active:opacity-80 ${isSuccess ? 'bg-accent' : 'bg-background border border-border'}`}
+                        className={`w-full rounded-2xl p-5 items-center justify-center active:opacity-80 ${isSuccess ? 'bg-accent' : 'bg-accent border border-border'}`}
                     >
                         <Text className={`font-black text-xl tracking-widest ${isSuccess ? 'text-white' : 'text-text'}`}>
                             {isSuccess ? "CONTINUE" : "DISMISS"}

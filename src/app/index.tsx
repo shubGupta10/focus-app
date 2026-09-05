@@ -28,7 +28,10 @@ export default function Index() {
   const handleFocusPress = () => {
     if (engine.isSessionActive) {
       if (engine.sessionStartTime) {
-        const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+        const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+          ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+          : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
 
         const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
 
@@ -101,7 +104,10 @@ export default function Index() {
         <ActiveSessionUI
           onStopPress={() => {
             if (engine.sessionStartTime) {
-              const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+              const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+                ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
               savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
                 setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
               });

@@ -22,6 +22,7 @@ export function useFocusEngine() {
         loadApps();
         checkPermissions();
         loadSelectedApps();
+        checkActiveSession();
 
         const subscription = AppState.addEventListener("change", (nextAppState) => {
             if (nextAppState === "active") {
@@ -40,6 +41,20 @@ export function useFocusEngine() {
             setSelectedApps(rows.map(row => row.package_name))
         } catch (error) {
             console.error("Error loading selected apps:", error);
+        }
+    }
+
+    const checkActiveSession = async () => {
+        try {
+            const active = await db.getFirstAsync<{ start_time: number, end_time: number }>("SELECT * FROM active_session WHERE id = 1")
+
+            if (active) {
+                setSessionStartTime(active.start_time);
+                setSessionEndTime(active.end_time);
+                setIsSessionActive(true)
+            }
+        } catch (error) {
+            console.error("Error loading active session:", error);
         }
     }
 
@@ -83,6 +98,12 @@ export function useFocusEngine() {
             await FocusBlocker.startService(selectedApps, durationMs);
 
             const now = Date.now();
+            const endTime = durationMs > 0 ? now + durationMs : -1;
+
+            await db.runAsync(
+                "INSERT OR REPLACE INTO active_session(id, start_time, end_time) VALUES (1, ?, ?)",
+                [now, endTime]
+            )
             setSessionStartTime(now);
             setSessionEndTime(durationMs > 0 ? now + durationMs : -1);
             setIsSessionActive(true);
@@ -94,7 +115,10 @@ export function useFocusEngine() {
     const stopSession = async () => {
         try {
             await FocusBlocker.stopService();
+            await db.runAsync("DELETE FROM active_session WHERE id = 1");
             setIsSessionActive(false);
+            setSessionStartTime(null);
+            setSessionEndTime(null);
         } catch (error: any) {
             alert("Error, stopping:" + error.message);
         }
