@@ -1,10 +1,10 @@
+import { Material3Switch } from "@/components/Material3Switch";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { AppState, Pressable, Text, View } from "react-native";
-import { Material3Switch } from "@/components/Material3Switch";
 import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 export default function Settings() {

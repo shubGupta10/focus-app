@@ -1,9 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { cssInterop } from "nativewind";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { Material3Switch } from "../Material3Switch";
 import FocusBlocker from "../../../modules/focus-blocker/src/FocusBlockerModule";
 import { useTheme } from "../../contexts/ThemeContext";
+
+cssInterop(Ionicons, {
+    className: {
+        target: "style",
+        nativeStyleToProp: {
+            color: true,
+        },
+    },
+});
 
 interface PermissionModalProps {
     visible: boolean;
@@ -22,7 +32,7 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                     <View className="flex-row justify-between items-center mb-4">
                         <Text className="text-text text-2xl font-bold">Permissions Required</Text>
                         <TouchableOpacity className="p-1" onPress={onClose}>
-                            <Ionicons name="close" size={24} color={isMaterialYou ? palette.system_accent1[4] : "#D97A59"} />
+                            <Ionicons name="close" size={24} className="text-icon" />
                         </TouchableOpacity>
                     </View>
                     <Text className="text-textSecondary mb-6">

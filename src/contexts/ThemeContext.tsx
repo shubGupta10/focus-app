@@ -69,16 +69,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             }
             : {
                 trackActive: palette.system_accent1[7],    // 500
-                thumbActive: palette.system_accent1[11],   // 900
+                thumbActive: palette.system_neutral1[1],   // 10 (White/Light)
                 trackInactive: palette.system_neutral2[4], // 200
                 thumbInactive: palette.system_neutral2[7], // 500
             }
-        : {
-            trackActive: "#D97A59",
-            thumbActive: "#FFFFFF",
-            trackInactive: "#374151",
-            thumbInactive: "#9CA3AF",
-        };
+        : colorScheme === "dark"
+            ? {
+                trackActive: "#D97A59",
+                thumbActive: "#FFFFFF",
+                trackInactive: "#374151",
+                thumbInactive: "#9CA3AF",
+            }
+            : {
+                trackActive: "#D97A59",
+                thumbActive: "#FFFFFF",
+                trackInactive: "#E8E4DF",
+                thumbInactive: "#6B625B",
+            };
 
     return (
         <ThemeContext.Provider value={{ isMaterialYou, setIsMaterialYou, activeStyle, palette, switchColors }}>
