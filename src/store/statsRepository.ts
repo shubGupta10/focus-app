@@ -1,0 +1,77 @@
+import { SQLiteDatabase } from "expo-sqlite";
+
+export type UserStats = {
+    total_coins: number;
+    current_streak: number;
+    longest_streak: number;
+    last_active_date: string | null;
+    total_focus_seconds: number;
+}
+
+export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
+    const stats = await db.getFirstAsync<UserStats>("SELECT * FROM user_stats WHERE id = 1");
+
+    if (!stats) {
+        return {
+            total_coins: 0,
+            current_streak: 0,
+            longest_streak: 0,
+            last_active_date: null,
+            total_focus_seconds: 0,
+        };
+    }
+    return stats
+}
+
+export async function recordSession(db: SQLiteDatabase, durationSeconds: number): Promise<{ earnedCoins: number, newStreak: number }> {
+    const earnedCoins = Math.floor(durationSeconds / 60);
+
+    const now = new Date();
+    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+    const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const yesterday = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+    const currentStats = await getUserStats(db);
+    let newStreak = currentStats.current_streak;
+
+    if (currentStats.last_active_date === today) {
+        newStreak = currentStats.current_streak;
+    } else if (currentStats.last_active_date === yesterday) {
+        newStreak += 1;
+    } else {
+        newStreak = 1;
+    }
+
+    const newLongestStreak = Math.max(currentStats.longest_streak, newStreak);
+
+    await db.runAsync(
+        `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, session_date)
+        VALUES(?, ?, ?, ?, ?, ?)`,
+        [
+            Date.now() - durationSeconds * 1000,
+            Date.now(),
+            durationSeconds,
+            1,
+            earnedCoins,
+            today,
+        ]
+    )
+
+    //update totalStats in user_stats
+    await db.runAsync(
+        `UPDATE user_stats 
+     SET total_coins = total_coins + ?, 
+         current_streak = ?, 
+         longest_streak = ?, 
+         last_active_date = ?,
+         total_focus_seconds = total_focus_seconds + ?
+     WHERE id = 1`,
+        [earnedCoins, newStreak, newLongestStreak, today, durationSeconds]
+    );
+
+    return {
+        earnedCoins,
+        newStreak
+    }
+}

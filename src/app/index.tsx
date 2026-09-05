@@ -3,8 +3,10 @@ import { CentralFocusOrb } from "@/components/CentralFocusOrb";
 import { CustomBottomBar } from "@/components/CustomBottomBar";
 import { AppApplicationModal } from "@/components/modals/AppSelectionModal";
 import { PermissionModal } from "@/components/modals/PermissionModal";
+import { SessionResultModal } from "@/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { useUserStats } from "@/hooks/useUserStats";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -12,13 +14,36 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const engine = useFocusEngine();
+  const { stats, savedCompletedSession } = useUserStats();
 
   const [showAppList, setShowAppList] = useState(false);
   const [showPermission, setShowPermission] = useState(false);
   const [isTimerModalVisible, setIsTimeModalVisible] = useState(false);
+  const [sessionResult, setSessionResult] = useState<{
+    type: "completed" | "canceled",
+    coins: number;
+    durationSeconds: number;
+  } | null>(null)
 
   const handleFocusPress = () => {
     if (engine.isSessionActive) {
+      if (engine.sessionStartTime) {
+        const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
+        const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
+
+        if (isCountdown) {
+          setSessionResult({
+            type: "canceled",
+            coins: 0,
+            durationSeconds
+          })
+        } else {
+          savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
+            setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+          });
+        }
+      }
       engine.stopSession();
       return;
     }
@@ -44,12 +69,12 @@ export default function Index() {
       <View className="flex-row justify-between items-center px-6 pt-4">
         <View className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border shadow-sm">
           <Text className="text-xl mr-2">🪙</Text>
-          <Text className="text-text font-black text-lg">1,250</Text>
+          <Text className="text-text font-black text-lg">{stats.total_coins.toLocaleString()}</Text>
         </View>
 
         <View className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border shadow-sm">
           <Text className="text-base mr-1.5">🔥</Text>
-          <Text className="text-text font-bold text-sm">3 Days</Text>
+          <Text className="text-text font-bold text-sm">{stats.current_streak === 1 ? "1 Days" : `${stats.current_streak} Days`}</Text>
         </View>
       </View>
 
@@ -74,7 +99,15 @@ export default function Index() {
         </View>
       ) : (
         <ActiveSessionUI
-          onStopPress={engine.stopSession}
+          onStopPress={() => {
+            if (engine.sessionStartTime) {
+              const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+              savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
+                setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+              });
+            }
+            engine.stopSession();
+          }}
           startTime={engine.sessionStartTime}
           endTime={engine.sessionEndTime}
         />
@@ -112,6 +145,12 @@ export default function Index() {
         hasUsage={engine.hasUsage}
         hasOverlay={engine.hasOverlay}
         hasBattery={engine.hasBattery}
+      />
+
+      <SessionResultModal
+        visible={sessionResult !== null}
+        onClose={() => setSessionResult(null)}
+        result={sessionResult}
       />
     </SafeAreaView>
   );

@@ -13,6 +13,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
     const [isInfinite, setIsInfinite] = useState(false);
     const [sessionProgress, setSessionProgress] = useState(1);
     const [minuteProgress, setMinuteProgress] = useState(1);
+    const [earnedCoins, setEarnedCoins] = useState(0);
 
     useEffect(() => {
         if (!startTime) return;
@@ -32,6 +33,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
                 setSessionProgress(1);
                 const msInMinute = diffMs % 60000;
                 setMinuteProgress(msInMinute / 60000);
+                setEarnedCoins(minutes);
             } else if (endTime && endTime > 0) {
                 const totalDuration = endTime - startTime;
                 const diffMs = endTime - now;
@@ -51,6 +53,8 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
                 const msInMinute = diffMs % 60000;
                 const minProg = msInMinute === 0 && diffMs > 0 ? 1 : msInMinute / 60000;
                 setMinuteProgress(Math.max(0, Math.min(1, minProg)));
+                const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                setEarnedCoins(Math.floor(elapsedSeconds / 60));
             }
         };
 
@@ -70,7 +74,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
 
             <CentralFocusOrb
                 isActive={true}
-                earnedCoins={38}
+                earnedCoins={earnedCoins}
                 sessionProgress={sessionProgress}
                 minuteProgress={minuteProgress}
                 isInfinite={isInfinite}
