@@ -1,4 +1,4 @@
-import { getUserStats, recordSession, UserStats } from "@/store/statsRepository";
+import { getUserStats, recordSession, UserStats, getTodayStats, TodayStats } from "@/store/statsRepository";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
 
@@ -11,11 +11,18 @@ export function useUserStats() {
         last_active_date: null,
         total_focus_seconds: 0,
     });
+    const [todayStats, setTodayStats] = useState<TodayStats>({
+        today_focus_seconds: 0,
+        today_sessions: 0,
+        today_coins: 0,
+    });
 
     const refreshStats = useCallback(async () => {
         try {
             const currentStats = await getUserStats(db);
             setStats(currentStats);
+            const currentToday = await getTodayStats(db);
+            setTodayStats(currentToday);
         } catch (error) {
             console.error("Error refreshing stats:", error);
         }
@@ -39,6 +46,7 @@ export function useUserStats() {
     return {
         stats,
         refreshStats,
-        savedCompletedSession
+        savedCompletedSession,
+        todayStats
     }
 }

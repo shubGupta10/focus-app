@@ -8,6 +8,12 @@ export type UserStats = {
     total_focus_seconds: number;
 }
 
+export type TodayStats = {
+    today_focus_seconds: number;
+    today_sessions: number;
+    today_coins: number;
+}
+
 export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
     const stats = await db.getFirstAsync<UserStats>("SELECT * FROM user_stats WHERE id = 1");
 
@@ -74,4 +80,27 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number)
         earnedCoins,
         newStreak
     }
+}
+
+
+
+export async function getTodayStats(db: SQLiteDatabase): Promise<TodayStats> {
+    const now = new Date();
+    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+    const result = await db.getFirstAsync<{
+        today_focus_seconds: number,
+        today_sessions: number,
+        today_coins: number
+    }>(
+        `SELECT 
+            COALESCE(SUM(duration_seconds), 0) as today_focus_seconds,
+            COUNT(id) as today_sessions,
+            COALESCE(SUM(coins_earned), 0) as today_coins
+         FROM sessions 
+         WHERE session_date = ? AND is_completed = 1`,
+        [today]
+    );
+
+    return result || { today_focus_seconds: 0, today_sessions: 0, today_coins: 0 };
 }
