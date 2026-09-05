@@ -2,8 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { cssInterop } from "nativewind";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Material3Switch } from "../Material3Switch";
 import { AppInfo } from "../../../modules/focus-blocker/src/FocusBlockerModule";
+import { useTheme } from "../../contexts/ThemeContext";
 
 cssInterop(Ionicons, {
     className: {
@@ -29,6 +31,7 @@ export function AppApplicationModal({
     selectedApps,
     onToggleApp
 }: AppApplicationModalProps) {
+    const { isMaterialYou, switchColors, activeStyle, palette } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
 
     const filteredApps = installedApps.filter((app) =>
@@ -41,7 +44,7 @@ export function AppApplicationModal({
                 <Pressable className="flex-1" onPress={onClose} />
 
                 <View className="h-[88%] bg-surface rounded-t-[36px] shadow-2xl flex flex-col">
-                    <View className="w-12 h-1.5 bg-neutral-300 dark:bg-neutral-700 rounded-full self-center mt-3 mb-2" />
+                    <View className="w-12 h-1.5 bg-border rounded-full self-center mt-3 mb-2" />
 
                     <View className="flex-row justify-between items-center px-6 pt-2 pb-4">
                         <View>
@@ -55,7 +58,7 @@ export function AppApplicationModal({
                             onPress={onClose}
                             className="bg-accent px-6 py-2.5 rounded-full active:opacity-85 shadow-sm"
                         >
-                            <Text className="text-white font-black text-xs tracking-widest uppercase">DONE</Text>
+                            <Text className="text-background font-black text-xs tracking-widest uppercase">DONE</Text>
                         </Pressable>
                     </View>
 
@@ -65,7 +68,7 @@ export function AppApplicationModal({
                             <TextInput
                                 className="flex-1 ml-2.5 text-text text-sm font-medium"
                                 placeholder="Search apps by name..."
-                                placeholderTextColor="#A39992"
+                                placeholderTextColor={isMaterialYou ? palette.system_neutral2[6] : "#A39992"}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                                 autoCorrect={false}
@@ -120,10 +123,9 @@ export function AppApplicationModal({
                                         </View>
 
                                         <View pointerEvents="none">
-                                            <Switch
+                                            <Material3Switch
                                                 value={isSelected}
-                                                trackColor={{ false: "#E8E4DF", true: "#D97A59" }}
-                                                thumbColor="#FFFFFF"
+                                                onValueChange={() => {}}
                                             />
                                         </View>
                                     </Pressable>

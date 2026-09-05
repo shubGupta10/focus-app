@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
+import { useMaterialYouPalette } from "@assembless/react-native-material-you";
 
 interface CentralFocusOrbProps {
     isActive?: boolean;
@@ -20,6 +21,11 @@ export function CentralFocusOrb({
     const [showHud, setShowHud] = useState(false);
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const palette = useMaterialYouPalette();
+
+    const colorAccent = palette.system_accent1[4]; // 200
+    const colorTrack = palette.system_neutral2[9]; // 700
+    const colorDotCenter = palette.system_neutral1[11]; // 900
 
     useEffect(() => {
         return () => {
@@ -109,7 +115,7 @@ export function CentralFocusOrb({
                                     y1={tick.y1}
                                     x2={tick.x2}
                                     y2={tick.y2}
-                                    stroke="#3F352F"
+                                    stroke={colorTrack}
                                     strokeWidth={tick.isMajor ? "2" : "1.5"}
                                     strokeLinecap="round"
                                 />
@@ -119,7 +125,7 @@ export function CentralFocusOrb({
                                 cx="170"
                                 cy="170"
                                 r={outerRadius}
-                                stroke="#3F352F"
+                                stroke={colorTrack}
                                 strokeWidth="2"
                                 fill="none"
                             />
@@ -128,7 +134,7 @@ export function CentralFocusOrb({
                                     cx="170"
                                     cy="170"
                                     r={outerRadius}
-                                    stroke="#D97A59"
+                                    stroke={colorAccent}
                                     strokeWidth="3"
                                     fill="none"
                                     strokeDasharray={outerCircumference}
@@ -142,7 +148,7 @@ export function CentralFocusOrb({
                                 cx="170"
                                 cy="170"
                                 r={innerRadius}
-                                stroke="#3F352F"
+                                stroke={colorTrack}
                                 strokeWidth="2"
                                 fill="none"
                             />
@@ -152,7 +158,7 @@ export function CentralFocusOrb({
                                         cx="170"
                                         cy="170"
                                         r={innerRadius}
-                                        stroke="#D97A59"
+                                        stroke={colorAccent}
                                         strokeWidth="2"
                                         fill="none"
                                         strokeDasharray={innerCircumference}
@@ -164,20 +170,20 @@ export function CentralFocusOrb({
                                         cx={dotX}
                                         cy={dotY}
                                         r="7"
-                                        fill="#D97A59"
+                                        fill={colorAccent}
                                         opacity="0.25"
                                     />
                                     <Circle
                                         cx={dotX}
                                         cy={dotY}
                                         r="4"
-                                        fill="#D97A59"
+                                        fill={colorAccent}
                                     />
                                     <Circle
                                         cx={dotX}
                                         cy={dotY}
                                         r="1.5"
-                                        fill="#FFFFFF"
+                                        fill={colorDotCenter}
                                     />
                                 </>
                             )}
@@ -190,25 +196,25 @@ export function CentralFocusOrb({
                 {isActive ? (
                     !isInfinite ? (
                         <>
-                            <Text className="text-white font-black text-5xl tracking-tight leading-none">
+                            <Text className="text-background font-black text-5xl tracking-tight leading-none">
                                 {percent}%
                             </Text>
-                            <Text className="text-white opacity-80 text-xs font-bold tracking-widest uppercase mt-1.5">
+                            <Text className="text-background opacity-80 text-xs font-bold tracking-widest uppercase mt-1.5">
                                 COMPLETED
                             </Text>
                         </>
                     ) : (
                         <>
-                            <Text className="text-white font-black text-4xl tracking-tight leading-none">
+                            <Text className="text-background font-black text-4xl tracking-tight leading-none">
                                 ACTIVE
                             </Text>
-                            <Text className="text-white opacity-80 text-xs font-bold tracking-widest uppercase mt-1.5">
+                            <Text className="text-background opacity-80 text-xs font-bold tracking-widest uppercase mt-1.5">
                                 FOCUSING
                             </Text>
                         </>
                     )
                 ) : (
-                    <Text className="text-white font-black text-6xl leading-none">
+                    <Text className="text-background font-black text-6xl leading-none">
                         ¢
                     </Text>
                 )}

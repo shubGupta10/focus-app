@@ -36,7 +36,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                             {isSuccess ? "SESSION COMPLETED" : "SESSION CANCELED"}
                         </Text>
                         <Pressable className="p-2" onPress={onClose}>
-                            <Ionicons name="close" size={24} color="#9CA3AF" />
+                            <Ionicons name="close" size={24} className="text-icon" />
                         </Pressable>
                     </View>
 
@@ -68,7 +68,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                         onPress={onClose}
                         className={`w-full rounded-2xl p-5 items-center justify-center active:opacity-80 ${isSuccess ? 'bg-accent' : 'bg-accent border border-border'}`}
                     >
-                        <Text className={`font-black text-xl tracking-widest ${isSuccess ? 'text-white' : 'text-text'}`}>
+                        <Text className="font-black text-xl tracking-widest text-background">
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
                     </Pressable>

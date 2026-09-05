@@ -4,13 +4,12 @@ import { Text, TouchableOpacity, View } from 'react-native';
 interface Props {
     onAppsPress: () => void;
     onFocusPress: () => void;
-    onPermissionsPress: () => void;
+    onSettingsPress: () => void;
     selectedCount: number;
-    hasAllPermissions: boolean;
     isSessionActive?: boolean;
 }
 
-export function CustomBottomBar({ onAppsPress, onFocusPress, onPermissionsPress, selectedCount, isSessionActive = false }: Props) {
+export function CustomBottomBar({ onAppsPress, onFocusPress, selectedCount, onSettingsPress, isSessionActive = false }: Props) {
     return (
         <View className="absolute bottom-0 w-full px-4 pb-8 pt-4">
             <View className="flex-row justify-between items-center bg-surface rounded-[40px] px-8 py-4 border border-border shadow-lg">
@@ -19,7 +18,7 @@ export function CustomBottomBar({ onAppsPress, onFocusPress, onPermissionsPress,
                         <Ionicons name="grid" size={24} className="text-icon" />
                         {selectedCount > 0 && (
                             <View className="absolute -top-2 -right-3 bg-accent w-5 h-5 rounded-full items-center justify-center border-2 border-surface">
-                                <Text className="text-white text-[10px] font-bold">{selectedCount}</Text>
+                                <Text className="text-background text-[10px] font-bold">{selectedCount}</Text>
                             </View>
                         )}
                     </View>
@@ -35,7 +34,7 @@ export function CustomBottomBar({ onAppsPress, onFocusPress, onPermissionsPress,
                         <Ionicons
                             name={isSessionActive ? "pause" : "play"}
                             size={isSessionActive ? 28 : 32}
-                            color="#FFFFFF"
+                            className="text-background"
                             style={isSessionActive ? undefined : { marginLeft: 3 }}
                         />
                     </TouchableOpacity>
@@ -44,9 +43,9 @@ export function CustomBottomBar({ onAppsPress, onFocusPress, onPermissionsPress,
                     </Text>
                 </View>
 
-                <TouchableOpacity className="items-center justify-center w-20" onPress={onPermissionsPress}>
-                    <Ionicons name="shield-checkmark" size={24} className="text-icon" />
-                    <Text className="text-textSecondary text-[9px] mt-1 font-medium tracking-wider uppercase text-center">Permissions</Text>
+                <TouchableOpacity className="items-center justify-center w-20" onPress={onSettingsPress}>
+                    <Ionicons name="settings-sharp" size={24} className="text-icon" />
+                    <Text className="text-textSecondary text-[9px] mt-1 font-medium tracking-wider uppercase text-center">Settings</Text>
                 </TouchableOpacity>
             </View>
         </View>

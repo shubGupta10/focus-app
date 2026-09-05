@@ -5,8 +5,10 @@ import { AppApplicationModal } from "@/components/modals/AppSelectionModal";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { SessionResultModal } from "@/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { useUserStats } from "@/hooks/useUserStats";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -15,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
   const engine = useFocusEngine();
   const { stats, savedCompletedSession } = useUserStats();
+  const { activeStyle } = useTheme()
 
   const [showAppList, setShowAppList] = useState(false);
   const [showPermission, setShowPermission] = useState(false);
@@ -66,7 +69,7 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
       <StatusBar style="auto" />
 
       <View className="flex-row justify-between items-center px-6 pt-4">
@@ -122,9 +125,8 @@ export default function Index() {
       <CustomBottomBar
         onFocusPress={handleFocusPress}
         onAppsPress={() => setShowAppList(true)}
-        onPermissionsPress={() => setShowPermission(true)}
+        onSettingsPress={() => router.push("/settings")}
         selectedCount={engine.selectedApps.length}
-        hasAllPermissions={engine.hasUsage && engine.hasOverlay && engine.hasBattery}
         isSessionActive={engine.isSessionActive}
       />
 

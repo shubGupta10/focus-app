@@ -10,6 +10,11 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             package_name TEXT PRIMARY KEY NOT NULL 
         );
         
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY NOT NULL,
+            value TEXT NOT NULL
+        );
+        
         CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             start_time INTEGER NOT NULL,

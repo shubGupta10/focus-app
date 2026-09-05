@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface TimerSelectionModalProps {
     visible: boolean
@@ -12,6 +13,7 @@ interface TimerSelectionModalProps {
 const PRESET_TIMES = [1, 15, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
+    const { isMaterialYou, palette } = useTheme();
     const [selectedMinutes, setSelectedMinutes] = useState<number>(30)
 
     if (!visible) return null;
@@ -24,7 +26,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         <Text className="text-text text-2xl font-black tracking-wider">NEW SESSION</Text>
 
                         <Pressable className="p-2" onPress={onClose}>
-                            <Ionicons name="close" size={24} color="#9CA3AF" />
+                            <Ionicons name="close" size={24} className="text-icon" />
                         </Pressable>
                     </View>
 
@@ -38,7 +40,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                             <Text className="text-text font-black text-xl mb-1">Infinite Mode</Text>
                             <Text className="text-textSecondary font-medium">Stopwatch counts up until you quit</Text>
                         </View>
-                        <Ionicons name="infinite" size={32} color="#D97A59" />
+                        <Ionicons name="infinite" size={32} color={isMaterialYou ? palette.system_accent1[4] : "#D97A59"} />
                     </Pressable>
 
                     <Text className="text-textSecondary font-bold mb-3 tracking-widest text-xs uppercase">Deep Work (Countdown)</Text>
@@ -52,7 +54,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                     className={`mr-3 rounded-2xl px-6 py-4 ${isSelected ? "bg-accent" : "bg-background active:opacity-80"
                                         }`}
                                 >
-                                    <Text className={`font-black text-xl ${isSelected ? "text-white" : "text-textSecondary"}`}>
+                                    <Text className={`font-black text-xl ${isSelected ? "text-background" : "text-textSecondary"}`}>
                                         {mins}m
                                     </Text>
                                 </Pressable>
@@ -64,7 +66,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         onPress={() => onStartSession(selectedMinutes)}
                         className="w-full bg-accent rounded-2xl p-5 items-center justify-center active:opacity-80"
                     >
-                        <Text className="text-white font-black text-xl tracking-widest">START {selectedMinutes}m</Text>
+                        <Text className="text-background font-black text-xl tracking-widest">START {selectedMinutes}m</Text>
                     </Pressable>
                 </View>
             </BlurView>

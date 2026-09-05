@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@assembless/react-native-material-you": "^1.0.0-beta.4",
     "@expo/ui": "~57.0.14",
     "@expo/vector-icons": "^15.1.1",
     "babel-preset-expo": "^57.0.9",
