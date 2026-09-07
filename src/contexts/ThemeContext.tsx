@@ -1,11 +1,19 @@
+import { Colors } from "@/constants/Colors";
+import { useSettings } from "@/hooks/useSettings";
 import { useMaterialYouPalette } from "@assembless/react-native-material-you";
 import { useColorScheme, vars } from "nativewind";
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useSettings } from "@/hooks/useSettings";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+export type ThemeColors = typeof Colors.light;
 
 interface ThemeContextType {
     isMaterialYou: boolean;
     setIsMaterialYou: (val: boolean) => void;
+    isDarkMode: boolean;
+    toggleDarkMode: (val: boolean) => void;
+    colorScheme: "light" | "dark";
+    setColorScheme: (scheme: "light" | "dark" | "system") => void;
+    colors: ThemeColors;
     activeStyle: any;
     palette: any;
     switchColors: {
@@ -21,6 +29,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [isMaterialYou, setIsMaterialYouState] = useState(false);
     const palette = useMaterialYouPalette();
     const { getSetting, setSetting } = useSettings();
+    const { colorScheme, setColorScheme } = useColorScheme();
 
     useEffect(() => {
         getSetting("isMaterialYou").then((val) => {
@@ -28,67 +37,105 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 setIsMaterialYouState(val === "true");
             }
         });
-    }, [getSetting]);
+        getSetting("colorScheme").then((val) => {
+            if (val === "dark" || val === "light") {
+                setColorScheme(val);
+            }
+        });
+    }, [getSetting, setColorScheme]);
 
     const setIsMaterialYou = async (val: boolean) => {
         setIsMaterialYouState(val);
         await setSetting("isMaterialYou", val.toString());
     };
 
-    const { colorScheme } = useColorScheme();
+    const isDarkMode = colorScheme === "dark";
 
-    const materialTheme = colorScheme === "dark"
-        ? vars({
-            "--color-background": palette.system_neutral1[11], // 900
-            "--color-surface": palette.system_neutral1[10],    // 800
-            "--color-border": palette.system_neutral2[9],      // 700
-            "--color-text": palette.system_neutral1[1],        // 10
-            "--color-text-secondary": palette.system_neutral2[4], // 200
-            "--color-accent": palette.system_accent1[4],       // 200
-            "--color-icon": palette.system_neutral1[2],        // 50
-        })
-        : vars({
-            "--color-background": palette.system_neutral1[1],  // 10
-            "--color-surface": palette.system_neutral1[2],     // 50
-            "--color-border": palette.system_neutral2[4],      // 200
-            "--color-text": palette.system_neutral1[11],       // 900
-            "--color-text-secondary": palette.system_neutral2[8], // 600
-            "--color-accent": palette.system_accent1[8],       // 600 (Darker accent for light mode readability)
-            "--color-icon": palette.system_neutral1[10],       // 800
-        });
+    const toggleDarkMode = async (val: boolean) => {
+        const nextScheme = val ? "dark" : "light";
+        setColorScheme(nextScheme);
+        await setSetting("colorScheme", nextScheme);
+    };
 
-    const activeStyle = isMaterialYou ? materialTheme : vars({});
+    const isMaterialYouActive = isMaterialYou && !!palette?.system_neutral1;
 
-    const switchColors = isMaterialYou 
-        ? colorScheme === "dark"
+    const colors: ThemeColors = isMaterialYouActive
+        ? isDarkMode
             ? {
-                trackActive: palette.system_accent1[5],    // 300
-                thumbActive: palette.system_accent1[1],    // 10
-                trackInactive: palette.system_neutral2[9], // 700
-                thumbInactive: palette.system_neutral2[6], // 400
+                background: palette?.system_neutral1?.[11] ?? Colors.dark.background,
+                surface: palette?.system_neutral1?.[10] ?? Colors.dark.surface,
+                border: palette?.system_neutral2?.[9] ?? Colors.dark.border,
+                text: palette?.system_neutral1?.[1] ?? Colors.dark.text,
+                textSecondary: palette?.system_neutral2?.[4] ?? Colors.dark.textSecondary,
+                accent: palette?.system_accent1?.[4] ?? Colors.dark.accent,
+                icon: palette?.system_neutral1?.[2] ?? Colors.dark.icon,
             }
             : {
-                trackActive: palette.system_accent1[7],    // 500
-                thumbActive: palette.system_neutral1[1],   // 10 (White/Light)
-                trackInactive: palette.system_neutral2[4], // 200
-                thumbInactive: palette.system_neutral2[7], // 500
+                background: palette?.system_neutral1?.[1] ?? Colors.light.background,
+                surface: palette?.system_neutral1?.[2] ?? Colors.light.surface,
+                border: palette?.system_neutral2?.[4] ?? Colors.light.border,
+                text: palette?.system_neutral1?.[11] ?? Colors.light.text,
+                textSecondary: palette?.system_neutral2?.[8] ?? Colors.light.textSecondary,
+                accent: palette?.system_accent1?.[8] ?? Colors.light.accent,
+                icon: palette?.system_neutral1?.[10] ?? Colors.light.icon,
             }
-        : colorScheme === "dark"
+        : isDarkMode
+            ? Colors.dark
+            : Colors.light;
+
+    const activeStyle = vars({
+        "--color-background": colors.background,
+        "--color-surface": colors.surface,
+        "--color-border": colors.border,
+        "--color-text": colors.text,
+        "--color-text-secondary": colors.textSecondary,
+        "--color-accent": colors.accent,
+        "--color-icon": colors.icon,
+    });
+
+    const switchColors = isMaterialYouActive
+        ? isDarkMode
             ? {
-                trackActive: "#D97A59",
-                thumbActive: "#FFFFFF",
-                trackInactive: "#374151",
-                thumbInactive: "#9CA3AF",
+                trackActive: palette?.system_accent1?.[5] ?? colors.accent,
+                thumbActive: palette?.system_accent1?.[1] ?? "#FFFFFF",
+                trackInactive: palette?.system_neutral2?.[9] ?? colors.border,
+                thumbInactive: palette?.system_neutral2?.[6] ?? colors.textSecondary,
             }
             : {
-                trackActive: "#D97A59",
+                trackActive: palette?.system_accent1?.[7] ?? colors.accent,
+                thumbActive: palette?.system_neutral1?.[1] ?? "#FFFFFF",
+                trackInactive: palette?.system_neutral2?.[4] ?? colors.border,
+                thumbInactive: palette?.system_neutral2?.[7] ?? colors.textSecondary,
+            }
+        : isDarkMode
+            ? {
+                trackActive: colors.accent,
                 thumbActive: "#FFFFFF",
-                trackInactive: "#E8E4DF",
-                thumbInactive: "#6B625B",
+                trackInactive: colors.border,
+                thumbInactive: colors.textSecondary,
+            }
+            : {
+                trackActive: colors.accent,
+                thumbActive: "#FFFFFF",
+                trackInactive: colors.border,
+                thumbInactive: colors.textSecondary,
             };
 
     return (
-        <ThemeContext.Provider value={{ isMaterialYou, setIsMaterialYou, activeStyle, palette, switchColors }}>
+        <ThemeContext.Provider
+            value={{
+                isMaterialYou,
+                setIsMaterialYou,
+                isDarkMode,
+                toggleDarkMode,
+                colorScheme: isDarkMode ? "dark" : "light",
+                setColorScheme,
+                colors,
+                activeStyle,
+                palette,
+                switchColors,
+            }}
+        >
             {children}
         </ThemeContext.Provider>
     );

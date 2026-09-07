@@ -13,18 +13,21 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.RemoteViews
 import android.widget.Space
 import android.widget.TextView
+import expo.modules.focusblocker.R
 
 class FocusService : Service() {
 
-    private val CHANNEL_ID = "FocusBlockerChannel"
+    private val CHANNEL_ID = "FocusBlockerChannel_V2"
     private var isRunning = false
 
     private var windowManager: WindowManager? = null
@@ -54,17 +57,38 @@ class FocusService : Service() {
         if (!isRunning) {
             isRunning = true
 
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+            val pendingIntent = android.app.PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+
+
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val remoteViews = RemoteViews(packageName, R.layout.custom_notification)
+
             val notification: Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Lockout Active")
-                    .setContentText("Monitoring for distracting apps...")
+                val builder = Notification.Builder(this, CHANNEL_ID)
                     .setSmallIcon(applicationInfo.icon)
-                    .build()
+                    .setCustomContentView(remoteViews)
+                    .setStyle(Notification.DecoratedCustomViewStyle())
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+                }
+
+                builder.build()
             } else {
                 Notification.Builder(this)
-                    .setContentTitle("Lockout Active")
-                    .setContentText("Monitoring for distracting apps...")
                     .setSmallIcon(applicationInfo.icon)
+                    .setCustomContentView(remoteViews)
+                    .setStyle(Notification.DecoratedCustomViewStyle())
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
                     .build()
             }
 
@@ -230,7 +254,7 @@ class FocusService : Service() {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Lockout Service Channel",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             )
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(serviceChannel)

@@ -1,0 +1,233 @@
+import { ActiveSessionUI } from "@/components/ActiveSessionUI";
+import { CentralFocusOrb } from "@/components/CentralFocusOrb";
+import { PermissionModal } from "@/components/modals/PermissionModal";
+import { SessionResultModal } from "@/components/modals/SessionResultModal";
+import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { useUserStats } from "@/hooks/useUserStats";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useFocusEffect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useState } from "react";
+import { Alert, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export default function Index() {
+    const engine = useFocusEngine();
+    const { stats, savedCompletedSession, todayStats } = useUserStats();
+    const { activeStyle, colors, isDarkMode } = useTheme();
+
+    useFocusEffect(
+        useCallback(() => {
+            engine.loadSelectedApps();
+        }, [])
+    );
+
+    const todayHours = Math.floor(todayStats.today_focus_seconds / 3600);
+    const todayMinutes = Math.floor((todayStats.today_focus_seconds % 3600) / 60);
+    const todayTimeString = todayStats.today_focus_seconds === 0 ? "0h" : (todayHours > 0 ? `${todayHours}h ${todayMinutes}m` : `${todayMinutes}m`);
+
+    const [showPermission, setShowPermission] = useState(false);
+    const [isTimerModalVisible, setIsTimeModalVisible] = useState(false);
+    const [sessionResult, setSessionResult] = useState<{
+        type: "completed" | "canceled",
+        coins: number;
+        durationSeconds: number;
+    } | null>(null)
+
+    const handleFocusPress = () => {
+        if (engine.isSessionActive) {
+            if (engine.sessionStartTime) {
+                const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+                    ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                    : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
+                const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
+
+                if (isCountdown) {
+                    setSessionResult({
+                        type: "canceled",
+                        coins: 0,
+                        durationSeconds
+                    })
+                } else {
+                    savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
+                        setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+                    });
+                }
+            }
+            engine.stopSession();
+            return;
+        }
+
+        if (engine.selectedApps.length === 0) {
+            Alert.alert(
+                "Select Apps to Block",
+                "Choose the distracting apps you want to guard against before starting your focus session.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Choose Apps", onPress: () => router.push("/(tabs)/apps") }
+                ]
+            );
+            return;
+        }
+
+        engine.checkPermissions();
+        if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
+            setShowPermission(true);
+        } else {
+            setIsTimeModalVisible(true);
+        }
+    };
+
+    return (
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+            <StatusBar style={isDarkMode ? "light" : "dark"} />
+
+            {/* H1: Coins & Streak — top ambient metadata, fixed label hierarchy */}
+            <View className="flex-row justify-between items-center px-6 pt-3 pb-1">
+                <View
+                    className="flex-row items-center"
+                    pointerEvents="none"
+                    accessibilityRole="text"
+                    accessibilityLabel={`${stats.total_coins.toLocaleString()} coins`}
+                >
+                    <Text className="text-xl mr-2">🪙</Text>
+                    <View>
+                        <Text className="text-text font-black text-base tabular-nums leading-tight">
+                            {stats.total_coins.toLocaleString()}
+                        </Text>
+                        <Text className="text-textSecondary font-medium text-xs leading-tight">coins</Text>
+                    </View>
+                </View>
+
+                <View
+                    className="flex-row items-center"
+                    pointerEvents="none"
+                    accessibilityRole="text"
+                    accessibilityLabel={`${stats.current_streak} day streak`}
+                >
+                    <View className="items-end">
+                        {/* H1 fix: was "3 day" / "streak" — now clean value / label */}
+                        <Text className="text-text font-black text-base tabular-nums leading-tight">
+                            {stats.current_streak}
+                        </Text>
+                        <Text className="text-textSecondary font-medium text-xs leading-tight">day streak</Text>
+                    </View>
+                    <Text className="text-xl ml-2">🔥</Text>
+                </View>
+            </View>
+
+            {!engine.isSessionActive ? (
+                <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
+                    {/* Top Section: Ready to focus + Block List status pill */}
+                    <View className="items-center">
+                        <Text className="text-text text-4xl font-black tracking-tight text-center">
+                            Ready to focus?
+                        </Text>
+
+                        {/* H3: Added accessibilityRole and accessibilityLabel */}
+                        <Pressable
+                            onPress={() => router.push("/(tabs)/apps")}
+                            className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border mt-3 active:opacity-75"
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                engine.selectedApps.length > 0
+                                    ? `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} selected to block. Tap to change.`
+                                    : "No apps selected to block. Tap to choose apps."
+                            }
+                        >
+                            <Ionicons
+                                name="apps-outline"
+                                size={15}
+                                color={colors.accent}
+                                style={{ marginRight: 6 }}
+                            />
+                            <Text className="text-text font-semibold text-xs mr-1">
+                                {engine.selectedApps.length > 0
+                                    ? `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} to block`
+                                    : "Choose apps to block"}
+                            </Text>
+                            <Ionicons name="chevron-forward" size={13} color={colors.textSecondary} />
+                        </Pressable>
+                    </View>
+
+                    {/* Central Orb */}
+                    <View className="items-center justify-center my-auto">
+                        <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
+                        {/* H2: Removed uppercase and tracking-wider — softer instructional tone */}
+                        <Text className="text-textSecondary text-xs font-medium text-center mt-3">
+                            Tap the orb to begin
+                        </Text>
+                    </View>
+
+                    {/* Bottom Section: Today's Metrics */}
+                    {/* H4: Removed uppercase, tracking-wider, reduced label weight */}
+                    <View className="w-full flex-row items-center justify-around px-6 pb-2">
+                        <View className="items-center">
+                            <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
+                                {todayTimeString}
+                            </Text>
+                            <Text className="text-textSecondary text-xs font-medium mt-1">
+                                Focused today
+                            </Text>
+                        </View>
+
+                        <View className="w-[1px] h-10 bg-border opacity-50" />
+
+                        <View className="items-center">
+                            <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
+                                {todayStats.today_sessions}
+                            </Text>
+                            <Text className="text-textSecondary text-xs font-medium mt-1">
+                                Sessions
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+            ) : (
+                <ActiveSessionUI
+                    onStopPress={() => {
+                        if (engine.sessionStartTime) {
+                            const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+                                ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                                : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
+                            savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
+                                setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+                            });
+                        }
+                        engine.stopSession();
+                    }}
+                    startTime={engine.sessionStartTime}
+                    endTime={engine.sessionEndTime}
+                    blockedAppsCount={engine.selectedApps.length}
+                />
+            )}
+
+            <TimerSelectionModal
+                visible={isTimerModalVisible}
+                onClose={() => setIsTimeModalVisible(false)}
+                onStartSession={(durationMinutes) => {
+                    engine.startSession(durationMinutes);
+                    setIsTimeModalVisible(false);
+                }}
+            />
+
+            <PermissionModal
+                visible={showPermission}
+                onClose={() => setShowPermission(false)}
+                hasUsage={engine.hasUsage}
+                hasOverlay={engine.hasOverlay}
+                hasBattery={engine.hasBattery}
+            />
+
+            <SessionResultModal
+                visible={sessionResult !== null}
+                onClose={() => setSessionResult(null)}
+                result={sessionResult}
+            />
+        </SafeAreaView>
+    );
+}

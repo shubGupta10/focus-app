@@ -17,7 +17,9 @@ export default function Layout() {
             headerShown: false,
             animation: 'none'
           }}
-          />
+          >
+            <Stack.Screen name="(tabs)" />
+          </Stack>
         </ThemeProvider>
       </MaterialYouService>
     </SQLiteProvider>

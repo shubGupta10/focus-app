@@ -1,6 +1,6 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { AppState } from "react-native";
+import { AppState, PermissionsAndroid, Platform } from "react-native";
 import FocusBlocker, { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 export function useFocusEngine() {
@@ -94,6 +94,15 @@ export function useFocusEngine() {
 
     const startSession = async (durationMinutes: number) => {
         try {
+            if (Platform.OS === "android" && Platform.Version >= 33) {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+                );
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                    alert("Notification permission is required to keep the Focus session running in the background.");
+                    return;
+                }
+            }
             const durationMs = durationMinutes > 0 ? durationMinutes * 60 * 1000 : -1;
             await FocusBlocker.startService(selectedApps, durationMs);
 
@@ -137,6 +146,7 @@ export function useFocusEngine() {
         hasBattery,
         checkPermissions,
         toggleApp,
+        loadSelectedApps,
         startSession,
         stopSession,
         goHome,

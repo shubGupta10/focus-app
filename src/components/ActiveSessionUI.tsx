@@ -6,9 +6,10 @@ interface ActiveSessionUIProps {
     onStopPress: () => void;
     startTime: number | null;
     endTime: number | null;
+    blockedAppsCount?: number;
 }
 
-export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessionUIProps) {
+export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCount }: ActiveSessionUIProps) {
     const [timeLeft, setTimeLeft] = useState("00:00");
     const [isInfinite, setIsInfinite] = useState(false);
     const [sessionProgress, setSessionProgress] = useState(1);
@@ -17,6 +18,8 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
 
     useEffect(() => {
         if (!startTime) return;
+
+        let isStopped = false;
 
         const infinite = endTime === -1;
         setIsInfinite(infinite);
@@ -41,7 +44,11 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
                     setTimeLeft("00:00");
                     setSessionProgress(0);
                     setMinuteProgress(0);
-                    onStopPress();
+
+                    if (!isStopped) {
+                        isStopped = true;
+                        onStopPress();
+                    }
                     return;
                 }
                 const totalSeconds = Math.floor(diffMs / 1000);
@@ -65,31 +72,45 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime }: ActiveSessi
     }, [startTime, endTime, onStopPress]);
 
     return (
-        <View className="flex-1 items-center justify-between pb-32 pt-6">
-            <View className="items-center h-20 justify-center">
-                <Text className="text-text text-3xl font-black tracking-tight text-center">
-                    {isInfinite ? "Open Focus" : "Deep Work"}
+        <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
+            {/* A1: Reduced heading size and weight — active state should feel different from idle */}
+            <View className="items-center">
+                <Text className="text-text text-xl font-bold tracking-tight text-center">
+                    Blocker Active
+                </Text>
+                <Text className="text-textSecondary text-sm font-medium text-center mt-1">
+                    {blockedAppsCount && blockedAppsCount > 0
+                        ? `${blockedAppsCount} ${blockedAppsCount === 1 ? "app" : "apps"} blocked`
+                        : "No apps blocked"}
                 </Text>
             </View>
 
-            <CentralFocusOrb
-                isActive={true}
-                earnedCoins={earnedCoins}
-                sessionProgress={sessionProgress}
-                minuteProgress={minuteProgress}
-                isInfinite={isInfinite}
-            />
+            <View className="items-center justify-center my-auto">
+                <CentralFocusOrb
+                    isActive={true}
+                    earnedCoins={earnedCoins}
+                    sessionProgress={sessionProgress}
+                    minuteProgress={minuteProgress}
+                    isInfinite={isInfinite}
+                    onStopPress={onStopPress}
+                />
+            </View>
 
-            <View className="items-center h-28 justify-center">
-                <Text className="text-text text-6xl font-black tracking-tight tabular-nums text-center">
+            <View className="items-center justify-center pb-2">
+                {/* A2: adjustsFontSizeToFit prevents overflow on narrow screens (e.g. 120:45 at 2hr+) */}
+                <Text
+                    className="text-text font-black tracking-tight tabular-nums text-center"
+                    style={{ fontSize: 60 }}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                    numberOfLines={1}
+                >
                     {timeLeft}
                 </Text>
-                <Text className="text-textSecondary text-xs font-bold tracking-[4px] uppercase text-center mt-2">
-                    {isInfinite ? "FOCUS TIME" : "TIME REMAINING"}
+                <Text className="text-textSecondary text-sm font-medium text-center mt-2">
+                    {isInfinite ? "Focus time" : "Time remaining"}
                 </Text>
             </View>
         </View>
     );
 }
-
-
