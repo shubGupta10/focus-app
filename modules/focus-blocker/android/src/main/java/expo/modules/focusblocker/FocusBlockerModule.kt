@@ -6,6 +6,12 @@ import android.content.Intent
 import android.provider.Settings
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.Canvas
+import android.util.Base64
+import java.io.ByteArrayOutputStream
+
 
 class FocusBlockerModule : Module() {
     override fun definition() = ModuleDefinition {
@@ -133,10 +139,42 @@ class FocusBlockerModule : Module() {
                 val appsList = mutableListOf<Map<String, String>>()
 
                 for (app in packages) {
-                    // Only fetch apps that the user can actually launch (ignores invisible system apps)
                     if (pm.getLaunchIntentForPackage(app.packageName) != null) {
                         val appName = app.loadLabel(pm).toString()
-                        appsList.add(mapOf("name" to appName, "packageName" to app.packageName))
+                        var base64Icon = ""
+
+                        try {
+                            val drawable = pm.getApplicationIcon(app.packageName)
+                            val bitmap = if (drawable is BitmapDrawable) {
+                                drawable.bitmap
+                            } else {
+                                val bmp = Bitmap.createBitmap(
+                                    drawable.intrinsicWidth.coerceAtLeast(1),
+                                    drawable.intrinsicHeight.coerceAtLeast(1),
+                                    Bitmap.Config.ARGB_8888
+                                )
+                                val canvas = Canvas(bmp)
+                                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                                drawable.draw(canvas)
+                                bmp
+                            }
+                            // Scale to 96x96 so we don't blow up the React Native bridge!
+                            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 96, 96, true)
+                            val outputStream = ByteArrayOutputStream()
+                            scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                            val byteArray = outputStream.toByteArray()
+                            base64Icon = Base64.encodeToString(byteArray, Base64.NO_WRAP)
+                        } catch (e: Exception) {
+                            // Fallback if icon generation fails
+                        }
+
+                        appsList.add(
+                            mapOf(
+                                "name" to appName,
+                                "packageName" to app.packageName,
+                                "icon" to base64Icon
+                            )
+                        )
                     }
                 }
                 promise.resolve(appsList)

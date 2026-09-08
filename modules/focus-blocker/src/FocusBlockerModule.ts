@@ -3,6 +3,7 @@ import { requireNativeModule } from 'expo-modules-core';
 export type AppInfo = {
   name: string;
   packageName: string;
+  icon: string;
 };
 
 export declare class FocusBlockerModule {

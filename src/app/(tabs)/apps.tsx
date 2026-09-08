@@ -4,8 +4,9 @@ import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
 import { cssInterop } from "nativewind";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, Vibration, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 cssInterop(Ionicons, {
     className: {
@@ -16,24 +17,7 @@ cssInterop(Ionicons, {
     },
 });
 
-/**
- * B2: Deterministic background color from app name/package.
- * No new dependency — simple hash of first char of package segments.
- * Produces a consistent warm-palette hue per app so the list is visually scannable.
- */
-const APP_AVATAR_COLORS = [
-    "#C0392B", "#E67E22", "#F39C12", "#27AE60",
-    "#16A085", "#2980B9", "#8E44AD", "#D35400",
-    "#1ABC9C", "#E74C3C", "#3498DB", "#9B59B6",
-];
 
-function getAppColor(packageName: string): string {
-    let hash = 0;
-    for (let i = 0; i < packageName.length; i++) {
-        hash = (hash * 31 + packageName.charCodeAt(i)) >>> 0;
-    }
-    return APP_AVATAR_COLORS[hash % APP_AVATAR_COLORS.length];
-}
 
 export default function AppsTab() {
     const { activeStyle, colors } = useTheme();
@@ -84,8 +68,8 @@ export default function AppsTab() {
                     hitSlop={8}
                     style={{ opacity: !hasChanges ? 0.4 : 1 }}
                     className={`px-4 py-2 rounded-xl flex-row items-center justify-center active:opacity-80 ${isSaved
-                            ? "bg-accent/20 border border-accent/40"
-                            : "bg-accent shadow-sm"
+                        ? "bg-accent/20 border border-accent/40"
+                        : "bg-accent shadow-sm"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel={isSaved ? "Saved" : "Save block list"}
@@ -134,11 +118,7 @@ export default function AppsTab() {
                 </View>
             </View>
 
-            <ScrollView
-                className="flex-1 px-6"
-                contentContainerStyle={{ paddingBottom: 24 }}
-                showsVerticalScrollIndicator={false}
-            >
+            <View className="flex-1 px-6">
                 {engine.installedApps.length === 0 ? (
                     <View className="py-20 items-center justify-center">
                         <ActivityIndicator size="large" color={colors.accent} />
@@ -147,7 +127,6 @@ export default function AppsTab() {
                         </Text>
                     </View>
                 ) : filteredApps.length === 0 ? (
-                    // B4: Reduced icon container from w-16 h-16 to w-12 h-12 so it doesn't overpower search context
                     <View className="py-12 items-center justify-center">
                         <View className="w-12 h-12 rounded-2xl bg-surface items-center justify-center mb-3 border border-border">
                             <Ionicons name="apps-outline" size={22} color={colors.textSecondary} />
@@ -168,51 +147,55 @@ export default function AppsTab() {
                         )}
                     </View>
                 ) : (
-                    filteredApps.map((app) => {
-                        const isSelected = engine.selectedApps.includes(app.packageName);
-                        const initial = app.name ? app.name.charAt(0).toUpperCase() : "?";
-                        // B2: Deterministic color per app — makes list visually scannable
-                        const avatarBg = getAppColor(app.packageName);
+                    <FlatList
+                        data={filteredApps}
+                        keyExtractor={(app) => app.packageName}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 24 }}
+                        initialNumToRender={15}
+                        renderItem={({ item: app }) => {
+                            const isSelected = engine.selectedApps.includes(app.packageName);
+                            return (
+                                <Pressable
+                                    onPress={() => handleToggleApp(app.packageName)}
+                                    className="flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border"
+                                    accessibilityRole="checkbox"
+                                    accessibilityState={{ checked: isSelected }}
+                                    accessibilityLabel={`${app.name}, ${isSelected ? 'selected to block' : 'not blocked'}`}
+                                    accessibilityHint="Double tap to toggle blocking"
+                                >
+                                    <View className="flex-row items-center flex-1 mr-3">
 
-                        return (
-                            <Pressable
-                                key={app.packageName}
-                                onPress={() => handleToggleApp(app.packageName)}
-                                className="flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border"
-                                accessibilityRole="checkbox"
-                                accessibilityState={{ checked: isSelected }}
-                                accessibilityLabel={`${app.name}, ${isSelected ? 'selected to block' : 'not blocked'}`}
-                                accessibilityHint="Double tap to toggle blocking"
-                            >
-                                <View className="flex-row items-center flex-1 mr-3">
-                                    {/* B2: Colored avatar background — distinct per app */}
-                                    <View
-                                        className="w-11 h-11 rounded-2xl items-center justify-center mr-3.5"
-                                        style={{ backgroundColor: avatarBg }}
-                                    >
-                                        <Text className="font-black text-base text-white">
-                                            {initial}
-                                        </Text>
+                                        {app.icon ? (
+                                            <Image
+                                                source={{ uri: `data:image/png;base64,${app.icon}` }}
+                                                className="w-11 h-11 rounded-xl mr-3.5"
+                                            />
+                                        ) : (
+                                            <View className="w-11 h-11 rounded-xl bg-border items-center justify-center mr-3.5">
+                                                <Ionicons name="help" size={20} color={colors.textSecondary} />
+                                            </View>
+                                        )}
+
+                                        <View className="flex-1">
+                                            <Text className="font-bold text-base text-text" numberOfLines={1}>
+                                                {app.name}
+                                            </Text>
+                                        </View>
                                     </View>
 
-                                    <View className="flex-1">
-                                        <Text className="font-bold text-base text-text" numberOfLines={1}>
-                                            {app.name}
-                                        </Text>
+                                    <View pointerEvents="none">
+                                        <Material3Switch
+                                            value={isSelected}
+                                            onValueChange={() => { }}
+                                        />
                                     </View>
-                                </View>
-
-                                <View pointerEvents="none">
-                                    <Material3Switch
-                                        value={isSelected}
-                                        onValueChange={() => { }}
-                                    />
-                                </View>
-                            </Pressable>
-                        );
-                    })
+                                </Pressable>
+                            );
+                        }}
+                    />
                 )}
-            </ScrollView>
+            </View>
         </SafeAreaView>
     );
 }
