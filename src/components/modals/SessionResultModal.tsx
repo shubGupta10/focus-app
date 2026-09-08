@@ -2,7 +2,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Modal, Pressable, Text, View } from "react-native";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 
 interface SessionResultModalProps {
     visible: boolean;
@@ -28,14 +27,12 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                 tint={isDarkMode ? "dark" : "light"}
                 className="absolute inset-0"
             />
-            <Animated.View
-                entering={FadeIn}
+            <View
                 className={isDarkMode ? "absolute inset-0 bg-black/50" : "absolute inset-0 bg-black/25"}
             />
 
             <View className="flex-1 justify-center items-center px-6">
-                <Animated.View
-                    entering={ZoomIn.springify().damping(20).stiffness(200)}
+                <View
                     className="w-full max-w-sm bg-surface rounded-3xl p-6 border border-border shadow-lg"
                 >
                     <View className="flex-row justify-between items-center mb-5">
@@ -89,7 +86,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
                     </Pressable>
-                </Animated.View>
+                </View>
             </View>
         </Modal>
     );

@@ -24,6 +24,11 @@ export function CentralFocusOrb({
     onStopPress,
 }: CentralFocusOrbProps) {
     const { colors } = useTheme();
+    const holdProgress = useRef(new Animated.Value(0)).current;
+    const holdTimeRef = useRef<NodeJS.Timeout | null>(null)
+    const [showHoldHint, setShowHoldHint] = useState(false);
+    const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 
     const colorAccent = colors.accent;
     const colorTrack = colors.border;
@@ -57,6 +62,46 @@ export function CentralFocusOrb({
             isMajor,
         };
     });
+
+    useEffect(() => {
+        return () => {
+            if (holdTimeRef.current)
+                clearTimeout(holdTimeRef.current)
+        }
+    }, [])
+
+    const handlePressIn = () => {
+        if (!isActive) return;
+
+        try { Vibration.vibrate(10); } catch { }
+
+        Animated.timing(holdProgress, {
+            toValue: 1,
+            duration: 10000,
+            useNativeDriver: false,
+        }).start();
+
+        holdTimeRef.current = setTimeout(() => {
+            try { Vibration.vibrate([0, 40, 60, 40]); } catch { }
+            onStopPress?.();
+        }, 10000);
+    };
+
+    const handlePressOut = () => {
+        if (!isActive) return;
+
+        if (holdTimeRef.current) {
+            clearTimeout(holdTimeRef.current);
+            holdTimeRef.current = null;
+        }
+
+        Animated.timing(holdProgress, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start();
+    };
+
 
     return (
         <View className="items-center justify-center w-[340px] h-[340px]">
@@ -150,30 +195,50 @@ export function CentralFocusOrb({
                             />
                         </>
                     )}
+
+                    {isActive && (
+                        <AnimatedCircle
+                            cx="170"
+                            cy="170"
+                            r="96"
+                            stroke={colors.accent}
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={2 * Math.PI * 96}
+                            strokeDashoffset={holdProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [2 * Math.PI * 96, 0],
+                            })}
+                            strokeLinecap="round"
+                            transform="rotate(-90 170 170)"
+                            opacity="0.8"
+                        />
+                    )}
                 </Svg>
             </View>
 
             <Pressable
                 onPress={() => {
-                    try {
-                        Vibration.vibrate(12);
-                    } catch {}
-                    if (isActive) {
-                        onStopPress?.();
-                    } else {
+                    if (!isActive) {
+                        try { Vibration.vibrate(12); } catch { }
                         onStartPress?.();
+                    } else {
+                        setShowHoldHint(true);
+                        setTimeout(() => setShowHoldHint(false), 2000);
                     }
                 }}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
                 className="w-44 h-44 rounded-full bg-accent items-center justify-center shadow-2xl active:opacity-80"
                 accessibilityRole="button"
-                accessibilityLabel={isActive ? "End focus session" : "Start focus session"}
-                accessibilityHint={isActive ? "Double tap to end the current focus session" : "Double tap to configure and begin a focus session"}
+                accessibilityLabel={isActive ? "Hold for 3 seconds to end session" : "Start focus session"}
+                accessibilityHint={isActive ? "Press and hold to unlock and end the focus session" : "Double tap to configure and begin a focus session"}
             >
                 {isActive ? (
                     <View className="items-center justify-center">
                         <Ionicons name="stop" size={44} color={colors.background} />
                         <Text className="text-background font-black text-sm tracking-wider uppercase mt-2">
-                            END SESSION
+                            {showHoldHint ? "HOLD TO END" : "END SESSION"}
                         </Text>
                     </View>
                 ) : (

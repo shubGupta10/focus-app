@@ -1,5 +1,6 @@
 import { ActiveSessionUI } from "@/components/ActiveSessionUI";
 import { CentralFocusOrb } from "@/components/CentralFocusOrb";
+import { EndSessionModal } from "@/components/modals/EndSessionModal";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { SessionResultModal } from "@/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
@@ -30,34 +31,40 @@ export default function Index() {
 
     const [showPermission, setShowPermission] = useState(false);
     const [isTimerModalVisible, setIsTimeModalVisible] = useState(false);
+    const [isEndModalVisible, setIsEndModalVisible] = useState(false);
     const [sessionResult, setSessionResult] = useState<{
         type: "completed" | "canceled",
         coins: number;
         durationSeconds: number;
     } | null>(null)
 
+    const confirmEndSession = () => {
+        setIsEndModalVisible(false);
+        if (engine.sessionStartTime) {
+            const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+                ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+
+            const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
+
+            if (isCountdown) {
+                setSessionResult({
+                    type: "canceled",
+                    coins: 0,
+                    durationSeconds
+                })
+            } else {
+                savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
+                    setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+                });
+            }
+        }
+        engine.stopSession();
+    };
+
     const handleFocusPress = () => {
         if (engine.isSessionActive) {
-            if (engine.sessionStartTime) {
-                const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                    ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
-                    : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
-
-                const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
-
-                if (isCountdown) {
-                    setSessionResult({
-                        type: "canceled",
-                        coins: 0,
-                        durationSeconds
-                    })
-                } else {
-                    savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
-                        setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
-                    });
-                }
-            }
-            engine.stopSession();
+            setIsEndModalVisible(true);
             return;
         }
 
@@ -169,18 +176,7 @@ export default function Index() {
                 </View>
             ) : (
                 <ActiveSessionUI
-                    onStopPress={() => {
-                        if (engine.sessionStartTime) {
-                            const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                                ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
-                                : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
-
-                            savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
-                                setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
-                            });
-                        }
-                        engine.stopSession();
-                    }}
+                    onStopPress={handleFocusPress}
                     startTime={engine.sessionStartTime}
                     endTime={engine.sessionEndTime}
                     blockedAppsCount={engine.selectedApps.length}
@@ -208,6 +204,12 @@ export default function Index() {
                 visible={sessionResult !== null}
                 onClose={() => setSessionResult(null)}
                 result={sessionResult}
+            />
+
+            <EndSessionModal 
+                visible={isEndModalVisible}
+                onClose={() => setIsEndModalVisible(false)}
+                onConfirmEnd={confirmEndSession}
             />
         </SafeAreaView>
     );

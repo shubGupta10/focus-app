@@ -31,7 +31,7 @@ export default function ProgressBar() {
                 <View className="mb-8 items-center justify-center py-6">
                     <Text className="text-6xl mb-2">🔥</Text>
                     <Text className="text-text font-black text-5xl tabular-nums tracking-light">{stats.current_streak}</Text>
-                    <Text className="text-textSeconday font-bold text-sm tracking-wider uppercase mt-1">Day Streak</Text>
+                    <Text className="text-text font-bold text-sm tracking-wider uppercase mt-1">Day Streak</Text>
                 </View>
 
                 <Text className="text-text font-bold text-lg mb-3">
