@@ -1,13 +1,15 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { AppState, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FocusBlocker from "../../../modules/focus-blocker/src/FocusBlockerModule";
+import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 export default function SettingsTab() {
-    const { isMaterialYou, setIsMaterialYou, isDarkMode, toggleDarkMode, activeStyle } = useTheme();
+    const { isMaterialYou, setIsMaterialYou, isDarkMode, toggleDarkMode, activeStyle, colors } = useTheme();
     const [permissionModalVisible, setPermissionModalVisible] = useState(false);
 
     const [hasUsage, setHasUsage] = useState(false);
@@ -33,6 +35,14 @@ export default function SettingsTab() {
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-5 border-b border-border">
+                <Pressable
+                    onPress={() => router.back()}
+                    className="mr-4 w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70 border border-border"
+                    accessibilityRole="button"
+                    accessibilityLabel="Go back to Home"
+                >
+                    <Ionicons name="chevron-back" size={24} color={colors.text} />
+                </Pressable>
                 <Text className="text-text text-3xl font-black tracking-tight">Settings</Text>
             </View>
 

@@ -19,6 +19,13 @@ export default function Layout() {
           }}
           >
             <Stack.Screen name="(tabs)" />
+
+            <Stack.Screen
+              name="settings"
+              options={{
+                animation: "default"
+              }}
+            />
           </Stack>
         </ThemeProvider>
       </MaterialYouService>

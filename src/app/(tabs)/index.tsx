@@ -85,39 +85,20 @@ export default function Index() {
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
-            {/* H1: Coins & Streak — top ambient metadata, fixed label hierarchy */}
-            <View className="flex-row justify-between items-center px-6 pt-3 pb-1">
-                <View
-                    className="flex-row items-center"
-                    pointerEvents="none"
-                    accessibilityRole="text"
-                    accessibilityLabel={`${stats.total_coins.toLocaleString()} coins`}
-                >
-                    <Text className="text-xl mr-2">🪙</Text>
-                    <View>
-                        <Text className="text-text font-black text-base tabular-nums leading-tight">
-                            {stats.total_coins.toLocaleString()}
-                        </Text>
-                        <Text className="text-textSecondary font-medium text-xs leading-tight">coins</Text>
-                    </View>
-                </View>
+            {!engine.isSessionActive && (
+                <View className="flex-row justify-between items-center px-6 pt-3 pb-2 w-full">
+                    <Text className="text-text font-black text-3xl tracking-tight">Lockout</Text>
 
-                <View
-                    className="flex-row items-center"
-                    pointerEvents="none"
-                    accessibilityRole="text"
-                    accessibilityLabel={`${stats.current_streak} day streak`}
-                >
-                    <View className="items-end">
-                        {/* H1 fix: was "3 day" / "streak" — now clean value / label */}
-                        <Text className="text-text font-black text-base tabular-nums leading-tight">
-                            {stats.current_streak}
-                        </Text>
-                        <Text className="text-textSecondary font-medium text-xs leading-tight">day streak</Text>
-                    </View>
-                    <Text className="text-xl ml-2">🔥</Text>
+                    <Pressable
+                        onPress={() => router.push("/settings")}
+                        className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70 border border-border"
+                        accessibilityRole="button"
+                        accessibilityLabel="Open Settings"
+                    >
+                        <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+                    </Pressable>
                 </View>
-            </View>
+            )}
 
             {!engine.isSessionActive ? (
                 <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">

@@ -2,7 +2,7 @@ import { ThemeColors, useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TabIcon({
@@ -138,14 +138,14 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
-                name="settings"
+                name="progress"
                 options={{
-                    title: "Settings",
+                    title: "Progress",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
-                            name="settings"
-                            outlineName="settings-outline"
+                            name="bar-chart"
+                            outlineName="bar-chart-outline"
                             colors={colors}
                             isDarkMode={isDarkMode}
                         />
