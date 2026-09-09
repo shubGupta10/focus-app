@@ -19,6 +19,7 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd }: EndSessionMo
                     tint={isDarkMode ? "dark" : "light"}
                     className="absolute inset-0"
                 />
+                <View style={{ backgroundColor: colors.scrim }} className="absolute inset-0" />
 
                 <View className="bg-surface w-[85%] max-w-sm rounded-3xl p-6 border border-border shadow-2xl">
                     <Text className="text-text font-black text-2xl tracking-tight mb-3">
@@ -36,18 +37,18 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd }: EndSessionMo
                             className="bg-accent py-4 rounded-xl items-center justify-center active:opacity-80"
                             accessibilityRole="button"
                         >
-                            <Text className="text-background font-black text-sm tracking-wider uppercase">
+                            <Text className="text-accentForeground font-black text-sm tracking-wider uppercase">
                                 Keep focusing
                             </Text>
                         </Pressable>
 
-                        {/* Secondary Action: End Session */}
+                        {/* Secondary Action: End Session (Destructive) */}
                         <Pressable
                             onPress={onConfirmEnd}
-                            className="py-4 rounded-xl items-center justify-center active:opacity-60 bg-background border border-border"
+                            className="py-4 rounded-xl items-center justify-center active:opacity-75 bg-destructiveMuted border border-destructive/40"
                             accessibilityRole="button"
                         >
-                            <Text className="text-text font-bold text-sm tracking-wider uppercase">
+                            <Text className="text-destructive font-bold text-sm tracking-wider uppercase">
                                 End session
                             </Text>
                         </Pressable>

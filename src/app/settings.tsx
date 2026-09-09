@@ -85,8 +85,8 @@ export default function SettingsTab() {
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-text font-bold text-lg">System Permissions</Text>
                         {/* S1: Use icon + text not color alone to distinguish status states */}
-                        <View className="px-2.5 py-1 rounded-full bg-background border border-border">
-                            <Text className={`text-xs font-bold ${allPermissionsGranted ? 'text-accent' : 'text-textSecondary'}`}>
+                        <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-success/40' : 'bg-warningMuted border-warning/40'}`}>
+                            <Text className={`text-xs font-bold ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
                                 {allPermissionsGranted ? "✓ All Active" : "⚠ Setup Needed"}
                             </Text>
                         </View>
@@ -100,7 +100,7 @@ export default function SettingsTab() {
                         onPress={() => setPermissionModalVisible(true)}
                         className="bg-accent py-3 px-4 rounded-xl items-center justify-center active:opacity-80"
                     >
-                        <Text className="text-background font-black text-xs tracking-wider uppercase">
+                        <Text className="text-accentForeground font-black text-xs tracking-wider uppercase">
                             {allPermissionsGranted ? "Review Permissions" : "Grant Permissions"}
                         </Text>
                     </Pressable>

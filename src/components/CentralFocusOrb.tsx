@@ -2,7 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, Vibration, View } from "react-native";
-import Svg, { Circle, Line } from "react-native-svg";
+import Svg, { Circle } from "react-native-svg";
 
 interface CentralFocusOrbProps {
     isActive?: boolean;
@@ -25,7 +25,7 @@ export function CentralFocusOrb({
 }: CentralFocusOrbProps) {
     const { colors } = useTheme();
     const holdProgress = useRef(new Animated.Value(0)).current;
-    const holdTimeRef = useRef<NodeJS.Timeout | null>(null)
+    const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [showHoldHint, setShowHoldHint] = useState(false);
     const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -48,20 +48,7 @@ export function CentralFocusOrb({
     const dotX = 170 + innerRadius * Math.cos(minuteAngle);
     const dotY = 170 + innerRadius * Math.sin(minuteAngle);
 
-    const ticks = Array.from({ length: 12 }, (_, i) => {
-        const angleRad = (i * 30 - 90) * (Math.PI / 180);
-        const isMajor = i % 3 === 0;
-        const r1 = isMajor ? 146 : 150;
-        const r2 = isMajor ? 166 : 162;
-        return {
-            key: i,
-            x1: 170 + r1 * Math.cos(angleRad),
-            y1: 170 + r1 * Math.sin(angleRad),
-            x2: 170 + r2 * Math.cos(angleRad),
-            y2: 170 + r2 * Math.sin(angleRad),
-            isMajor,
-        };
-    });
+
 
     useEffect(() => {
         return () => {
@@ -107,7 +94,7 @@ export function CentralFocusOrb({
         <View className="items-center justify-center w-[340px] h-[340px]">
             {isActive && (
                 <View
-                    className="absolute -top-9 z-50 bg-surface px-4 py-2 rounded-full border border-border shadow-md flex-row items-center pointer-events-none"
+                    className="absolute -top-9 z-50 bg-surfaceElevated px-4 py-2 rounded-full border border-border shadow-md flex-row items-center pointer-events-none"
                 >
                     <Text className="text-base mr-1.5">🪙</Text>
                     <Text className="text-text font-bold text-sm">+{earnedCoins} coins earned</Text>
@@ -116,18 +103,6 @@ export function CentralFocusOrb({
 
             <View className="absolute inset-0 items-center justify-center pointer-events-none">
                 <Svg width="340" height="340" viewBox="0 0 340 340">
-                    {ticks.map((tick) => (
-                        <Line
-                            key={tick.key}
-                            x1={tick.x1}
-                            y1={tick.y1}
-                            x2={tick.x2}
-                            y2={tick.y2}
-                            stroke={colorTrack}
-                            strokeWidth={tick.isMajor ? "2" : "1.5"}
-                            strokeLinecap="round"
-                        />
-                    ))}
 
                     <Circle
                         cx="170"
@@ -236,14 +211,14 @@ export function CentralFocusOrb({
             >
                 {isActive ? (
                     <View className="items-center justify-center">
-                        <Ionicons name="stop" size={44} color={colors.background} />
-                        <Text className="text-background font-black text-sm tracking-wider uppercase mt-2">
+                        <Ionicons name="stop" size={44} color={colors.accentForeground} />
+                        <Text className="text-accentForeground font-black text-sm tracking-wider uppercase mt-2">
                             {showHoldHint ? "HOLD TO END" : "END SESSION"}
                         </Text>
                     </View>
                 ) : (
                     <View className="items-center justify-center ml-1.5">
-                        <Ionicons name="play" size={72} color={colors.background} />
+                        <Ionicons name="play" size={72} color={colors.accentForeground} />
                     </View>
                 )}
             </Pressable>

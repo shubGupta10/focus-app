@@ -20,11 +20,7 @@ function TabIcon({
     colors: ThemeColors;
     isDarkMode: boolean;
 }) {
-    const pillBg = focused
-        ? isDarkMode
-            ? `${colors.accent}2E`
-            : `${colors.accent}1E`
-        : "transparent";
+    const pillBg = focused ? colors.accentMuted : "transparent";
 
     return (
         <View className="items-center justify-center">
@@ -46,7 +42,7 @@ function TabIcon({
                 {badgeCount !== undefined && badgeCount > 0 && (
                     <View
                         style={{
-                            backgroundColor: colors.accent,
+                            backgroundColor: colors.warning,
                             borderColor: colors.surface,
                             width: 8,
                             height: 8,

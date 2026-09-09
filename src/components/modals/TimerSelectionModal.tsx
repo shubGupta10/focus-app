@@ -27,7 +27,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                 style={{
                     flex: 1,
                     justifyContent: 'flex-end',
-                    backgroundColor: isDarkMode ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)',
+                    backgroundColor: colors.scrim,
                 }}
             >
                 <View className="bg-surface rounded-t-3xl p-6 border-t border-border">
@@ -35,7 +35,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         <Text className="text-text text-xl font-black tracking-tight">New Focus Session</Text>
 
                         <Pressable
-                            className="w-10 h-10 rounded-full bg-background items-center justify-center active:opacity-70"
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 border border-border"
                             onPress={onClose}
                             hitSlop={12}
                             accessibilityRole="button"
@@ -53,7 +53,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 try { Vibration.vibrate(12); } catch { }
                                 onStartSession(-1);
                             }}
-                            className="bg-background rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border border-border/60"
+                            className="bg-surfaceElevated rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border border-border"
                             accessibilityRole="button"
                             accessibilityLabel="Start infinite mode — counts up until you stop"
                         >
@@ -84,13 +84,13 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                     }}
                                     className={`mr-3 rounded-2xl px-5 py-3.5 border ${isSelected
                                         ? "bg-accent border-accent"
-                                        : "bg-background border-border/80 active:opacity-80"
+                                        : "bg-surfaceElevated border-border active:opacity-80"
                                         }`}
                                     accessibilityRole="button"
                                     accessibilityLabel={`${mins} minutes`}
                                     accessibilityState={{ selected: isSelected }}
                                 >
-                                    <Text className={`font-black text-lg ${isSelected ? "text-background" : "text-textSecondary"}`}>
+                                    <Text className={`font-black text-lg ${isSelected ? "text-accentForeground" : "text-textSecondary"}`}>
                                         {mins}m
                                     </Text>
                                 </Pressable>
@@ -107,7 +107,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         accessibilityRole="button"
                         accessibilityLabel={`Start ${selectedMinutes} minute focus session`}
                     >
-                        <Text className="text-background font-black text-base uppercase">
+                        <Text className="text-accentForeground font-black text-base uppercase">
                             Start {selectedMinutes}m Session
                         </Text>
                     </Pressable>

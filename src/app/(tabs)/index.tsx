@@ -152,7 +152,7 @@ export default function Index() {
 
                     {/* Bottom Section: Today's Metrics */}
                     {/* H4: Removed uppercase, tracking-wider, reduced label weight */}
-                    <View className="w-full flex-row items-center justify-around px-6 pb-2">
+                    <View className="w-full flex-row items-center justify-around px-6 pb-24">
                         <View className="items-center">
                             <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
                                 {todayTimeString}

@@ -96,7 +96,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 />
             </View>
 
-            <View className="items-center justify-center pb-2">
+            <View className="items-center justify-center pb-24">
                 {/* A2: adjustsFontSizeToFit prevents overflow on narrow screens (e.g. 120:45 at 2hr+) */}
                 <Text
                     className="text-text font-black tracking-tight tabular-nums text-center"

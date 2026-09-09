@@ -162,7 +162,7 @@ class FocusService : Service() {
             // Build the Native View
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Color.parseColor("#030712")) // Tailwind gray-950
+                setBackgroundColor(Color.parseColor("#161517")) // Rosewood Dark Canvas
                 gravity = Gravity.CENTER
             }
 
@@ -173,7 +173,7 @@ class FocusService : Service() {
 
             val title = TextView(this).apply {
                 text = "BLOCKED"
-                setTextColor(Color.parseColor("#EF4444")) // Tailwind red-500
+                setTextColor(Color.parseColor("#D45656")) // Rosewood Destructive
                 textSize = 50f
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
@@ -182,7 +182,7 @@ class FocusService : Service() {
 
             val subtitle = TextView(this).apply {
                 text = "STAY FOCUSED.\nGET BACK TO WORK."
-                setTextColor(Color.parseColor("#9CA3AF")) // Tailwind gray-400
+                setTextColor(Color.parseColor("#A09896")) // Rosewood Secondary
                 textSize = 20f
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
@@ -197,8 +197,8 @@ class FocusService : Service() {
 
             val button = Button(this).apply {
                 text = "GO HOME"
-                setTextColor(Color.WHITE)
-                setBackgroundColor(Color.parseColor("#1F2937")) // Tailwind gray-800
+                setTextColor(Color.parseColor("#F0EDEC")) // Rosewood Primary Text
+                setBackgroundColor(Color.parseColor("#201E20")) // Rosewood Surface
                 textSize = 20f
                 setTypeface(null, Typeface.BOLD)
 

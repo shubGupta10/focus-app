@@ -24,14 +24,16 @@ export default function ProgressBar() {
             <ScrollView
                 className="flex-1 px-6 pt-4"
                 contentContainerStyle={{
-                    paddingBottom: 40
+                    paddingBottom: 100
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View className="mb-8 items-center justify-center py-6">
-                    <Text className="text-6xl mb-2">🔥</Text>
+                <View className="mb-8 items-center justify-center py-4">
+                    <View className="w-20 h-20 rounded-full bg-warningMuted border border-warning/30 items-center justify-center mb-3">
+                        <Text className="text-4xl">🔥</Text>
+                    </View>
                     <Text className="text-text font-black text-5xl tabular-nums tracking-light">{stats.current_streak}</Text>
-                    <Text className="text-text font-bold text-sm tracking-wider uppercase mt-1">Day Streak</Text>
+                    <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase mt-1">Day Streak</Text>
                 </View>
 
                 <Text className="text-text font-bold text-lg mb-3">
@@ -40,12 +42,12 @@ export default function ProgressBar() {
 
                 <View className="bg-surface rounded-3xl p-5 mb-8 flex-row items-center justify-between border border-border">
                     <View className="flex-row items-center">
-                        <View className="w-12 h-12 rounded-2xl bg-background border border-border items-center justify-center mr-4">
+                        <View className="w-12 h-12 rounded-2xl bg-warningMuted border border-warning/30 items-center justify-center mr-4">
                             <Text className="text-2xl">🪙</Text>
                         </View>
 
                         <View>
-                            <Text className="text-text font-bold text-2xl tabular-nums tracking-light">
+                            <Text className="text-warning font-black text-2xl tabular-nums tracking-light">
                                 {stats.total_coins.toLocaleString()}
                             </Text>
                             <Text className="text-textSecondary font-medium text-xs">Total Coins Earned</Text>
@@ -56,7 +58,7 @@ export default function ProgressBar() {
                 <Text className="text-text font-bold text-lg mb-3">Today's Activity</Text>
                 <View className="flex-row gap-3">
                     <View className="flex-1 bg-surface rounded-3xl p-5 border border-border">
-                        <View className="w-8 h-8 rounded-full bg-background border border-border items-center justify-center mb-3">
+                        <View className="w-8 h-8 rounded-full bg-surfaceElevated border border-border items-center justify-center mb-3">
                             <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
                         </View>
                         <Text className="text-text font-black text-2xl tabular-nums tracking-tight">
@@ -65,7 +67,7 @@ export default function ProgressBar() {
                         <Text className="text-textSecondary font-medium text-xs mt-1">Focused</Text>
                     </View>
                     <View className="flex-1 bg-surface rounded-3xl p-5 border border-border">
-                        <View className="w-8 h-8 rounded-full bg-background border border-border items-center justify-center mb-3">
+                        <View className="w-8 h-8 rounded-full bg-surfaceElevated border border-border items-center justify-center mb-3">
                             <Ionicons name="checkmark-done" size={16} color={colors.textSecondary} />
                         </View>
                         <Text className="text-text font-black text-2xl tabular-nums tracking-tight">

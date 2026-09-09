@@ -27,9 +27,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                 tint={isDarkMode ? "dark" : "light"}
                 className="absolute inset-0"
             />
-            <View
-                className={isDarkMode ? "absolute inset-0 bg-black/50" : "absolute inset-0 bg-black/25"}
-            />
+            <View style={{ backgroundColor: colors.scrim }} className="absolute inset-0" />
 
             <View className="flex-1 justify-center items-center px-6">
                 <View
@@ -40,7 +38,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                             {isSuccess ? "Session Completed" : "Session Ended Early"}
                         </Text>
                         <Pressable
-                            className="w-10 h-10 rounded-full bg-background items-center justify-center active:opacity-70"
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 border border-border"
                             onPress={onClose}
                             hitSlop={12}
                             accessibilityRole="button"
@@ -51,7 +49,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                     </View>
 
                     <View className="items-center mb-6 mt-1">
-                        <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-background border border-border/80">
+                        <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-surfaceElevated border border-border">
                             {/* SR2: 🔔 for interrupted/canceled — clearer than ⏱️ which is just a timer */}
                         <Text className="text-4xl">{isSuccess ? "🎉" : "🔔"}</Text>
                         </View>
@@ -64,10 +62,10 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                     </View>
 
                     {isSuccess && (
-                        <View className="bg-background rounded-2xl p-4 mb-6 flex-row items-center justify-between border border-border">
+                        <View className="bg-warningMuted rounded-2xl p-4 mb-6 flex-row items-center justify-between border border-warning/30">
                             <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase">COINS EARNED</Text>
                             <View className="flex-row items-center">
-                                <Text className="text-accent font-black text-2xl mr-2">
+                                <Text className="text-warning font-black text-2xl mr-2">
                                     +{result.coins}
                                 </Text>
                                 <Text className="text-xl">🪙</Text>
@@ -82,7 +80,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                         accessibilityLabel={isSuccess ? "Continue" : "Dismiss"}
                     >
                         {/* SR1: Removed tracking-wider — font-black text-base uppercase is already strong enough */}
-                        <Text className="font-black text-base uppercase text-background">
+                        <Text className="font-black text-base uppercase text-accentForeground">
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
                     </Pressable>

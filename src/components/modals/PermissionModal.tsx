@@ -41,7 +41,7 @@ function PermissionRow({
 
     return (
         <TouchableOpacity
-            className={`p-4 rounded-2xl flex-row justify-between items-center border ${isGranted ? 'bg-background border-accent/60' : 'bg-background border-border/80'
+            className={`p-4 rounded-2xl flex-row justify-between items-center border ${isGranted ? 'bg-surfaceElevated border-success/40' : 'bg-surfaceElevated border-border/80'
                 }`}
             onPress={isGranted ? undefined : onRequest}
             disabled={isGranted}
@@ -53,7 +53,7 @@ function PermissionRow({
                 <View className="flex-row items-center mb-0.5">
                     <Text className="text-text font-bold text-base mr-2">{label}</Text>
                     {/* P2: ✓ / → instead of ● ● — not color alone */}
-                    <Text className={`text-[11px] font-bold ${isGranted ? 'text-accent' : 'text-textSecondary'}`}>
+                    <Text className={`text-[11px] font-bold ${isGranted ? 'text-success' : 'text-warning'}`}>
                         {isGranted ? "✓ Granted" : "→ Setup"}
                     </Text>
                 </View>
@@ -61,7 +61,7 @@ function PermissionRow({
             </View>
 
             {isGranted ? (
-                <Ionicons name="checkmark-circle" size={24} color={colors.accent} />
+                <Ionicons name="checkmark-circle" size={24} color={colors.success} />
             ) : (
                 <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
             )}
@@ -81,14 +81,14 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                     justifyContent: 'center',
                     alignItems: 'center',
                     padding: 20,
-                    backgroundColor: isDarkMode ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.25)',
+                    backgroundColor: colors.scrim,
                 }}
             >
                 <View className="bg-surface w-full max-w-sm rounded-3xl p-6 border border-border">
                     <View className="flex-row justify-between items-center mb-3">
                         <Text className="text-text text-xl font-black tracking-tight">Permissions Required</Text>
                         <TouchableOpacity
-                            className="w-10 h-10 rounded-full bg-background items-center justify-center"
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center border border-border"
                             onPress={onClose}
                             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                             accessibilityRole="button"
@@ -134,7 +134,7 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                         accessibilityRole="button"
                         accessibilityLabel="Done and return"
                     >
-                        <Text className="text-background font-black text-sm uppercase">Done</Text>
+                        <Text className="text-accentForeground font-black text-sm uppercase">Done</Text>
                     </TouchableOpacity>
                 </View>
             </BlurView>

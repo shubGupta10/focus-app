@@ -66,10 +66,11 @@ export default function AppsTab() {
                     onPress={handleSave}
                     disabled={!hasChanges || isSaved}
                     hitSlop={8}
-                    style={{ opacity: !hasChanges ? 0.4 : 1 }}
                     className={`px-4 py-2 rounded-xl flex-row items-center justify-center active:opacity-80 ${isSaved
-                        ? "bg-accent/20 border border-accent/40"
-                        : "bg-accent shadow-sm"
+                        ? "bg-successMuted border border-success"
+                        : hasChanges
+                            ? "bg-accent shadow-sm"
+                            : "bg-surface border border-border opacity-50"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel={isSaved ? "Saved" : "Save block list"}
@@ -79,11 +80,11 @@ export default function AppsTab() {
                     <Ionicons
                         name={isSaved ? "checkmark-circle" : "checkmark"}
                         size={16}
-                        color={isSaved ? colors.accent : colors.background}
+                        color={isSaved ? colors.success : hasChanges ? colors.accentForeground : colors.textMuted}
                         style={{ marginRight: 4 }}
                     />
                     <Text
-                        style={{ color: isSaved ? colors.accent : colors.background }}
+                        style={{ color: isSaved ? colors.success : hasChanges ? colors.accentForeground : colors.textMuted }}
                         className="font-bold text-sm"
                     >
                         {isSaved ? "Saved!" : "Save"}
@@ -98,7 +99,7 @@ export default function AppsTab() {
                     <TextInput
                         className="flex-1 ml-2.5 text-text text-sm font-medium"
                         placeholder="Search apps by name..."
-                        placeholderTextColor={colors.textSecondary}
+                        placeholderTextColor={colors.textMuted}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         autoCorrect={false}
@@ -142,7 +143,7 @@ export default function AppsTab() {
                                 accessibilityRole="button"
                                 accessibilityLabel="Clear search and show all apps"
                             >
-                                <Text className="text-accent font-bold text-xs">Clear Search</Text>
+                                <Text className="text-text font-bold text-xs">Clear Search</Text>
                             </Pressable>
                         )}
                     </View>
@@ -172,8 +173,8 @@ export default function AppsTab() {
                                                 className="w-11 h-11 rounded-xl mr-3.5"
                                             />
                                         ) : (
-                                            <View className="w-11 h-11 rounded-xl bg-border items-center justify-center mr-3.5">
-                                                <Ionicons name="help" size={20} color={colors.textSecondary} />
+                                            <View className="w-11 h-11 rounded-xl bg-surfaceElevated border border-border items-center justify-center mr-3.5">
+                                                <Ionicons name="help" size={20} color={colors.textMuted} />
                                             </View>
                                         )}
 
