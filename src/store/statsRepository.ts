@@ -29,8 +29,9 @@ export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
     return stats
 }
 
-export async function recordSession(db: SQLiteDatabase, durationSeconds: number): Promise<{ earnedCoins: number, newStreak: number }> {
-    const earnedCoins = Math.floor(durationSeconds / 60);
+export async function recordSession(db: SQLiteDatabase, durationSeconds: number, isStrict: boolean = false): Promise<{ earnedCoins: number, newStreak: number }> {
+    const baseCoins = Math.floor(durationSeconds / 60);
+    const earnedCoins = isStrict ? Math.floor(baseCoins * 1.5) : baseCoins;
 
     const now = new Date();
     const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
@@ -52,28 +53,31 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number)
     const newLongestStreak = Math.max(currentStats.longest_streak, newStreak);
 
     await db.runAsync(
-        `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, session_date)
-        VALUES(?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, is_strict, session_date)
+        VALUES(?, ?, ?, ?, ?, ?, ?)`,
         [
             Date.now() - durationSeconds * 1000,
             Date.now(),
             durationSeconds,
             1,
             earnedCoins,
+            isStrict ? 1 : 0,
             today,
         ]
-    )
+    );
 
-    //update totalStats in user_stats
+    const newTotalCoins = currentStats.total_coins + earnedCoins;
+    const newTotalFocus = currentStats.total_focus_seconds + durationSeconds;
+
     await db.runAsync(
-        `UPDATE user_stats 
-     SET total_coins = total_coins + ?, 
-         current_streak = ?, 
-         longest_streak = ?, 
-         last_active_date = ?,
-         total_focus_seconds = total_focus_seconds + ?
-     WHERE id = 1`,
-        [earnedCoins, newStreak, newLongestStreak, today, durationSeconds]
+        `UPDATE user_stats SET 
+            total_coins = ?, 
+            current_streak = ?, 
+            longest_streak = ?, 
+            last_active_date = ?, 
+            total_focus_seconds = ? 
+        WHERE id = 1`,
+        [newTotalCoins, newStreak, newLongestStreak, today, newTotalFocus]
     );
 
     return {
@@ -81,8 +85,6 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number)
         newStreak
     }
 }
-
-
 
 export async function getTodayStats(db: SQLiteDatabase): Promise<TodayStats> {
     const now = new Date();

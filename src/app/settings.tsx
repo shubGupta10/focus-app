@@ -85,9 +85,9 @@ export default function SettingsTab() {
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-text font-bold text-lg">System Permissions</Text>
                         {/* S1: Use icon + text not color alone to distinguish status states */}
-                        <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-success/40' : 'bg-warningMuted border-warning/40'}`}>
+                        <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-transparent' : 'bg-warningMuted border-warning/40'}`}>
                             <Text className={`text-xs font-bold ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
-                                {allPermissionsGranted ? "✓ All Active" : "⚠ Setup Needed"}
+                                {allPermissionsGranted ? "All Active" : "Setup Needed"}
                             </Text>
                         </View>
                     </View>

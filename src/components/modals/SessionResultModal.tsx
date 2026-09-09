@@ -10,6 +10,7 @@ interface SessionResultModalProps {
         type: "completed" | "canceled";
         coins: number;
         durationSeconds: number;
+        isStrict?: boolean;
     } | null;
 }
 
@@ -51,7 +52,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                     <View className="items-center mb-6 mt-1">
                         <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-surfaceElevated border border-border">
                             {/* SR2: 🔔 for interrupted/canceled — clearer than ⏱️ which is just a timer */}
-                        <Text className="text-4xl">{isSuccess ? "🎉" : "🔔"}</Text>
+                            <Text className="text-4xl">{isSuccess ? "🎉" : "🔔"}</Text>
                         </View>
 
                         <Text className="text-textSecondary text-center leading-5 text-sm px-2 font-medium">
@@ -61,15 +62,12 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                         </Text>
                     </View>
 
-                    {isSuccess && (
-                        <View className="bg-warningMuted rounded-2xl p-4 mb-6 flex-row items-center justify-between border border-warning/30">
-                            <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase">COINS EARNED</Text>
-                            <View className="flex-row items-center">
-                                <Text className="text-warning font-black text-2xl mr-2">
-                                    +{result.coins}
-                                </Text>
-                                <Text className="text-xl">🪙</Text>
-                            </View>
+                    {isSuccess && result.isStrict && (
+                        <View className="flex-row items-center justify-center rounded-full px-3 py-1 mb-3 self-center">
+                            <Ionicons name="shield-checkmark" size={13} color={colors.accent} style={{ marginRight: 5 }} />
+                            <Text className="text-accent text-xs font-bold uppercase tracking-wider">
+                                Strict Focus Completed · 1.5x Coins
+                            </Text>
                         </View>
                     )}
 

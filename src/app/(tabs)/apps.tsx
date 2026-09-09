@@ -3,9 +3,10 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
 import { cssInterop } from "nativewind";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 
 
 cssInterop(Ionicons, {
@@ -26,11 +27,23 @@ export default function AppsTab() {
     const [isSaved, setIsSaved] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
+    useFocusEffect(
+        useCallback(() => {
+            if (engine.refreshSessionState) {
+                engine.refreshSessionState();
+            }
+        }, [engine])
+    );
+
     const filteredApps = engine.installedApps.filter((app) =>
         app.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const handleToggleApp = (packageName: string) => {
+        if (engine.isSessionActive) {
+            try { Vibration.vibrate([0, 50, 100, 50]); } catch { }
+            return;
+        }
         try {
             Vibration.vibrate(8);
         } catch { }
@@ -40,6 +53,7 @@ export default function AppsTab() {
     };
 
     const handleSave = async () => {
+        if (engine.isSessionActive) return;
         try {
             Vibration.vibrate(25);
         } catch { }
@@ -64,11 +78,11 @@ export default function AppsTab() {
                 {/* Save button — explicit save flow (hasChanges tracks pending toggles) */}
                 <Pressable
                     onPress={handleSave}
-                    disabled={!hasChanges || isSaved}
+                    disabled={!hasChanges || isSaved || engine.isSessionActive}
                     hitSlop={8}
                     className={`px-4 py-2 rounded-xl flex-row items-center justify-center active:opacity-80 ${isSaved
                         ? "bg-successMuted border border-success"
-                        : hasChanges
+                        : hasChanges && !engine.isSessionActive
                             ? "bg-accent shadow-sm"
                             : "bg-surface border border-border opacity-50"
                         }`}
@@ -119,6 +133,19 @@ export default function AppsTab() {
                 </View>
             </View>
 
+            {engine.isSessionActive && (
+                <View className="px-6 mb-4">
+                    <View className="bg-warningMuted border border-warning rounded-2xl p-4 flex-row items-center">
+                        <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 12 }} />
+                        <Text className="text-warning font-bold text-sm flex-1">
+                            {engine.isStrictSession 
+                                ? "Block list is locked during a strict session."
+                                : "End your current session to modify the block list."}
+                        </Text>
+                    </View>
+                </View>
+            )}
+
             <View className="flex-1 px-6">
                 {engine.installedApps.length === 0 ? (
                     <View className="py-20 items-center justify-center">
@@ -159,7 +186,7 @@ export default function AppsTab() {
                             return (
                                 <Pressable
                                     onPress={() => handleToggleApp(app.packageName)}
-                                    className="flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border"
+                                    className={`flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border ${engine.isSessionActive ? 'opacity-50' : ''}`}
                                     accessibilityRole="checkbox"
                                     accessibilityState={{ checked: isSelected }}
                                     accessibilityLabel={`${app.name}, ${isSelected ? 'selected to block' : 'not blocked'}`}

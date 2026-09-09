@@ -6,20 +6,26 @@ import Svg, { Circle } from "react-native-svg";
 
 interface CentralFocusOrbProps {
     isActive?: boolean;
+    timeLeft?: string;
     earnedCoins?: number;
     sessionProgress?: number | null;
     minuteProgress?: number | null;
     isInfinite?: boolean;
+    isStrict?: boolean;
+    skipsRemaining?: number;
     onStartPress?: () => void;
     onStopPress?: () => void;
 }
 
 export function CentralFocusOrb({
     isActive = false,
-    earnedCoins = 38,
+    timeLeft = "00:00",
+    earnedCoins = 0,
     sessionProgress = null,
     minuteProgress = null,
     isInfinite = false,
+    isStrict = false,
+    skipsRemaining = 1,
     onStartPress,
     onStopPress,
 }: CentralFocusOrbProps) {
@@ -27,8 +33,9 @@ export function CentralFocusOrb({
     const holdProgress = useRef(new Animated.Value(0)).current;
     const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [showHoldHint, setShowHoldHint] = useState(false);
+    const [isHolding, setIsHolding] = useState(false);
+    const breathAnim = useRef(new Animated.Value(1)).current;
     const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
 
     const colorAccent = colors.accent;
     const colorTrack = colors.border;
@@ -48,19 +55,54 @@ export function CentralFocusOrb({
     const dotX = 170 + innerRadius * Math.cos(minuteAngle);
     const dotY = 170 + innerRadius * Math.sin(minuteAngle);
 
+    // Subtle, serene breathing animation when active
+    useEffect(() => {
+        if (!isActive) {
+            breathAnim.setValue(1);
+            return;
+        }
 
+        const animation = Animated.loop(
+            Animated.sequence([
+                Animated.timing(breathAnim, {
+                    toValue: 1.035,
+                    duration: 3000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(breathAnim, {
+                    toValue: 0.985,
+                    duration: 3000,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        animation.start();
+
+        return () => animation.stop();
+    }, [isActive]);
 
     useEffect(() => {
         return () => {
-            if (holdTimeRef.current)
-                clearTimeout(holdTimeRef.current)
-        }
-    }, [])
+            if (holdTimeRef.current) {
+                clearTimeout(holdTimeRef.current);
+            }
+        };
+    }, []);
 
     const handlePressIn = () => {
         if (!isActive) return;
 
-        try { Vibration.vibrate(10); } catch { }
+        if (isStrict && skipsRemaining <= 0) {
+            try {
+                Vibration.vibrate([0, 30, 40, 30]);
+            } catch (error) {}
+            setShowHoldHint(true);
+            setTimeout(() => setShowHoldHint(false), 2500);
+            return;
+        }
+
+        try { Vibration.vibrate(10); } catch {}
+        setIsHolding(true);
 
         Animated.timing(holdProgress, {
             toValue: 1,
@@ -69,7 +111,8 @@ export function CentralFocusOrb({
         }).start();
 
         holdTimeRef.current = setTimeout(() => {
-            try { Vibration.vibrate([0, 40, 60, 40]); } catch { }
+            try { Vibration.vibrate([0, 40, 60, 40]); } catch {}
+            setIsHolding(false);
             onStopPress?.();
         }, 10000);
     };
@@ -77,6 +120,7 @@ export function CentralFocusOrb({
     const handlePressOut = () => {
         if (!isActive) return;
 
+        setIsHolding(false);
         if (holdTimeRef.current) {
             clearTimeout(holdTimeRef.current);
             holdTimeRef.current = null;
@@ -89,28 +133,23 @@ export function CentralFocusOrb({
         }).start();
     };
 
+    // Core active radius for hold feedback ring
+    const coreRadius = 96;
 
     return (
         <View className="items-center justify-center w-[340px] h-[340px]">
-            {isActive && (
-                <View
-                    className="absolute -top-9 z-50 bg-surfaceElevated px-4 py-2 rounded-full border border-border shadow-md flex-row items-center pointer-events-none"
-                >
-                    <Text className="text-base mr-1.5">🪙</Text>
-                    <Text className="text-text font-bold text-sm">+{earnedCoins} coins earned</Text>
-                </View>
-            )}
-
+            {/* Concentric Progress Rings */}
             <View className="absolute inset-0 items-center justify-center pointer-events-none">
                 <Svg width="340" height="340" viewBox="0 0 340 340">
-
+                    {/* Outer Track & Session Progress */}
                     <Circle
                         cx="170"
                         cy="170"
                         r={outerRadius}
                         stroke={colorTrack}
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         fill="none"
+                        opacity={0.35}
                     />
                     {isActive && clampedSession > 0 && (
                         <Circle
@@ -118,7 +157,7 @@ export function CentralFocusOrb({
                             cy="170"
                             r={outerRadius}
                             stroke={colorAccent}
-                            strokeWidth="3"
+                            strokeWidth="3.5"
                             fill="none"
                             strokeDasharray={outerCircumference}
                             strokeDashoffset={outerOffset}
@@ -127,13 +166,15 @@ export function CentralFocusOrb({
                         />
                     )}
 
+                    {/* Inner Track & Minute Orbit */}
                     <Circle
                         cx="170"
                         cy="170"
                         r={innerRadius}
                         stroke={colorTrack}
-                        strokeWidth="2"
+                        strokeWidth="1.5"
                         fill="none"
+                        opacity={0.35}
                     />
                     {isActive && clampedMinute > 0 && (
                         <>
@@ -148,80 +189,126 @@ export function CentralFocusOrb({
                                 strokeDashoffset={innerOffset}
                                 strokeLinecap="round"
                                 transform="rotate(-90 170 170)"
+                                opacity={0.65}
                             />
+                            {/* Glowing Orbiting Second Dot */}
                             <Circle
                                 cx={dotX}
                                 cy={dotY}
-                                r="7"
+                                r="8"
                                 fill={colorAccent}
-                                opacity="0.25"
+                                opacity={0.25}
                             />
                             <Circle
                                 cx={dotX}
                                 cy={dotY}
-                                r="4"
+                                r="4.5"
                                 fill={colorAccent}
                             />
                             <Circle
                                 cx={dotX}
                                 cy={dotY}
-                                r="1.5"
+                                r="2"
                                 fill={colorDotCenter}
                             />
                         </>
                     )}
 
+                    {/* Active Hold Progress Ring (sweeps around the center disc) */}
                     {isActive && (
                         <AnimatedCircle
                             cx="170"
                             cy="170"
-                            r="96"
-                            stroke={colors.accent}
-                            strokeWidth="8"
+                            r={coreRadius + 3}
+                            stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
+                            strokeWidth="5"
                             fill="none"
-                            strokeDasharray={2 * Math.PI * 96}
+                            strokeDasharray={2 * Math.PI * (coreRadius + 3)}
                             strokeDashoffset={holdProgress.interpolate({
                                 inputRange: [0, 1],
-                                outputRange: [2 * Math.PI * 96, 0],
+                                outputRange: [2 * Math.PI * (coreRadius + 3), 0],
                             })}
                             strokeLinecap="round"
                             transform="rotate(-90 170 170)"
-                            opacity="0.8"
                         />
                     )}
                 </Svg>
             </View>
 
-            <Pressable
-                onPress={() => {
-                    if (!isActive) {
-                        try { Vibration.vibrate(12); } catch { }
-                        onStartPress?.();
-                    } else {
-                        setShowHoldHint(true);
-                        setTimeout(() => setShowHoldHint(false), 2000);
-                    }
-                }}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                className="w-44 h-44 rounded-full bg-accent items-center justify-center shadow-2xl active:opacity-80"
-                accessibilityRole="button"
-                accessibilityLabel={isActive ? "Hold for 3 seconds to end session" : "Start focus session"}
-                accessibilityHint={isActive ? "Press and hold to unlock and end the focus session" : "Double tap to configure and begin a focus session"}
-            >
-                {isActive ? (
-                    <View className="items-center justify-center">
-                        <Ionicons name="stop" size={44} color={colors.accentForeground} />
-                        <Text className="text-accentForeground font-black text-sm tracking-wider uppercase mt-2">
-                            {showHoldHint ? "HOLD TO END" : "END SESSION"}
+            {/* Center Interactive Orb */}
+            {isActive ? (
+                <Animated.View
+                    style={{
+                        transform: [{ scale: breathAnim }],
+                    }}
+                >
+                    <Pressable
+                        onPress={() => {
+                            setShowHoldHint(true);
+                            setTimeout(() => setShowHoldHint(false), 2200);
+                        }}
+                        onPressIn={handlePressIn}
+                        onPressOut={handlePressOut}
+                        className={`w-48 h-48 rounded-full items-center justify-center border shadow-2xl ${
+                            isHolding
+                                ? "bg-destructiveMuted/30 border-destructive"
+                                : "bg-surfaceElevated border-border"
+                        }`}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
+                    >
+                        {/* Top Indicator (Fixed height to prevent shift) */}
+                        <View className="flex-row items-center justify-center h-4 mb-2">
+                            <Text
+                                className={`font-black text-[12px] tracking-widest uppercase ${
+                                    isStrict && skipsRemaining <= 0 ? "text-warning" : "text-destructive"
+                                }`}
+                            >
+                                {isHolding
+                                    ? "HOLDING TO END..."
+                                    : showHoldHint
+                                    ? isStrict
+                                        ? skipsRemaining <= 0
+                                            ? "NO SKIPS LEFT"
+                                            : "HOLD TO SKIP"
+                                        : "HOLD TO END"
+                                    : ""}
+                            </Text>
+                        </View>
+
+                        {/* Hero Digital Timer */}
+                        <Text
+                            className="text-text font-black text-5xl tracking-tight tabular-nums text-center"
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.75}
+                            numberOfLines={1}
+                        >
+                            {timeLeft}
                         </Text>
-                    </View>
-                ) : (
+
+                        {/* Bottom Label */}
+                        <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
+                            {isInfinite ? "Elapsed" : "Remaining"}
+                        </Text>
+                    </Pressable>
+                </Animated.View>
+            ) : (
+                /* Idle Home Orb: Play button */
+                <Pressable
+                    onPress={() => {
+                        try { Vibration.vibrate(12); } catch {}
+                        onStartPress?.();
+                    }}
+                    className="w-44 h-44 rounded-full bg-accent items-center justify-center shadow-2xl active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel="Start focus session"
+                    accessibilityHint="Double tap to configure and begin a focus session"
+                >
                     <View className="items-center justify-center ml-1.5">
                         <Ionicons name="play" size={72} color={colors.accentForeground} />
                     </View>
-                )}
-            </Pressable>
+                </Pressable>
+            )}
         </View>
     );
 }

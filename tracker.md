@@ -45,11 +45,50 @@
 - [x] Fix Gradle Node.js OOM limits (`--max-old-space-size=4096`).
 - [x] Successfully compile and generate Standalone Release APK (`assembleRelease`).
 
+## Phase 12: Gamification & Session Completion Experience
+- [x] Added coins calculation and streak tracking logic.
+- [x] Built `SessionResultModal.tsx` with celebratory rewards and session completion feedback.
+- [x] Integrated real-time coin earnings counter onto the active session orb.
+
+## Phase 13: Multi-Tab Navigation & Dedicated Screens
+- [x] Implemented multi-tab navigation via Expo Router (`(tabs)/_layout.tsx`).
+- [x] Created dedicated Block List screen (`apps.tsx`) with fast search filtering, memoized app list, and batched saving.
+- [x] Created dedicated Progress screen (`progress.tsx`) displaying current day streak, lifetime coins, and daily focus statistics.
+- [x] Polished bottom navigation bar with active indicator pills, unselected app badge cues, and theme integration.
+
+## Phase 14: Visual Identity, Color System & Focus Orb Refinements
+- [x] Redesigned visual palette in `Colors.ts` to a bespoke Rosewood & Charcoal identity (`#161517` dark background, `#201E20` surface, `#C07480` / `#A35265` Rosewood accent).
+- [x] Unified theme system in `ThemeContext.tsx` supporting seamless transitions between Dark Mode, Light Mode, and Material You dynamic theming.
+- [x] Refined `CentralFocusOrb.tsx`: removed ring cutting artifacts, enhanced circular progress indicators, and added tactile hold-to-cancel gestures.
+- [x] Completed full-app UI/UX audit standardizing typography, spacing, and accessibility roles across all modals and screens.
+
 ## What we are doing (Next Up)
-## Phase 12: Notifications & Reminders
-- [ ] Research and implement local notifications logic.
-- [ ] Set up notification permissions and channels.
-- [ ] Integrate notification triggers based on user rules (e.g. reminding them to focus, celebrating streaks).
+## Phase 15: Strict Mode & Weekly Emergency Skip System
+- [ ] Create `useStrictMode.ts` hook managing 1 weekly skip, Monday 00:00 reset cadence, and SQLite storage.
+- [ ] Add `is_strict` column to `active_session` and `sessions` SQLite tables.
+- [ ] Update `TimerSelectionModal.tsx` with Strict Mode card, toggle switch, and skip availability status.
+- [ ] Update `useFocusEngine.ts` to accept and persist `isStrict` flag for active sessions.
+- [ ] Update `ActiveSessionUI.tsx` and `CentralFocusOrb.tsx` with `🔒 Strict Mode` visual badge and locked-hold feedback.
+- [ ] Update `EndSessionModal.tsx` for Strict emergency skip confirmation (with 5-second safety timer).
+- [ ] Award 1.5x bonus coins and "Strict Focus" badge in `SessionResultModal.tsx` on completion.
+
+## Phase 16: Auto Sessions (Scheduled & Recurring Focus)
+- [ ] Build schedule engine for recurring focus routines (e.g., Workday, Deep Study, Nighttime).
+- [ ] Implement Android `AlarmManager` / background triggers to automatically start and stop focus sessions.
+- [ ] Create UI for managing schedules: day-of-week pickers, time ranges, and associated blocklists.
+- [ ] Ambient background transitions and status handling when auto sessions trigger.
+
+## Phase 17: Advanced Analytics & Deep Insights
+- [ ] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
+- [ ] Build rich data visualizations on the Progress tab (weekly/monthly trend charts, daily focus breakdowns).
+- [ ] Distraction metrics: track which apps were blocked most frequently and total bypass attempts thwarted.
+- [ ] Milestone summaries: average session duration, most productive hours, and streak health.
+
+## Phase 18: Notifications & Ambient Reminders
+- [ ] Research and implement local notifications logic for auto-sessions and streak alerts.
+- [ ] Set up notification permissions and dedicated Android notification channels.
+- [ ] Integrate smart reminders based on user habits and scheduled focus times.
 
 ## What we are yet to do
 - [ ] Add Premium features / Pro Wall.
+

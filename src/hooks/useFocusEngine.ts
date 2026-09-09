@@ -11,6 +11,7 @@ export function useFocusEngine() {
     const [isSessionActive, setIsSessionActive] = useState(false);
     const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
     const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+    const [isStrictSession, setIsStrictSession] = useState<boolean>(false)
 
 
     //permission states
@@ -46,12 +47,44 @@ export function useFocusEngine() {
 
     const checkActiveSession = async () => {
         try {
-            const active = await db.getFirstAsync<{ start_time: number, end_time: number }>("SELECT * FROM active_session WHERE id = 1")
+            const active = await db.getFirstAsync<{ start_time: number, end_time: number, is_strict?: number }>("SELECT * FROM active_session WHERE id = 1")
 
             if (active) {
+                const now = Date.now();
+                if (active.end_time !== -1 && now >= active.end_time) {
+                    // Session expired while app was closed/killed
+                    await stopSession();
+                    return;
+                }
+
                 setSessionStartTime(active.start_time);
                 setSessionEndTime(active.end_time);
-                setIsSessionActive(true)
+                setIsStrictSession(Boolean(active.is_strict));
+                setIsSessionActive(true);
+
+                const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
+                let appsToBlock = rows.map(row => row.package_name);
+
+                if (Boolean(active.is_strict)) {
+                    const systemApps = [
+                        "com.android.settings",
+                        "com.android.vending",
+                        "com.google.android.packageinstaller"
+                    ];
+                    systemApps.forEach(app => {
+                        if (!appsToBlock.includes(app)) {
+                            appsToBlock.push(app);
+                        }
+                    });
+                }
+
+                const durationMs = active.end_time !== -1 ? active.end_time - now : -1;
+                await FocusBlocker.startService(appsToBlock, durationMs);
+            } else {
+                setSessionStartTime(null);
+                setSessionEndTime(null);
+                setIsStrictSession(false);
+                setIsSessionActive(false);
             }
         } catch (error) {
             console.error("Error loading active session:", error);
@@ -92,7 +125,7 @@ export function useFocusEngine() {
 
     };
 
-    const startSession = async (durationMinutes: number) => {
+    const startSession = async (durationMinutes: number, isStrict: boolean) => {
         try {
             if (Platform.OS === "android" && Platform.Version >= 33) {
                 const granted = await PermissionsAndroid.request(
@@ -104,17 +137,33 @@ export function useFocusEngine() {
                 }
             }
             const durationMs = durationMinutes > 0 ? durationMinutes * 60 * 1000 : -1;
-            await FocusBlocker.startService(selectedApps, durationMs);
+
+            let appsToBlock = [...selectedApps];
+            if (isStrict) {
+                const systemApps = [
+                    "com.android.settings",
+                    "com.android.vending",
+                    "com.google.android.packageinstaller"
+                ];
+                systemApps.forEach(app => {
+                    if (!appsToBlock.includes(app)) {
+                        appsToBlock.push(app);
+                    }
+                });
+            }
+
+            await FocusBlocker.startService(appsToBlock, durationMs);
 
             const now = Date.now();
             const endTime = durationMs > 0 ? now + durationMs : -1;
 
             await db.runAsync(
-                "INSERT OR REPLACE INTO active_session(id, start_time, end_time) VALUES (1, ?, ?)",
-                [now, endTime]
+                "INSERT OR REPLACE INTO active_session(id, start_time, end_time, is_strict) VALUES (1, ?, ?, ?)",
+                [now, endTime, isStrict ? 1 : 0]
             )
             setSessionStartTime(now);
             setSessionEndTime(durationMs > 0 ? now + durationMs : -1);
+            setIsStrictSession(isStrict);
             setIsSessionActive(true);
         } catch (error: any) {
             alert("Error Starting:" + error.message);
@@ -126,6 +175,7 @@ export function useFocusEngine() {
             await FocusBlocker.stopService();
             await db.runAsync("DELETE FROM active_session WHERE id = 1");
             setIsSessionActive(false);
+            setIsStrictSession(false);
             setSessionStartTime(null);
             setSessionEndTime(null);
         } catch (error: any) {
@@ -141,6 +191,7 @@ export function useFocusEngine() {
         installedApps,
         selectedApps,
         isSessionActive,
+        isStrictSession,
         hasUsage,
         hasOverlay,
         hasBattery,
@@ -152,6 +203,7 @@ export function useFocusEngine() {
         goHome,
         sessionStartTime,
         sessionEndTime,
+        refreshSessionState: checkActiveSession,
     }
 
 }

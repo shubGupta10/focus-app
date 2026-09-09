@@ -6,6 +6,7 @@ import { SessionResultModal } from "@/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { useStrictMode } from "@/hooks/useStrictMode";
 import { useUserStats } from "@/hooks/useUserStats";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -18,6 +19,7 @@ export default function Index() {
     const engine = useFocusEngine();
     const { stats, savedCompletedSession, todayStats } = useUserStats();
     const { activeStyle, colors, isDarkMode } = useTheme();
+    const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
 
     useFocusEffect(
         useCallback(() => {
@@ -30,32 +32,58 @@ export default function Index() {
     const todayTimeString = todayStats.today_focus_seconds === 0 ? "0h" : (todayHours > 0 ? `${todayHours}h ${todayMinutes}m` : `${todayMinutes}m`);
 
     const [showPermission, setShowPermission] = useState(false);
-    const [isTimerModalVisible, setIsTimeModalVisible] = useState(false);
+    const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
     const [isEndModalVisible, setIsEndModalVisible] = useState(false);
     const [sessionResult, setSessionResult] = useState<{
-        type: "completed" | "canceled",
+        type: "completed" | "canceled";
         coins: number;
         durationSeconds: number;
-    } | null>(null)
+        isStrict?: boolean;
+    } | null>(null);
 
-    const confirmEndSession = () => {
-        setIsEndModalVisible(false);
+    const handleCompleteSession = async () => {
         if (engine.sessionStartTime) {
             const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
                 ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
                 : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
 
+            const wasStrict = engine.isStrictSession;
+            const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
+            setSessionResult({
+                type: "completed",
+                coins: earnedCoins,
+                durationSeconds,
+                isStrict: wasStrict,
+            });
+        }
+        engine.stopSession();
+    };
+
+    const confirmEndSession = async () => {
+        setIsEndModalVisible(false);
+        if (engine.sessionStartTime) {
+            const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+            const wasStrict = engine.isStrictSession;
             const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
 
             if (isCountdown) {
+                if (wasStrict) {
+                    await useEmergencySkip();
+                }
+
                 setSessionResult({
                     type: "canceled",
                     coins: 0,
-                    durationSeconds
-                })
+                    durationSeconds,
+                    isStrict: wasStrict,
+                });
             } else {
-                savedCompletedSession(durationSeconds).then(({ earnedCoins }) => {
-                    setSessionResult({ type: "completed", coins: earnedCoins, durationSeconds });
+                const { earnedCoins } = await savedCompletedSession(durationSeconds, false);
+                setSessionResult({
+                    type: "completed",
+                    coins: earnedCoins,
+                    durationSeconds,
+                    isStrict: false,
                 });
             }
         }
@@ -64,6 +92,21 @@ export default function Index() {
 
     const handleFocusPress = () => {
         if (engine.isSessionActive) {
+            // If timer has naturally finished
+            if (engine.sessionEndTime && engine.sessionEndTime > 0 && Date.now() >= engine.sessionEndTime) {
+                handleCompleteSession();
+                return;
+            }
+
+            // If in strict mode and no skips remaining: strictly locked
+            if (engine.isStrictSession && skipsRemaining <= 0) {
+                Alert.alert(
+                    "Strict Mode Active",
+                    `This session is locked in Strict Mode and you have 0 emergency skips left this week (${resetCountdownText}). It will unlock when the timer finishes.`
+                );
+                return;
+            }
+
             setIsEndModalVisible(true);
             return;
         }
@@ -74,7 +117,7 @@ export default function Index() {
                 "Choose the distracting apps you want to guard against before starting your focus session.",
                 [
                     { text: "Cancel", style: "cancel" },
-                    { text: "Choose Apps", onPress: () => router.push("/(tabs)/apps") }
+                    { text: "Choose Apps", onPress: () => router.push("/(tabs)/apps") },
                 ]
             );
             return;
@@ -84,7 +127,7 @@ export default function Index() {
         if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
             setShowPermission(true);
         } else {
-            setIsTimeModalVisible(true);
+            setIsTimerModalVisible(true);
         }
     };
 
@@ -152,7 +195,7 @@ export default function Index() {
 
                     {/* Bottom Section: Today's Metrics */}
                     {/* H4: Removed uppercase, tracking-wider, reduced label weight */}
-                    <View className="w-full flex-row items-center justify-around px-6 pb-24">
+                    <View className="w-full flex-row items-center justify-around px-6 pb-2">
                         <View className="items-center">
                             <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
                                 {todayTimeString}
@@ -180,15 +223,17 @@ export default function Index() {
                     startTime={engine.sessionStartTime}
                     endTime={engine.sessionEndTime}
                     blockedAppsCount={engine.selectedApps.length}
+                    isStrict={engine.isStrictSession}
+                    skipsRemaining={skipsRemaining}
                 />
             )}
 
             <TimerSelectionModal
                 visible={isTimerModalVisible}
-                onClose={() => setIsTimeModalVisible(false)}
-                onStartSession={(durationMinutes) => {
-                    engine.startSession(durationMinutes);
-                    setIsTimeModalVisible(false);
+                onClose={() => setIsTimerModalVisible(false)}
+                onStartSession={(durationMinutes, isStrict) => {
+                    setIsTimerModalVisible(false);
+                    engine.startSession(durationMinutes, isStrict);
                 }}
             />
 
@@ -206,10 +251,12 @@ export default function Index() {
                 result={sessionResult}
             />
 
-            <EndSessionModal 
+            <EndSessionModal
                 visible={isEndModalVisible}
                 onClose={() => setIsEndModalVisible(false)}
                 onConfirmEnd={confirmEndSession}
+                isStrict={engine.isStrictSession}
+                resetCountdownText={resetCountdownText}
             />
         </SafeAreaView>
     );

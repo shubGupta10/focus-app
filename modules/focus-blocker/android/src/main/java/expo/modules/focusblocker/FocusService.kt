@@ -101,6 +101,7 @@ class FocusService : Service() {
     private fun startMonitoringLoop() {
         Thread {
             val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as android.app.usage.UsageStatsManager
+            var currentForegroundApp = ""
 
             while (isRunning) {
                 if (endTime > 0 && System.currentTimeMillis() >= endTime) {
@@ -108,12 +109,11 @@ class FocusService : Service() {
                     stopSelf()
                     break
                 }
-                val endTime = System.currentTimeMillis()
-                val startTime = endTime - 10000
+                val nowTime = System.currentTimeMillis()
+                val startTime = nowTime - 10000
 
-                val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+                val usageEvents = usageStatsManager.queryEvents(startTime, nowTime)
                 val event = android.app.usage.UsageEvents.Event()
-                var currentForegroundApp = ""
 
                 while (usageEvents.hasNextEvent()) {
                     usageEvents.getNextEvent(event)
@@ -148,7 +148,7 @@ class FocusService : Service() {
 
             val windowLayoutParams = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT, // FULL SCREEN!
+                WindowManager.LayoutParams.MATCH_PARENT,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 else
@@ -159,10 +159,9 @@ class FocusService : Service() {
                 PixelFormat.TRANSLUCENT
             )
 
-            // Build the Native View
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Color.parseColor("#161517")) // Rosewood Dark Canvas
+                setBackgroundColor(Color.parseColor("#0F0E13"))
                 gravity = Gravity.CENTER
             }
 
@@ -171,22 +170,30 @@ class FocusService : Service() {
             }
             container.addView(topSpacer)
 
+            val icon = TextView(this).apply {
+                text = "🔒"
+                textSize = 80f
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, 40)
+            }
+            container.addView(icon)
+
             val title = TextView(this).apply {
-                text = "BLOCKED"
-                setTextColor(Color.parseColor("#D45656")) // Rosewood Destructive
-                textSize = 50f
+                text = "Focus Session Active"
+                setTextColor(Color.parseColor("#F0EDEC"))
+                textSize = 28f
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
             }
             container.addView(title)
 
             val subtitle = TextView(this).apply {
-                text = "STAY FOCUSED.\nGET BACK TO WORK."
-                setTextColor(Color.parseColor("#A09896")) // Rosewood Secondary
-                textSize = 20f
-                setTypeface(null, Typeface.BOLD)
+                text = "This app is guarded so you can stay in the zone."
+                setTextColor(Color.parseColor("#A09896"))
+                textSize = 16f
+                setTypeface(null, Typeface.NORMAL)
                 gravity = Gravity.CENTER
-                setPadding(0, 40, 0, 0)
+                setPadding(80, 30, 80, 0)
             }
             container.addView(subtitle)
 
@@ -196,14 +203,22 @@ class FocusService : Service() {
             container.addView(bottomSpacer)
 
             val button = Button(this).apply {
-                text = "GO HOME"
-                setTextColor(Color.parseColor("#F0EDEC")) // Rosewood Primary Text
-                setBackgroundColor(Color.parseColor("#201E20")) // Rosewood Surface
-                textSize = 20f
+                text = "RETURN TO HOME"
+                setTextColor(Color.parseColor("#F0EDEC"))
+                textSize = 16f
                 setTypeface(null, Typeface.BOLD)
+                isAllCaps = true
+                stateListAnimator = null
 
-                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200)
-                btnParams.setMargins(80, 0, 80, 150)
+                val shape = android.graphics.drawable.GradientDrawable()
+                shape.shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                shape.cornerRadius = 100f
+                shape.setColor(Color.parseColor("#D45656"))
+
+                background = shape
+
+                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 160)
+                btnParams.setMargins(100, 0, 100, 150)
                 layoutParams = btnParams
 
                 setOnClickListener {
@@ -211,7 +226,6 @@ class FocusService : Service() {
                     intent.addCategory(Intent.CATEGORY_HOME)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivity(intent)
-                    // Hiding is automatic because the loop detects the Home Screen!
                 }
             }
             container.addView(button)

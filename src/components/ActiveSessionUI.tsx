@@ -1,3 +1,5 @@
+import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { CentralFocusOrb } from "./CentralFocusOrb";
@@ -7,14 +9,17 @@ interface ActiveSessionUIProps {
     startTime: number | null;
     endTime: number | null;
     blockedAppsCount?: number;
+    isStrict?: boolean;
+    skipsRemaining?: number;
 }
 
-export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCount }: ActiveSessionUIProps) {
+export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCount, isStrict, skipsRemaining }: ActiveSessionUIProps) {
     const [timeLeft, setTimeLeft] = useState("00:00");
     const [isInfinite, setIsInfinite] = useState(false);
     const [sessionProgress, setSessionProgress] = useState(1);
     const [minuteProgress, setMinuteProgress] = useState(1);
     const [earnedCoins, setEarnedCoins] = useState(0);
+    const { colors } = useTheme();
 
     useEffect(() => {
         if (!startTime) return;
@@ -72,44 +77,85 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     }, [startTime, endTime, onStopPress]);
 
     return (
-        <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
-            {/* A1: Reduced heading size and weight — active state should feel different from idle */}
-            <View className="items-center">
-                <Text className="text-text text-xl font-bold tracking-tight text-center">
-                    Blocker Active
+        <View className="flex-1 items-center justify-between px-6 py-10 w-full max-w-md mx-auto">
+            {/* Top Section: Status Badges & Deep Focus Title */}
+            <View className="items-center w-full pt-6">
+                <View className="flex-row items-center justify-center gap-3 mb-6">
+                    {isStrict && (
+                        <View className="flex-row items-center bg-accent/15 px-4 py-2 rounded-lg">
+                            <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 6 }} />
+                            <Text className="text-accent text-[13px] font-bold tracking-widest uppercase">
+                                Strict Mode
+                            </Text>
+                        </View>
+                    )}
+
+                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-lg border border-border shadow-sm">
+                        <Ionicons name="apps-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                        <Text className="text-textSecondary text-[13px] font-bold">
+                            {blockedAppsCount && blockedAppsCount > 0
+                                ? `${blockedAppsCount} ${blockedAppsCount === 1 ? "App" : "Apps"} Blocked`
+                                : "No Apps Blocked"}
+                        </Text>
+                    </View>
+                </View>
+
+                <Text className="text-text text-4xl font-black tracking-tight text-center mb-1">
+                    {isStrict ? "Strict Lockout" : "Deep Focus"}
                 </Text>
-                <Text className="text-textSecondary text-sm font-medium text-center mt-1">
-                    {blockedAppsCount && blockedAppsCount > 0
-                        ? `${blockedAppsCount} ${blockedAppsCount === 1 ? "app" : "apps"} blocked`
-                        : "No apps blocked"}
+                <Text className="text-textSecondary text-sm font-bold tracking-widest uppercase text-center">
+                    {isInfinite ? "Infinite Mode" : "Session in Progress"}
                 </Text>
             </View>
 
-            <View className="items-center justify-center my-auto">
+            {/* Center Section: Unified Focus Orb with Live Clock & Progress */}
+            <View className="items-center justify-center flex-1 w-full">
                 <CentralFocusOrb
                     isActive={true}
+                    timeLeft={timeLeft}
                     earnedCoins={earnedCoins}
                     sessionProgress={sessionProgress}
                     minuteProgress={minuteProgress}
                     isInfinite={isInfinite}
+                    isStrict={isStrict}
+                    skipsRemaining={skipsRemaining ?? 1}
                     onStopPress={onStopPress}
                 />
             </View>
 
-            <View className="items-center justify-center pb-24">
-                {/* A2: adjustsFontSizeToFit prevents overflow on narrow screens (e.g. 120:45 at 2hr+) */}
-                <Text
-                    className="text-text font-black tracking-tight tabular-nums text-center"
-                    style={{ fontSize: 60 }}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                    numberOfLines={1}
-                >
-                    {timeLeft}
-                </Text>
-                <Text className="text-textSecondary text-sm font-medium text-center mt-2">
-                    {isInfinite ? "Focus time" : "Time remaining"}
-                </Text>
+            {/* Bottom Section: Live Coins Earned & Friction Guide */}
+            <View className="items-center justify-center pb-6 w-full gap-6">
+                <View className="flex-row items-center justify-center">
+                    <Text className="text-2xl mr-2">🪙</Text>
+                    <Text className="text-text font-black text-xl">
+                        +{earnedCoins} coins earned
+                    </Text>
+                </View>
+
+                <View className="flex-row items-center justify-center">
+                    {isStrict && (skipsRemaining ?? 1) <= 0 ? (
+                        <>
+                            <Ionicons name="lock-closed" size={16} color={colors.warning} style={{ marginRight: 6 }} />
+                            <Text className="text-textSecondary text-sm font-medium">
+                                Session locked · Unlocks at 00:00
+                            </Text>
+                        </>
+                    ) : isStrict && (skipsRemaining ?? 1) > 0 ? (
+                        <>
+                            <Ionicons name="alert-circle-outline" size={16} color={colors.warning} style={{ marginRight: 6 }} />
+                            <Text className="text-textSecondary text-sm font-medium">
+                                {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold orb to skip
+                            </Text>
+                        </>
+                    ) : (
+                        <>
+                            <Ionicons name="finger-print-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                            <Text className="text-textSecondary text-sm font-medium">
+                                Press and hold orb to end session
+                            </Text>
+                        </>
+                    )}
+                </View>
             </View>
         </View>
     );

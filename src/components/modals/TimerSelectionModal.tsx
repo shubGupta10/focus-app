@@ -1,13 +1,15 @@
+import { useStrictMode } from "@/hooks/useStrictMode";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
+import { Material3Switch } from "../Material3Switch";
 
 interface TimerSelectionModalProps {
     visible: boolean
     onClose: () => void;
-    onStartSession: (durationMinutes: number) => void;
+    onStartSession: (durationMinutes: number, isStrict: boolean) => void;
 }
 
 
@@ -15,9 +17,19 @@ const PRESET_TIMES = [15, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const { colors, isDarkMode } = useTheme();
+    const { skipsRemaining, resetCountdownText, refreshStrictMode } = useStrictMode()
     const [selectedMinutes, setSelectedMinutes] = useState<number>(30);
+    const [isStrict, setIsStrict] = useState<boolean>(false)
+
+    useEffect(() => {
+        if (visible) {
+            refreshStrictMode();
+        }
+    }, [visible, refreshStrictMode]);
 
     if (!visible) return null;
+
+    const hasSkipAvailable = skipsRemaining > 0;
 
     return (
         <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
@@ -51,7 +63,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         <Pressable
                             onPress={() => {
                                 try { Vibration.vibrate(12); } catch { }
-                                onStartSession(-1);
+                                onStartSession(-1, false);
                             }}
                             className="bg-surfaceElevated rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border border-border"
                             accessibilityRole="button"
@@ -98,17 +110,79 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         })}
                     </ScrollView>
 
+                    {/* Strict Mode Card */}
+                    <View className="bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border">
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center flex-1 mr-3">
+                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict ? 'bg-accentMuted' : 'bg-surface border border-border'}`}>
+                                    <Ionicons
+                                        name={isStrict ? "shield-checkmark" : "shield-outline"}
+                                        size={20}
+                                        color={isStrict ? colors.accent : colors.textSecondary}
+                                    />
+                                </View>
+                                <View className="flex-1">
+                                    <View className="flex-row items-center">
+                                        <Text className="text-text font-bold text-base mr-2">Strict Mode</Text>
+                                        <View className="bg-accent/15 px-2 py-0.5 rounded-md">
+                                            <Text className="text-accent text-[10px] font-bold tracking-wider uppercase">1.5x Coins</Text>
+                                        </View>
+                                    </View>
+                                    <Text className="text-textSecondary text-xs font-medium mt-0.5">
+                                        Timer cannot be ended early
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <Material3Switch
+                                value={isStrict}
+                                onValueChange={(val) => {
+                                    try {
+                                        Vibration.vibrate(8);
+                                    } catch (error) { }
+                                    setIsStrict(val);
+                                }}
+                            />
+                        </View>
+
+                        {isStrict && (
+                            <View className="mt-3 pt-3 border-t border-border flex-row items-center">
+                                <Ionicons
+                                    name={hasSkipAvailable ? "checkmark-circle" : "alert-circle"}
+                                    size={14}
+                                    color={hasSkipAvailable ? colors.success : colors.warning}
+                                    style={{ marginRight: 6 }}
+                                />
+                                <Text className="text-textSecondary text-xs font-medium flex-1">
+                                    {hasSkipAvailable
+                                        ? `1 Emergency Skip Available (${resetCountdownText})`
+                                        : `0 Skips left (${resetCountdownText}) · Full lockout`}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
                     <Pressable
                         onPress={() => {
                             try { Vibration.vibrate(12); } catch { }
-                            onStartSession(selectedMinutes);
+                            onStartSession(selectedMinutes, isStrict);
                         }}
-                        className="w-full bg-accent rounded-2xl p-4 items-center justify-center active:opacity-80"
+                        className="w-full bg-accent rounded-2xl p-4 items-center justify-center active:opacity-80 flex-row"
                         accessibilityRole="button"
                         accessibilityLabel={`Start ${selectedMinutes} minute focus session`}
                     >
+                        {isStrict && (
+                            <Ionicons
+                                name="lock-closed"
+                                size={17}
+                                color={colors.accentForeground}
+                                style={{ marginRight: 8 }}
+                            />
+                        )}
                         <Text className="text-accentForeground font-black text-base uppercase">
-                            Start {selectedMinutes}m Session
+                            {isStrict
+                                ? `Start ${selectedMinutes}m Strict Session`
+                                : `Start ${selectedMinutes}m Session`}
                         </Text>
                     </Pressable>
                 </View>

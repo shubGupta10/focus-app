@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 2;
+    const DATABASE_VERSION = 4;
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
@@ -22,6 +22,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             duration_seconds INTEGER NOT NULL,
             is_completed INTEGER NOT NULL,
             coins_earned INTEGER NOT NULL,
+            is_strict INTEGER NOT NULL DEFAULT 0,
             session_date TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         );
@@ -29,7 +30,8 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             CREATE TABLE IF NOT EXISTS active_session (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             start_time INTEGER NOT NULL,
-            end_time INTEGER NOT NULL
+            end_time INTEGER NOT NULL,
+            is_strict INTEGER NOT NULL DEFAULT 0
         );
 
             
@@ -47,5 +49,22 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         VALUES (1, 0, 0, 0);`
     );
 
-    await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+    const versionResult = await db.getFirstAsync<{
+        user_version: number
+    }>("PRAGMA user_version");
+    const currentVersion = versionResult?.user_version ?? 0;
+
+    if (currentVersion < 4) {
+        try {
+            await db.execAsync("ALTER TABLE active_session ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
+        } catch (error) {
+
+        }
+        try {
+            await db.execAsync("ALTER TABLE sessions ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
+        } catch (error) {
+
+        }
+        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+    }
 }

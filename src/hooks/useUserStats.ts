@@ -1,4 +1,4 @@
-import { getUserStats, recordSession, UserStats, getTodayStats, TodayStats } from "@/store/statsRepository";
+import { getTodayStats, getUserStats, recordSession, TodayStats, UserStats } from "@/store/statsRepository";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
 
@@ -32,9 +32,9 @@ export function useUserStats() {
         refreshStats();
     }, [refreshStats])
 
-    const savedCompletedSession = async (durationSeconds: number) => {
+    const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false) => {
         try {
-            const { earnedCoins, newStreak } = await recordSession(db, durationSeconds);
+            const { earnedCoins, newStreak } = await recordSession(db, durationSeconds, isStrict);
             await refreshStats();
             return { earnedCoins, newStreak };
         } catch (error) {
