@@ -1,10 +1,10 @@
-import { Material3Switch } from "@/components/Material3Switch";
+import { AppListItem } from "@/components/AppListItem";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
 import { cssInterop } from "nativewind";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, Vibration, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, Text, TextInput, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 
@@ -24,8 +24,7 @@ export default function AppsTab() {
     const { activeStyle, colors } = useTheme();
     const engine = useFocusEngine();
     const [searchQuery, setSearchQuery] = useState("");
-    const [isSaved, setIsSaved] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false);
+    const [filterMode, setFilterMode] = useState<"all" | "guarded">("all");
 
     useFocusEffect(
         useCallback(() => {
@@ -35,9 +34,14 @@ export default function AppsTab() {
         }, [engine])
     );
 
-    const filteredApps = engine.installedApps.filter((app) =>
-        app.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredApps = engine.installedApps.filter((app) => {
+        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+        if (filterMode === "guarded") {
+            return engine.selectedApps.includes(app.packageName);
+        }
+        return true;
+    });
 
     const handleToggleApp = (packageName: string) => {
         if (engine.isSessionActive) {
@@ -48,66 +52,48 @@ export default function AppsTab() {
             Vibration.vibrate(8);
         } catch { }
         engine.toggleApp(packageName);
-        setHasChanges(true);
-        setIsSaved(false);
-    };
-
-    const handleSave = async () => {
-        if (engine.isSessionActive) return;
-        try {
-            Vibration.vibrate(25);
-        } catch { }
-        await engine.loadSelectedApps();
-        setIsSaved(true);
-        setHasChanges(false);
-        setTimeout(() => {
-            setIsSaved(false);
-        }, 2000);
     };
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <View className="flex-row justify-between items-center px-6 pt-5 pb-3">
-                <View className="flex-1 mr-3">
+                <View className="flex-1">
                     <Text className="text-text font-black text-3xl tracking-tight">Block List</Text>
                     <Text className="text-textSecondary text-sm mt-0.5 font-medium">
-                        {engine.selectedApps.length} of {engine.installedApps.length} apps selected
+                        {engine.selectedApps.length === 0
+                            ? "No apps guarded yet"
+                            : `${engine.selectedApps.length} of ${engine.installedApps.length} apps guarded`}
                     </Text>
                 </View>
 
-                {/* Save button — explicit save flow (hasChanges tracks pending toggles) */}
-                <Pressable
-                    onPress={handleSave}
-                    disabled={!hasChanges || isSaved || engine.isSessionActive}
-                    hitSlop={8}
-                    className={`px-4 py-2 rounded-xl flex-row items-center justify-center active:opacity-80 ${isSaved
-                        ? "bg-successMuted border border-success"
-                        : hasChanges && !engine.isSessionActive
-                            ? "bg-accent shadow-sm"
-                            : "bg-surface border border-border opacity-50"
-                        }`}
-                    accessibilityRole="button"
-                    accessibilityLabel={isSaved ? "Saved" : "Save block list"}
-                    // B1: Accessibility hint when button is disabled explains why
-                    accessibilityHint={!hasChanges ? "Toggle an app to enable saving" : undefined}
-                >
-                    <Ionicons
-                        name={isSaved ? "checkmark-circle" : "checkmark"}
-                        size={16}
-                        color={isSaved ? colors.success : hasChanges ? colors.accentForeground : colors.textMuted}
-                        style={{ marginRight: 4 }}
+                <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-border">
+                    <View
+                        style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: engine.selectedApps.length > 0 ? colors.success : colors.textMuted,
+                            marginRight: 6,
+                        }}
                     />
-                    <Text
-                        style={{ color: isSaved ? colors.success : hasChanges ? colors.accentForeground : colors.textMuted }}
-                        className="font-bold text-sm"
-                    >
-                        {isSaved ? "Saved!" : "Save"}
+                    <Text className="text-textSecondary text-xs font-semibold">
+                        {engine.selectedApps.length > 0 ? "Auto-saved" : "Ready"}
                     </Text>
-                </Pressable>
+                </View>
             </View>
 
-            {/* B3: Reduced py-3 → py-2.5 for slightly more proportionate search field */}
-            <View className="px-6 mb-4">
+            {engine.selectedApps.length === 0 && !engine.isSessionActive && (
+                <View className="px-6 mb-3">
+                    <View className="bg-surface rounded-2xl p-4 border border-border flex-row items-center">
+                        <Ionicons name="shield-outline" size={20} color={colors.accent} style={{ marginRight: 12 }} />
+                        <Text className="text-textSecondary text-xs leading-5 flex-1 font-medium">
+                            Choose the apps that distract you most. Lockout will guard them when you start a focus session.
+                        </Text>
+                    </View>
+                </View>
+            )}
+
+            <View className="px-6 mb-3">
                 <View className="flex-row items-center bg-surface rounded-2xl px-4 py-2.5 border border-border">
                     <Ionicons name="search" size={18} color={colors.textSecondary} />
                     <TextInput
@@ -131,6 +117,46 @@ export default function AppsTab() {
                         </Pressable>
                     )}
                 </View>
+            </View>
+
+            <View className="flex-row px-6 mb-4 gap-2">
+                <Pressable
+                    onPress={() => setFilterMode("all")}
+                    className={`px-3.5 py-1.5 rounded-full border ${
+                        filterMode === "all"
+                            ? "bg-accent border-accent"
+                            : "bg-surface border-border active:opacity-75"
+                    }`}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show all apps"
+                >
+                    <Text
+                        className={`text-xs font-bold ${
+                            filterMode === "all" ? "text-accentForeground" : "text-textSecondary"
+                        }`}
+                    >
+                        All ({engine.installedApps.length})
+                    </Text>
+                </Pressable>
+
+                <Pressable
+                    onPress={() => setFilterMode("guarded")}
+                    className={`px-3.5 py-1.5 rounded-full border ${
+                        filterMode === "guarded"
+                            ? "bg-accent border-accent"
+                            : "bg-surface border-border active:opacity-75"
+                    }`}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show guarded apps only"
+                >
+                    <Text
+                        className={`text-xs font-bold ${
+                            filterMode === "guarded" ? "text-accentForeground" : "text-textSecondary"
+                        }`}
+                    >
+                        Guarded ({engine.selectedApps.length})
+                    </Text>
+                </Pressable>
             </View>
 
             {engine.isSessionActive && (
@@ -181,46 +207,14 @@ export default function AppsTab() {
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 24 }}
                         initialNumToRender={15}
-                        renderItem={({ item: app }) => {
-                            const isSelected = engine.selectedApps.includes(app.packageName);
-                            return (
-                                <Pressable
-                                    onPress={() => handleToggleApp(app.packageName)}
-                                    className={`flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border ${engine.isSessionActive ? 'opacity-50' : ''}`}
-                                    accessibilityRole="checkbox"
-                                    accessibilityState={{ checked: isSelected }}
-                                    accessibilityLabel={`${app.name}, ${isSelected ? 'selected to block' : 'not blocked'}`}
-                                    accessibilityHint="Double tap to toggle blocking"
-                                >
-                                    <View className="flex-row items-center flex-1 mr-3">
-
-                                        {app.icon ? (
-                                            <Image
-                                                source={{ uri: `data:image/png;base64,${app.icon}` }}
-                                                className="w-11 h-11 rounded-xl mr-3.5"
-                                            />
-                                        ) : (
-                                            <View className="w-11 h-11 rounded-xl bg-surfaceElevated border border-border items-center justify-center mr-3.5">
-                                                <Ionicons name="help" size={20} color={colors.textMuted} />
-                                            </View>
-                                        )}
-
-                                        <View className="flex-1">
-                                            <Text className="font-bold text-base text-text" numberOfLines={1}>
-                                                {app.name}
-                                            </Text>
-                                        </View>
-                                    </View>
-
-                                    <View pointerEvents="none">
-                                        <Material3Switch
-                                            value={isSelected}
-                                            onValueChange={() => { }}
-                                        />
-                                    </View>
-                                </Pressable>
-                            );
-                        }}
+                        renderItem={({ item: app }) => (
+                            <AppListItem
+                                app={app}
+                                isSelected={engine.selectedApps.includes(app.packageName)}
+                                onToggle={handleToggleApp}
+                                disabled={engine.isSessionActive}
+                            />
+                        )}
                     />
                 )}
             </View>

@@ -81,10 +81,15 @@ export function CentralFocusOrb({
         return () => animation.stop();
     }, [isActive]);
 
+    const holdIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
     useEffect(() => {
         return () => {
             if (holdTimeRef.current) {
                 clearTimeout(holdTimeRef.current);
+            }
+            if (holdIntervalRef.current) {
+                clearInterval(holdIntervalRef.current);
             }
         };
     }, []);
@@ -101,20 +106,28 @@ export function CentralFocusOrb({
             return;
         }
 
-        try { Vibration.vibrate(10); } catch {}
+        try { Vibration.vibrate(12); } catch {}
         setIsHolding(true);
 
         Animated.timing(holdProgress, {
             toValue: 1,
-            duration: 10000,
+            duration: 3500,
             useNativeDriver: false,
         }).start();
 
+        holdIntervalRef.current = setInterval(() => {
+            try { Vibration.vibrate(8); } catch {}
+        }, 800);
+
         holdTimeRef.current = setTimeout(() => {
+            if (holdIntervalRef.current) {
+                clearInterval(holdIntervalRef.current);
+                holdIntervalRef.current = null;
+            }
             try { Vibration.vibrate([0, 40, 60, 40]); } catch {}
             setIsHolding(false);
             onStopPress?.();
-        }, 10000);
+        }, 3500);
     };
 
     const handlePressOut = () => {
@@ -125,10 +138,14 @@ export function CentralFocusOrb({
             clearTimeout(holdTimeRef.current);
             holdTimeRef.current = null;
         }
+        if (holdIntervalRef.current) {
+            clearInterval(holdIntervalRef.current);
+            holdIntervalRef.current = null;
+        }
 
         Animated.timing(holdProgress, {
             toValue: 0,
-            duration: 250,
+            duration: 200,
             useNativeDriver: false,
         }).start();
     };

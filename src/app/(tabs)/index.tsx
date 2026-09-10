@@ -6,26 +6,45 @@ import { SessionResultModal } from "@/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { useSettings } from "@/hooks/useSettings";
 import { useStrictMode } from "@/hooks/useStrictMode";
 import { useUserStats } from "@/hooks/useUserStats";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
     const engine = useFocusEngine();
+    const { getSetting } = useSettings();
     const { stats, savedCompletedSession, todayStats } = useUserStats();
     const { activeStyle, colors, isDarkMode } = useTheme();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
+    const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+
+    useEffect(() => {
+        const checkFirstRun = async () => {
+            const completed = await getSetting("has_completed_onboarding");
+            if (completed !== "true") {
+                router.replace("/onboarding");
+            } else {
+                setIsCheckingOnboarding(false)
+            }
+        };
+        checkFirstRun();
+    }, [])
 
     useFocusEffect(
         useCallback(() => {
             engine.loadSelectedApps();
+            engine.checkPermissions();
         }, [])
     );
+
+    const hasAllPermissions = engine.hasUsage && engine.hasOverlay && engine.hasBattery;
+    const hasSelectedApps = engine.selectedApps.length > 0;
 
     const todayHours = Math.floor(todayStats.today_focus_seconds / 3600);
     const todayMinutes = Math.floor((todayStats.today_focus_seconds % 3600) / 60);
@@ -92,13 +111,11 @@ export default function Index() {
 
     const handleFocusPress = () => {
         if (engine.isSessionActive) {
-            // If timer has naturally finished
             if (engine.sessionEndTime && engine.sessionEndTime > 0 && Date.now() >= engine.sessionEndTime) {
                 handleCompleteSession();
                 return;
             }
 
-            // If in strict mode and no skips remaining: strictly locked
             if (engine.isStrictSession && skipsRemaining <= 0) {
                 Alert.alert(
                     "Strict Mode Active",
@@ -111,25 +128,31 @@ export default function Index() {
             return;
         }
 
-        if (engine.selectedApps.length === 0) {
-            Alert.alert(
-                "Select Apps to Block",
-                "Choose the distracting apps you want to guard against before starting your focus session.",
-                [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Choose Apps", onPress: () => router.push("/(tabs)/apps") },
-                ]
-            );
+        if (!hasSelectedApps) {
+            router.push("/(tabs)/apps");
             return;
         }
 
         engine.checkPermissions();
         if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
             setShowPermission(true);
-        } else {
+            return;
+        }
+
+        setIsTimerModalVisible(true);
+    };
+
+    const handleClosePermissionModal = () => {
+        setShowPermission(false);
+        engine.checkPermissions();
+        if (hasSelectedApps && engine.hasUsage && engine.hasOverlay && engine.hasBattery) {
             setIsTimerModalVisible(true);
         }
     };
+
+    if (isCheckingOnboarding) {
+        return <SafeAreaView className="flex-1 bg-background" style={activeStyle} />
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
@@ -152,33 +175,53 @@ export default function Index() {
 
             {!engine.isSessionActive ? (
                 <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
-                    {/* Top Section: Ready to focus + Block List status pill */}
                     <View className="items-center">
                         <Text className="text-text text-4xl font-black tracking-tight text-center">
-                            Ready to focus?
+                            {!hasSelectedApps
+                                ? "Set up your focus"
+                                : !hasAllPermissions
+                                    ? "Almost ready"
+                                    : "Ready to focus?"}
                         </Text>
 
-                        {/* H3: Added accessibilityRole and accessibilityLabel */}
                         <Pressable
-                            onPress={() => router.push("/(tabs)/apps")}
+                            onPress={() => {
+                                if (!hasSelectedApps) {
+                                    router.push("/(tabs)/apps");
+                                } else if (!hasAllPermissions) {
+                                    setShowPermission(true);
+                                } else {
+                                    router.push("/(tabs)/apps");
+                                }
+                            }}
                             className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border mt-3 active:opacity-75"
                             accessibilityRole="button"
                             accessibilityLabel={
-                                engine.selectedApps.length > 0
-                                    ? `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} selected to block. Tap to change.`
-                                    : "No apps selected to block. Tap to choose apps."
+                                !hasSelectedApps
+                                    ? "Step 1 of 2: Choose apps to guard"
+                                    : !hasAllPermissions
+                                        ? "Step 2 of 2: Enable permissions to guard apps"
+                                        : `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} guarded. Tap to change.`
                             }
                         >
                             <Ionicons
-                                name="apps-outline"
+                                name={
+                                    !hasSelectedApps
+                                        ? "apps-outline"
+                                        : !hasAllPermissions
+                                            ? "shield-outline"
+                                            : "shield-checkmark-outline"
+                                }
                                 size={15}
                                 color={colors.accent}
                                 style={{ marginRight: 6 }}
                             />
                             <Text className="text-text font-semibold text-xs mr-1">
-                                {engine.selectedApps.length > 0
-                                    ? `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} to block`
-                                    : "Choose apps to block"}
+                                {!hasSelectedApps
+                                    ? "1. Choose apps to guard"
+                                    : !hasAllPermissions
+                                        ? "2. Enable permissions"
+                                        : `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} guarded`}
                             </Text>
                             <Ionicons name="chevron-forward" size={13} color={colors.textSecondary} />
                         </Pressable>
@@ -187,14 +230,16 @@ export default function Index() {
                     {/* Central Orb */}
                     <View className="items-center justify-center my-auto">
                         <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
-                        {/* H2: Removed uppercase and tracking-wider — softer instructional tone */}
                         <Text className="text-textSecondary text-xs font-medium text-center mt-3">
-                            Tap the orb to begin
+                            {!hasSelectedApps
+                                ? "Tap the orb to choose apps"
+                                : !hasAllPermissions
+                                    ? "Tap the orb to grant permissions"
+                                    : "Tap the orb to begin"}
                         </Text>
                     </View>
 
                     {/* Bottom Section: Today's Metrics */}
-                    {/* H4: Removed uppercase, tracking-wider, reduced label weight */}
                     <View className="w-full flex-row items-center justify-around px-6 pb-2">
                         <View className="items-center">
                             <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
@@ -239,7 +284,7 @@ export default function Index() {
 
             <PermissionModal
                 visible={showPermission}
-                onClose={() => setShowPermission(false)}
+                onClose={handleClosePermissionModal}
                 hasUsage={engine.hasUsage}
                 hasOverlay={engine.hasOverlay}
                 hasBattery={engine.hasBattery}

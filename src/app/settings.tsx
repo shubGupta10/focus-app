@@ -84,7 +84,6 @@ export default function SettingsTab() {
                 <View className="bg-surface rounded-2xl p-5 border border-border">
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-text font-bold text-lg">System Permissions</Text>
-                        {/* S1: Use icon + text not color alone to distinguish status states */}
                         <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-transparent' : 'bg-warningMuted border-warning/40'}`}>
                             <Text className={`text-xs font-bold ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
                                 {allPermissionsGranted ? "All Active" : "Setup Needed"}
@@ -114,6 +113,23 @@ export default function SettingsTab() {
                 hasOverlay={hasOverlay}
                 hasBattery={hasBattery}
             />
+
+            <View className="mx-6 mt-4 bg-surface rounded-2xl p-5 border border-border flex-row items-center justify-between">
+                <View className="flex-1 pr-4">
+                    <Text className="text-text font-bold text-lg mb-1">Onboarding Guide</Text>
+                    <Text className="text-textSecondary text-sm leading-5">
+                        Review how Lockout works and learn about intentional focus.
+                    </Text>
+                </View>
+                <Pressable
+                    onPress={() => router.push("/onboarding")}
+                    className="bg-surface border border-border px-3.5 py-2 rounded-xl active:opacity-75"
+                >
+                    <Text className="text-text font-bold text-xs uppercase tracking-wider">
+                        Revisit
+                    </Text>
+                </Pressable>
+            </View>
         </SafeAreaView>
     );
 }

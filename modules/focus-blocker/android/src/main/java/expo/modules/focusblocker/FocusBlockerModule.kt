@@ -38,11 +38,18 @@ class FocusBlockerModule : Module() {
         Function("requestUsagePermission") {
             val context = appContext.reactContext
             if (context != null) {
-                // Create an Intent (Android's way of opening a new screen)
-                val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                context.startActivity(intent)
+                val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                    data = android.net.Uri.parse("package:" + context.packageName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    val fallbackIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(fallbackIntent)
+                }
             }
         }
 

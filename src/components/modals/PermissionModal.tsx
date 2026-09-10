@@ -22,7 +22,7 @@ interface PermissionModalProps {
     hasBattery: boolean;
 }
 
-function PermissionRow({
+export function PermissionRow({
     label,
     description,
     isGranted,

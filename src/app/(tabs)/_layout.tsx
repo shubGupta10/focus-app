@@ -116,15 +116,12 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="apps"
                 options={{
-                    // N1: Shortened 'Block List' → 'Apps' to prevent wrapping on 360dp screens
                     title: "Apps",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
                             name="apps"
                             outlineName="apps-outline"
-                            // N2: Badge only when 0 apps selected (action-needed state)
-                            // Showing "25" in a 9px badge is misleading — badges signal attention, not quantity
                             badgeCount={engine.selectedApps.length === 0 ? 1 : undefined}
                             colors={colors}
                             isDarkMode={isDarkMode}

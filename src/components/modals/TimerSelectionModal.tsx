@@ -13,13 +13,13 @@ interface TimerSelectionModalProps {
 }
 
 
-const PRESET_TIMES = [15, 30, 45, 60, 90, 120];
+const PRESET_TIMES = [15, 25, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const { colors, isDarkMode } = useTheme();
-    const { skipsRemaining, resetCountdownText, refreshStrictMode } = useStrictMode()
-    const [selectedMinutes, setSelectedMinutes] = useState<number>(30);
-    const [isStrict, setIsStrict] = useState<boolean>(false)
+    const { skipsRemaining, resetCountdownText, refreshStrictMode } = useStrictMode();
+    const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
+    const [isStrict, setIsStrict] = useState<boolean>(false);
 
     useEffect(() => {
         if (visible) {
@@ -62,21 +62,37 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         <Text className="text-textSecondary font-bold mb-2.5 tracking-wider text-xs uppercase">No Timer</Text>
                         <Pressable
                             onPress={() => {
-                                try { Vibration.vibrate(12); } catch { }
-                                onStartSession(-1, false);
+                                try { Vibration.vibrate(8); } catch { }
+                                setSelectedMinutes(-1);
                             }}
-                            className="bg-surfaceElevated rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border border-border"
+                            className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border ${
+                                selectedMinutes === -1
+                                    ? "bg-accent border-accent"
+                                    : "bg-surfaceElevated border-border"
+                            }`}
                             accessibilityRole="button"
-                            accessibilityLabel="Start infinite mode — counts up until you stop"
+                            accessibilityLabel="Select infinite mode — counts up until you stop"
+                            accessibilityState={{ selected: selectedMinutes === -1 }}
                         >
                             <View className="flex-1 mr-3">
-                                <Text className="text-text font-black text-lg mb-0.5">Infinite Mode</Text>
-                                <Text className="text-textSecondary text-sm font-medium">Counts up until you stop</Text>
+                                <Text className={`font-black text-lg mb-0.5 ${
+                                    selectedMinutes === -1 ? "text-accentForeground" : "text-text"
+                                }`}>
+                                    Infinite Mode
+                                </Text>
+                                <Text className={`text-sm font-medium ${
+                                    selectedMinutes === -1 ? "text-accentForeground/80" : "text-textSecondary"
+                                }`}>
+                                    Counts up until you stop
+                                </Text>
                             </View>
-                            <Ionicons name="infinite" size={30} color={colors.accent} />
+                            <Ionicons
+                                name="infinite"
+                                size={30}
+                                color={selectedMinutes === -1 ? colors.accentForeground : colors.accent}
+                            />
                         </Pressable>
                     </View>
-
 
                     <Text className="text-textSecondary font-bold mb-2.5 tracking-wider text-xs uppercase">Timed Focus</Text>
                     <ScrollView
@@ -110,15 +126,18 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         })}
                     </ScrollView>
 
-                    {/* Strict Mode Card */}
-                    <View className="bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border">
+                    <View className={`bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border ${
+                        selectedMinutes === -1 ? "opacity-40" : ""
+                    }`}>
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1 mr-3">
-                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict ? 'bg-accentMuted' : 'bg-surface border border-border'}`}>
+                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
+                                    isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surface border border-border'
+                                }`}>
                                     <Ionicons
-                                        name={isStrict ? "shield-checkmark" : "shield-outline"}
+                                        name={isStrict && selectedMinutes !== -1 ? "shield-checkmark" : "shield-outline"}
                                         size={20}
-                                        color={isStrict ? colors.accent : colors.textSecondary}
+                                        color={isStrict && selectedMinutes !== -1 ? colors.accent : colors.textSecondary}
                                     />
                                 </View>
                                 <View className="flex-1">
@@ -129,23 +148,27 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                         </View>
                                     </View>
                                     <Text className="text-textSecondary text-xs font-medium mt-0.5">
-                                        Timer cannot be ended early
+                                        {selectedMinutes === -1
+                                            ? "Requires a timed session"
+                                            : "Timer cannot be ended early"}
                                     </Text>
                                 </View>
                             </View>
 
                             <Material3Switch
-                                value={isStrict}
+                                value={selectedMinutes === -1 ? false : isStrict}
                                 onValueChange={(val) => {
+                                    if (selectedMinutes === -1) return;
                                     try {
                                         Vibration.vibrate(8);
                                     } catch (error) { }
                                     setIsStrict(val);
                                 }}
+                                disabled={selectedMinutes === -1}
                             />
                         </View>
 
-                        {isStrict && (
+                        {isStrict && selectedMinutes !== -1 && (
                             <View className="mt-3 pt-3 border-t border-border flex-row items-center">
                                 <Ionicons
                                     name={hasSkipAvailable ? "checkmark-circle" : "alert-circle"}
@@ -165,13 +188,17 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     <Pressable
                         onPress={() => {
                             try { Vibration.vibrate(12); } catch { }
-                            onStartSession(selectedMinutes, isStrict);
+                            onStartSession(selectedMinutes, selectedMinutes === -1 ? false : isStrict);
                         }}
                         className="w-full bg-accent rounded-2xl p-4 items-center justify-center active:opacity-80 flex-row"
                         accessibilityRole="button"
-                        accessibilityLabel={`Start ${selectedMinutes} minute focus session`}
+                        accessibilityLabel={
+                            selectedMinutes === -1
+                                ? "Start infinite focus session"
+                                : `Start ${selectedMinutes} minute focus session`
+                        }
                     >
-                        {isStrict && (
+                        {selectedMinutes !== -1 && isStrict && (
                             <Ionicons
                                 name="lock-closed"
                                 size={17}
@@ -180,7 +207,9 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                             />
                         )}
                         <Text className="text-accentForeground font-black text-base uppercase">
-                            {isStrict
+                            {selectedMinutes === -1
+                                ? "Start Infinite Session"
+                                : isStrict
                                 ? `Start ${selectedMinutes}m Strict Session`
                                 : `Start ${selectedMinutes}m Session`}
                         </Text>

@@ -21,6 +21,13 @@ export default function Layout() {
             <Stack.Screen name="(tabs)" />
 
             <Stack.Screen
+              name="onboarding"
+              options={{
+                animation: "fade"
+              }}
+            />
+
+            <Stack.Screen
               name="settings"
               options={{
                 animation: "default"

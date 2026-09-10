@@ -130,7 +130,7 @@ class FocusService : Service() {
                 }
 
                 if (isDistracting) {
-                    showBlockOverlay()
+                    showBlockOverlay(currentForegroundApp)
                 } else {
                     hideBlockOverlay()
                 }
@@ -140,10 +140,29 @@ class FocusService : Service() {
         }.start()
     }
 
-    private fun showBlockOverlay() {
-        if (isOverlayShowing) return
-
+    private fun showBlockOverlay(blockedPackage: String) {
         Handler(Looper.getMainLooper()).post {
+            val appLabel = try {
+                val appInfo = packageManager.getApplicationInfo(blockedPackage, 0)
+                packageManager.getApplicationLabel(appInfo).toString()
+            } catch (e: Exception) {
+                "This app"
+            }
+
+            val timeMessage = if (endTime > 0) {
+                val diffMs = endTime - System.currentTimeMillis()
+                val minutesLeft = (diffMs / 1000 / 60).coerceAtLeast(1)
+                if (minutesLeft > 1) "$minutesLeft minutes remaining" else "Less than a minute remaining"
+            } else {
+                "Session in progress"
+            }
+
+            if (isOverlayShowing) {
+                titleView?.text = "$appLabel is guarded"
+                subtitleView?.text = "$timeMessage · Stay in the zone"
+                return@post
+            }
+
             windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
             val windowLayoutParams = WindowManager.LayoutParams(
@@ -161,7 +180,7 @@ class FocusService : Service() {
 
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Color.parseColor("#0F0E13"))
+                setBackgroundColor(Color.parseColor("#161517"))
                 gravity = Gravity.CENTER
             }
 
@@ -172,29 +191,31 @@ class FocusService : Service() {
 
             val icon = TextView(this).apply {
                 text = "🔒"
-                textSize = 80f
+                textSize = 72f
                 gravity = Gravity.CENTER
-                setPadding(0, 0, 0, 40)
+                setPadding(0, 0, 0, 32)
             }
             container.addView(icon)
 
             val title = TextView(this).apply {
-                text = "Focus Session Active"
+                text = "$appLabel is guarded"
                 setTextColor(Color.parseColor("#F0EDEC"))
-                textSize = 28f
+                textSize = 26f
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
             }
+            titleView = title
             container.addView(title)
 
             val subtitle = TextView(this).apply {
-                text = "This app is guarded so you can stay in the zone."
+                text = "$timeMessage · Stay in the zone"
                 setTextColor(Color.parseColor("#A09896"))
-                textSize = 16f
+                textSize = 15f
                 setTypeface(null, Typeface.NORMAL)
                 gravity = Gravity.CENTER
-                setPadding(80, 30, 80, 0)
+                setPadding(80, 20, 80, 0)
             }
+            subtitleView = subtitle
             container.addView(subtitle)
 
             val bottomSpacer = Space(this).apply {
@@ -202,33 +223,67 @@ class FocusService : Service() {
             }
             container.addView(bottomSpacer)
 
-            val button = Button(this).apply {
+            val homeButton = Button(this).apply {
                 text = "RETURN TO HOME"
-                setTextColor(Color.parseColor("#F0EDEC"))
-                textSize = 16f
+                setTextColor(Color.parseColor("#FFFFFF"))
+                textSize = 15f
                 setTypeface(null, Typeface.BOLD)
                 isAllCaps = true
                 stateListAnimator = null
 
-                val shape = android.graphics.drawable.GradientDrawable()
-                shape.shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                shape.cornerRadius = 100f
-                shape.setColor(Color.parseColor("#D45656"))
-
+                val shape = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = 48f
+                    setColor(Color.parseColor("#C07480"))
+                }
                 background = shape
 
-                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 160)
-                btnParams.setMargins(100, 0, 100, 150)
+                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 150).apply {
+                    setMargins(80, 0, 80, 16)
+                }
                 layoutParams = btnParams
 
                 setOnClickListener {
-                    val intent = Intent(Intent.ACTION_MAIN)
-                    intent.addCategory(Intent.CATEGORY_HOME)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_HOME)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
                     startActivity(intent)
                 }
             }
-            container.addView(button)
+            container.addView(homeButton)
+
+            val openAppButton = Button(this).apply {
+                text = "OPEN LOCKOUT"
+                setTextColor(Color.parseColor("#A09896"))
+                textSize = 13f
+                setTypeface(null, Typeface.BOLD)
+                isAllCaps = true
+                stateListAnimator = null
+
+                val shape = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = 48f
+                    setColor(Color.parseColor("#201E20"))
+                    setStroke(2, Color.parseColor("#3D3840"))
+                }
+                background = shape
+
+                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 130).apply {
+                    setMargins(80, 0, 80, 80)
+                }
+                layoutParams = btnParams
+
+                setOnClickListener {
+                    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    if (launchIntent != null) {
+                        startActivity(launchIntent)
+                    }
+                }
+            }
+            container.addView(openAppButton)
 
             try {
                 windowManager?.addView(container, windowLayoutParams)
@@ -240,12 +295,17 @@ class FocusService : Service() {
         }
     }
 
+    private var titleView: TextView? = null
+    private var subtitleView: TextView? = null
+
     private fun hideBlockOverlay() {
         if (!isOverlayShowing) return
         Handler(Looper.getMainLooper()).post {
             try {
                 windowManager?.removeView(overlayView)
                 overlayView = null
+                titleView = null
+                subtitleView = null
                 isOverlayShowing = false
             } catch (e: Exception) {
                 Log.e("FocusBlocker", "Failed to remove overlay", e)

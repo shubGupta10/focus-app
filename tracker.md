@@ -62,15 +62,33 @@
 - [x] Refined `CentralFocusOrb.tsx`: removed ring cutting artifacts, enhanced circular progress indicators, and added tactile hold-to-cancel gestures.
 - [x] Completed full-app UI/UX audit standardizing typography, spacing, and accessibility roles across all modals and screens.
 
-## What we are doing (Next Up)
 ## Phase 15: Strict Mode & Weekly Emergency Skip System
-- [ ] Create `useStrictMode.ts` hook managing 1 weekly skip, Monday 00:00 reset cadence, and SQLite storage.
-- [ ] Add `is_strict` column to `active_session` and `sessions` SQLite tables.
-- [ ] Update `TimerSelectionModal.tsx` with Strict Mode card, toggle switch, and skip availability status.
-- [ ] Update `useFocusEngine.ts` to accept and persist `isStrict` flag for active sessions.
-- [ ] Update `ActiveSessionUI.tsx` and `CentralFocusOrb.tsx` with `🔒 Strict Mode` visual badge and locked-hold feedback.
-- [ ] Update `EndSessionModal.tsx` for Strict emergency skip confirmation (with 5-second safety timer).
-- [ ] Award 1.5x bonus coins and "Strict Focus" badge in `SessionResultModal.tsx` on completion.
+- [x] Create `useStrictMode.ts` hook managing 1 weekly skip, Monday 00:00 reset cadence, and SQLite storage.
+- [x] Add `is_strict` column to `active_session` and `sessions` SQLite tables.
+- [x] Update `TimerSelectionModal.tsx` with Strict Mode card, toggle switch, and skip availability status.
+- [x] Update `useFocusEngine.ts` to accept and persist `isStrict` flag for active sessions.
+- [x] Update `ActiveSessionUI.tsx` and `CentralFocusOrb.tsx` with `🔒 Strict Mode` visual badge and locked-hold feedback.
+- [x] Update `EndSessionModal.tsx` for Strict emergency skip confirmation (with 5-second safety timer).
+- [x] Award 1.5x bonus coins and "Strict Focus" badge in `SessionResultModal.tsx` on completion.
+
+## P0: Product & UX Core Stabilization
+- [x] **P0 #1: Streamlined First-Run / Setup Experience**: Replaced disruptive `Alert.alert` with progressive setup guidance on Home (`Step 1: Choose apps` -> `Step 2: Enable permissions` -> `Ready to focus`), added welcoming blocklist guidance, refreshed permissions on screen focus, and smoothly chained permission completion directly into timer selection.
+- [x] **P0 #2: Fix Blocklist "Save" Button Mental Model**: Replaced the misleading Save button with an immediate auto-save status pill and introduced an `All` vs `Guarded` filter segment for effortless review.
+- [x] **P0 #3: Calibrate Hold-to-End Ergonomics**: Calibrated the orb hold gesture from 10.0s to 3.5s with rhythmic tactile feedback and clean timer disposal.
+- [x] **P0 #4: Timer Presets Polish**: Added the standard 25m focus cadence to preset intervals within the existing countdown architecture.
+- [x] **P0 #5: App/Session State Synchronization**: Added lightweight in-process listener synchronization across all active `useFocusEngine` instances, ensuring instant cross-tab state consistency between Home, Apps, and Tab Layout without external libraries.
+
+## P1: Product & Visual Guardrails Polish
+- [x] **P1 #1: Contextual Android Blocking Overlay**: Dynamically displays the human-readable app name (`"[App Name] is guarded"`), remaining focus session time, branded Rosewood button palette, and direct "Open Lockout" intent.
+- [x] **P1 #2: Standardize Infinite Mode Flow**: Unified Infinite Mode into the deliberate select-and-start pattern, eliminating accidental launches and cleanly deactivating Strict Mode when untimed.
+- [x] **P1 #3: Progress Tab Zero / Empty State Polish**: Added `useFocusEffect` to guarantee instant stats refresh on tab switch, and provided supportive zero-state explanations for building streaks and earning coins.
+
+## Phase 15.5: Dedicated First-Run Onboarding Experience
+- [x] Create `src/app/onboarding.tsx` with high-trust, calm 3-step walkthrough (Philosophy -> Distractions -> System Permissions).
+- [x] Use existing SQLite `settings` table via `useSettings` to persist `has_completed_onboarding`.
+- [x] Connect initial app multi-selection directly to `useFocusEngine` blocklist via shared `AppListItem.tsx`.
+- [x] Guide step-by-step Android permissions (Usage Access, System Alert Window, Battery Optimization) with clear "why" explanations.
+- [x] Route brand-new users smoothly into onboarding, and land completed users directly onto Home ready for their first session.
 
 ## Phase 16: Auto Sessions (Scheduled & Recurring Focus)
 - [ ] Build schedule engine for recurring focus routines (e.g., Workday, Deep Study, Nighttime).
@@ -89,6 +107,15 @@
 - [ ] Set up notification permissions and dedicated Android notification channels.
 - [ ] Integrate smart reminders based on user habits and scheduled focus times.
 
+## Phase 19: Coin Shop & Rewards Economy
+- [ ] Build the Coin Shop screen/modal to give utility and reward value to accumulated coins.
+- [ ] Catalog unlockables: bespoke focus orb themes, ambient audio soundscapes, and milestone badges.
+- [ ] Balance deduction and transaction logging in SQLite.
+
 ## What we are yet to do
 - [ ] Add Premium features / Pro Wall.
+
+---
+> **Product Vision & Roadmap:** For the complete long-term product vision, planned features (including the Coin Shop & Rewards Economy), and future exploration areas, refer to [FUTURE_FEATURES.md](file:///d:/Projects/react-native/focus/FUTURE_FEATURES.md).
+
 
