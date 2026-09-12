@@ -46,7 +46,7 @@ All features in Lockout belong to one of four distinct categories:
 ---
 
 ### 2. Scheduled & Recurring Focus Sessions (Auto Sessions)
-* **Status:** Planned (Phase 16)
+* **Status:** Completed (Phase 16)
 * **Purpose:**  
   Remove the cognitive friction of remembering to start focus sessions every day by letting users automate recurring routines (e.g., "Workday Focus" 9:00 AM – 12:00 PM, "Evening Study" 7:00 PM – 9:00 PM).
 * **Core Product Concept:**  

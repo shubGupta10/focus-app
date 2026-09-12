@@ -27,6 +27,13 @@ import expo.modules.focusblocker.R
 
 class FocusService : Service() {
 
+    companion object {
+        var isServiceActive = false
+        var activeStartTime: Long = -1L
+        var activeEndTime: Long = -1L
+        var isStrictActive: Boolean = false
+    }
+
     private val CHANNEL_ID = "FocusBlockerChannel_V2"
     private var isRunning = false
 
@@ -35,8 +42,6 @@ class FocusService : Service() {
     private var isOverlayShowing = false
 
     private var endTime: Long = -1L
-
-    // Holds the custom list of apps sent from React Native
     private var customBlockedApps: List<String> = emptyList()
 
     override fun onCreate() {
@@ -50,9 +55,16 @@ class FocusService : Service() {
             customBlockedApps = passedApps.toList()
         }
 
+        val isStrict = intent?.getBooleanExtra("isStrict", false) ?: false
         val durationMs = intent?.getDoubleExtra("durationMs", -1.0) ?: -1.0
+        val now = System.currentTimeMillis()
         endTime = if (durationMs > 0)
-            System.currentTimeMillis() + durationMs.toLong() else -1L
+            now + durationMs.toLong() else -1L
+
+        isServiceActive = true
+        activeStartTime = now
+        activeEndTime = endTime
+        isStrictActive = isStrict
 
         if (!isRunning) {
             isRunning = true
@@ -71,7 +83,8 @@ class FocusService : Service() {
 
             val notification: Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val builder = Notification.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(applicationInfo.icon)
+                    .setContentTitle("Lockout")
+                    .setSmallIcon(android.R.drawable.ic_secure)
                     .setCustomContentView(remoteViews)
                     .setStyle(Notification.DecoratedCustomViewStyle())
                     .setContentIntent(pendingIntent)
@@ -84,7 +97,8 @@ class FocusService : Service() {
                 builder.build()
             } else {
                 Notification.Builder(this)
-                    .setSmallIcon(applicationInfo.icon)
+                    .setContentTitle("Lockout")
+                    .setSmallIcon(android.R.drawable.ic_secure)
                     .setCustomContentView(remoteViews)
                     .setStyle(Notification.DecoratedCustomViewStyle())
                     .setContentIntent(pendingIntent)
@@ -315,6 +329,10 @@ class FocusService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        isServiceActive = false
+        activeStartTime = -1L
+        activeEndTime = -1L
+        isStrictActive = false
         hideBlockOverlay()
         super.onDestroy()
     }

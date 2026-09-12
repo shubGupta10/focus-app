@@ -40,6 +40,7 @@ export default function Index() {
         useCallback(() => {
             engine.loadSelectedApps();
             engine.checkPermissions();
+            engine.refreshSessionState();
         }, [])
     );
 

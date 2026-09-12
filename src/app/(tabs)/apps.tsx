@@ -1,12 +1,13 @@
 import { AppListItem } from "@/components/AppListItem";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useToast } from "@/contexts/ToastContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import { cssInterop } from "nativewind";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
 
 
 cssInterop(Ionicons, {
@@ -25,6 +26,7 @@ export default function AppsTab() {
     const engine = useFocusEngine();
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"all" | "guarded">("all");
+    const { showToast } = useToast();
 
     useFocusEffect(
         useCallback(() => {
@@ -43,16 +45,22 @@ export default function AppsTab() {
         return true;
     });
 
-    const handleToggleApp = (packageName: string) => {
-        if (engine.isSessionActive) {
-            try { Vibration.vibrate([0, 50, 100, 50]); } catch { }
-            return;
-        }
+    const handleToggleApp = useCallback((packageName: string) => {
+        if (engine.isSessionActive) return;
+        const isCurrentlySelected = engine.selectedApps.includes(packageName);
+
         try {
             Vibration.vibrate(8);
         } catch { }
+
         engine.toggleApp(packageName);
-    };
+
+        if (isCurrentlySelected) {
+            showToast("App removed from block list")
+        } else {
+            showToast("App added to block list")
+        }
+    }, [engine.isSessionActive, engine.selectedApps, showToast, engine.toggleApp]);
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
@@ -122,18 +130,16 @@ export default function AppsTab() {
             <View className="flex-row px-6 mb-4 gap-2">
                 <Pressable
                     onPress={() => setFilterMode("all")}
-                    className={`px-3.5 py-1.5 rounded-full border ${
-                        filterMode === "all"
-                            ? "bg-accent border-accent"
-                            : "bg-surface border-border active:opacity-75"
-                    }`}
+                    className={`px-3.5 py-1.5 rounded-full border ${filterMode === "all"
+                        ? "bg-accent border-accent"
+                        : "bg-surface border-border active:opacity-75"
+                        }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show all apps"
                 >
                     <Text
-                        className={`text-xs font-bold ${
-                            filterMode === "all" ? "text-accentForeground" : "text-textSecondary"
-                        }`}
+                        className={`text-xs font-bold ${filterMode === "all" ? "text-accentForeground" : "text-textSecondary"
+                            }`}
                     >
                         All ({engine.installedApps.length})
                     </Text>
@@ -141,18 +147,16 @@ export default function AppsTab() {
 
                 <Pressable
                     onPress={() => setFilterMode("guarded")}
-                    className={`px-3.5 py-1.5 rounded-full border ${
-                        filterMode === "guarded"
-                            ? "bg-accent border-accent"
-                            : "bg-surface border-border active:opacity-75"
-                    }`}
+                    className={`px-3.5 py-1.5 rounded-full border ${filterMode === "guarded"
+                        ? "bg-accent border-accent"
+                        : "bg-surface border-border active:opacity-75"
+                        }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show guarded apps only"
                 >
                     <Text
-                        className={`text-xs font-bold ${
-                            filterMode === "guarded" ? "text-accentForeground" : "text-textSecondary"
-                        }`}
+                        className={`text-xs font-bold ${filterMode === "guarded" ? "text-accentForeground" : "text-textSecondary"
+                            }`}
                     >
                         Guarded ({engine.selectedApps.length})
                     </Text>
@@ -164,7 +168,7 @@ export default function AppsTab() {
                     <View className="bg-warningMuted border border-warning rounded-2xl p-4 flex-row items-center">
                         <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 12 }} />
                         <Text className="text-warning font-bold text-sm flex-1">
-                            {engine.isStrictSession 
+                            {engine.isStrictSession
                                 ? "Block list is locked during a strict session."
                                 : "End your current session to modify the block list."}
                         </Text>

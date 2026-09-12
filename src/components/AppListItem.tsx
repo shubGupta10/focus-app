@@ -1,6 +1,7 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { memo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
 
@@ -11,7 +12,7 @@ interface AppListItemProps {
     disabled?: boolean;
 }
 
-export function AppListItem({ app, isSelected, onToggle, disabled }: AppListItemProps) {
+export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppListItemProps) {
     const { colors } = useTheme();
 
     return (
@@ -53,3 +54,9 @@ export function AppListItem({ app, isSelected, onToggle, disabled }: AppListItem
         </Pressable>
     );
 }
+
+export const AppListItem = memo(AppListItemInner, (prev, next) => {
+    return (
+        prev.isSelected === next.isSelected && prev.disabled === next.disabled && prev.app.packageName === next.app.packageName
+    )
+})

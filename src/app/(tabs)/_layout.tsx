@@ -114,6 +114,22 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
+                name="routines"
+                options={{
+                    title: "Routines",
+                    tabBarIcon: ({ focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="calendar"
+                            outlineName="calendar-outline"
+                            colors={colors}
+                            isDarkMode={isDarkMode}
+                        />
+                    )
+                }}
+            />
+
+            <Tabs.Screen
                 name="apps"
                 options={{
                     title: "Apps",

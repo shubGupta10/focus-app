@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 4;
+    const DATABASE_VERSION = 5;
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
@@ -42,6 +42,17 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             longest_streak INTEGER NOT NULL DEFAULT 0,
             last_active_date TEXT,
             total_focus_seconds INTEGER NOT NULL DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS routines (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          start_time TEXT NOT NULL,
+          end_time TEXT NOT NULL,
+          days_of_week TEXT NOT NULL,
+          is_enabled INTEGER NOT NULL DEFAULT 1,
+          is_strict INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         );
 
         -- Insert the default stats row if it doesn't exist

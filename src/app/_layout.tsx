@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import { migrateDbIfNeeded } from "@/store/database";
 import { MaterialYouService, defaultPalette } from "@assembless/react-native-material-you";
 import { Stack } from "expo-router";
@@ -13,27 +14,29 @@ export default function Layout() {
     >
       <MaterialYouService fallbackPalette={defaultPalette}>
         <ThemeProvider>
-          <Stack screenOptions={{
-            headerShown: false,
-            animation: 'none'
-          }}
-          >
-            <Stack.Screen name="(tabs)" />
+          <ToastProvider>
+            <Stack screenOptions={{
+              headerShown: false,
+              animation: 'none'
+            }}
+            >
+              <Stack.Screen name="(tabs)" />
 
-            <Stack.Screen
-              name="onboarding"
-              options={{
-                animation: "fade"
-              }}
-            />
+              <Stack.Screen
+                name="onboarding"
+                options={{
+                  animation: "fade"
+                }}
+              />
 
-            <Stack.Screen
-              name="settings"
-              options={{
-                animation: "default"
-              }}
-            />
-          </Stack>
+              <Stack.Screen
+                name="settings"
+                options={{
+                  animation: "default"
+                }}
+              />
+            </Stack>
+          </ToastProvider>
         </ThemeProvider>
       </MaterialYouService>
     </SQLiteProvider>

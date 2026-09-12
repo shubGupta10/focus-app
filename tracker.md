@@ -91,10 +91,10 @@
 - [x] Route brand-new users smoothly into onboarding, and land completed users directly onto Home ready for their first session.
 
 ## Phase 16: Auto Sessions (Scheduled & Recurring Focus)
-- [ ] Build schedule engine for recurring focus routines (e.g., Workday, Deep Study, Nighttime).
-- [ ] Implement Android `AlarmManager` / background triggers to automatically start and stop focus sessions.
-- [ ] Create UI for managing schedules: day-of-week pickers, time ranges, and associated blocklists.
-- [ ] Ambient background transitions and status handling when auto sessions trigger.
+- [x] Build schedule engine for recurring focus routines (e.g., Workday, Deep Study, Nighttime).
+- [x] Implement Android `AlarmManager` / background triggers to automatically start and stop focus sessions.
+- [x] Create UI for managing schedules: day-of-week pickers, time ranges, and associated blocklists.
+- [x] Ambient background transitions and status handling when auto sessions trigger.
 
 ## Phase 17: Advanced Analytics & Deep Insights
 - [ ] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.

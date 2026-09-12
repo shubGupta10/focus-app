@@ -11,6 +11,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.Canvas
 import android.util.Base64
 import java.io.ByteArrayOutputStream
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.TimePickerDialog
+import android.os.Build
 
 
 class FocusBlockerModule : Module() {
@@ -18,20 +22,13 @@ class FocusBlockerModule : Module() {
         Name("FocusBlocker")
 
         Function("hasUsagePermission") {
-            // Get the current Android Context (the app environment)
             val context = appContext.reactContext ?: return@Function false
-
-            // Get the AppOpsManager (Android's system for checking deep permissions)
             val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-
-            // Check if our app is allowed to get usage stats
             val mode = appOps.checkOpNoThrow(
                 AppOpsManager.OPSTR_GET_USAGE_STATS,
                 android.os.Process.myUid(),
                 context.packageName
             )
-
-            // Returns true if allowed, false if not allowed
             return@Function mode == AppOpsManager.MODE_ALLOWED
         }
 
@@ -99,7 +96,7 @@ class FocusBlockerModule : Module() {
             }
         }
 
-        AsyncFunction("startService") { customBlockedApps: List<String>, durationMs: Double, promise: expo.modules.kotlin.Promise ->
+        AsyncFunction("startService") { customBlockedApps: List<String>, durationMs: Double, isStrict: Boolean?, promise: expo.modules.kotlin.Promise ->
             try {
                 val context = appContext.reactContext
                 if (context != null) {
@@ -107,7 +104,8 @@ class FocusBlockerModule : Module() {
 
                     intent.putStringArrayListExtra("customBlockedApps", ArrayList(customBlockedApps))
 
-                    intent.putExtra("durationMs", durationMs);
+                    intent.putExtra("durationMs", durationMs)
+                    intent.putExtra("isStrict", isStrict ?: false)
 
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         context.startForegroundService(intent)
@@ -138,6 +136,18 @@ class FocusBlockerModule : Module() {
             }
         }
 
+        Function("getActiveSession") {
+            if (FocusService.isServiceActive) {
+                return@Function mapOf(
+                    "isActive" to true,
+                    "startTime" to FocusService.activeStartTime.toDouble(),
+                    "endTime" to FocusService.activeEndTime.toDouble(),
+                    "isStrict" to FocusService.isStrictActive
+                )
+            }
+            return@Function null
+        }
+
         AsyncFunction("getInstalledApps") { promise: expo.modules.kotlin.Promise ->
             val context = appContext.reactContext
             if (context != null) {
@@ -165,14 +175,12 @@ class FocusBlockerModule : Module() {
                                 drawable.draw(canvas)
                                 bmp
                             }
-                            // Scale to 96x96 so we don't blow up the React Native bridge!
                             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 96, 96, true)
                             val outputStream = ByteArrayOutputStream()
                             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                             val byteArray = outputStream.toByteArray()
                             base64Icon = Base64.encodeToString(byteArray, Base64.NO_WRAP)
                         } catch (e: Exception) {
-                            // Fallback if icon generation fails
                         }
 
                         appsList.add(
@@ -187,5 +195,102 @@ class FocusBlockerModule : Module() {
                 promise.resolve(appsList)
             }
         }
+
+        Function("scheduleRoutineAlarm") { routineId: Int, triggerAtMillis: Double, durationMs: Double, isStrict: Boolean, blockedApps: List<String>, daysOfWeek: String, startTime: String, endTime: String ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, RoutineReceiver::class.java).apply {
+                    putExtra("routineId", routineId)
+                    putExtra("durationMs", durationMs)
+                    putExtra("isStrict", isStrict)
+                    putStringArrayListExtra("blockedApps", ArrayList(blockedApps))
+                    putExtra("daysOfWeek", daysOfWeek)
+                    putExtra("startTime", startTime)
+                    putExtra("endTime", endTime)
+                }
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    routineId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis.toLong(),
+                            pendingIntent
+                        )
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis.toLong(),
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.setExact(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis.toLong(),
+                            pendingIntent
+                        )
+                    }
+                } catch (e: Exception) {
+                    try {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis.toLong(),
+                            pendingIntent
+                        )
+                    } catch (inner: Exception) {
+                    }
+                }
+            }
+        }
+
+        Function("cancelRoutineAlarm") { routineId: Int ->
+            val context = appContext.reactContext
+            if (context != null) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, RoutineReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    routineId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(pendingIntent)
+            }
+        }
+
+        AsyncFunction("showTimePicker") { initialHour: Int, initialMinute: Int, is24Hour: Boolean, promise: expo.modules.kotlin.Promise ->
+            val activity = appContext.currentActivity
+            if (activity == null) {
+                promise.reject("ERR_NO_ACTIVITY", "Current activity is null", null)
+                return@AsyncFunction
+            }
+            activity.runOnUiThread {
+                val dialog = TimePickerDialog(
+                    activity,
+                    { _, hourOfDay, minute ->
+                        promise.resolve(
+                            mapOf(
+                                "hour" to hourOfDay,
+                                "minute" to minute
+                            )
+                        )
+                    },
+                    initialHour,
+                    initialMinute,
+                    is24Hour
+                )
+                dialog.setOnCancelListener {
+                    promise.resolve(null)
+                }
+                dialog.show()
+            }
+        }
+
     }
 }
