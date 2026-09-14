@@ -37,7 +37,13 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 const totalSeconds = Math.floor(diffMs / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+                if (minutes >= 60) {
+                    const hours = Math.floor(minutes / 60);
+                    const remainingMinutes = minutes % 60;
+                    setTimeLeft(`${hours}h ${remainingMinutes}m`);
+                } else {
+                    setTimeLeft(`${minutes}m ${String(seconds).padStart(2, "0")}s`);
+                }
                 setSessionProgress(1);
                 const msInMinute = diffMs % 60000;
                 setMinuteProgress(msInMinute / 60000);
@@ -46,7 +52,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 const totalDuration = endTime - startTime;
                 const diffMs = endTime - now;
                 if (diffMs <= 0) {
-                    setTimeLeft("00:00");
+                    setTimeLeft("0m 00s");
                     setSessionProgress(0);
                     setMinuteProgress(0);
 
@@ -59,7 +65,13 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 const totalSeconds = Math.floor(diffMs / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+                if (minutes >= 60) {
+                    const hours = Math.floor(minutes / 60);
+                    const remainingMinutes = minutes % 60;
+                    setTimeLeft(`${hours}h ${remainingMinutes}m`);
+                } else {
+                    setTimeLeft(`${minutes}m ${String(seconds).padStart(2, "0")}s`);
+                }
                 setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, diffMs / totalDuration)) : 0);
 
                 const msInMinute = diffMs % 60000;

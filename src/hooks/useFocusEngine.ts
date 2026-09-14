@@ -181,9 +181,6 @@ export function useFocusEngine() {
                 const durationMs = active.end_time !== -1 ? active.end_time - now : -1;
                 await FocusBlocker.startService(appsToBlock, durationMs, Boolean(active.is_strict));
             } else {
-                if (!isSessionActive && sessionStartTime === null) {
-                    return;
-                }
                 setSessionStartTime(null);
                 setSessionEndTime(null);
                 setIsStrictSession(false);

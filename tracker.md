@@ -83,6 +83,12 @@
 - [x] **P1 #2: Standardize Infinite Mode Flow**: Unified Infinite Mode into the deliberate select-and-start pattern, eliminating accidental launches and cleanly deactivating Strict Mode when untimed.
 - [x] **P1 #3: Progress Tab Zero / Empty State Polish**: Added `useFocusEffect` to guarantee instant stats refresh on tab switch, and provided supportive zero-state explanations for building streaks and earning coins.
 
+## P2: Interaction & Visual Refinements
+- [x] **P2 #1: Bulletproof Hold-to-End Gesture**: Fixed a stale closure bug in `CentralFocusOrb.tsx` that prevented the session from ending when held during active timer ticks.
+- [x] **P2 #2: End Session UI Polish**: Corrected contrast issues on the destructive "End Session" modal button for better readability in light mode.
+- [x] **P2 #3: Idle Orb Ambience**: Enhanced the `SolarSystemBackground` to remain visible in an ambient, slow-rotating state while the app is idle.
+- [x] **P2 #4: Orb Theme Selection**: Added persistent "Orb Style" preference to Settings, allowing users to choose between the "Solar System" and "Classic" progress visuals.
+
 ## Phase 15.5: Dedicated First-Run Onboarding Experience
 - [x] Create `src/app/onboarding.tsx` with high-trust, calm 3-step walkthrough (Philosophy -> Distractions -> System Permissions).
 - [x] Use existing SQLite `settings` table via `useSettings` to persist `has_completed_onboarding`.
@@ -95,6 +101,12 @@
 - [x] Implement Android `AlarmManager` / background triggers to automatically start and stop focus sessions.
 - [x] Create UI for managing schedules: day-of-week pickers, time ranges, and associated blocklists.
 - [x] Ambient background transitions and status handling when auto sessions trigger.
+
+## Phase 16.5: UX & Stability Polishes
+- [x] Pre-load `@expo/vector-icons` in root `_layout.tsx` to fix icon loading flash on Onboarding/Tabs.
+- [x] Fix session double/triple-saving concurrency bug during `handleCompleteSession` / `confirmEndSession` (React `useEffect` un-memoized dependency loop).
+- [x] Fix stale closure bug in `useFocusEngine.ts` preventing immediate routine tracking updates.
+- [x] Resolve Android resource linking issues in `AndroidManifest.xml`.
 
 ## Phase 17: Advanced Analytics & Deep Insights
 - [ ] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.

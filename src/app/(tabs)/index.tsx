@@ -12,7 +12,7 @@ import { useUserStats } from "@/hooks/useUserStats";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,6 +23,7 @@ export default function Index() {
     const { activeStyle, colors, isDarkMode } = useTheme();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+    const isSavingSession = useRef(false);
 
     useEffect(() => {
         const checkFirstRun = async () => {
@@ -62,6 +63,8 @@ export default function Index() {
     } | null>(null);
 
     const handleCompleteSession = async () => {
+        if (isSavingSession.current) return;
+        isSavingSession.current = true;
         if (engine.sessionStartTime) {
             const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
                 ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
@@ -76,10 +79,14 @@ export default function Index() {
                 isStrict: wasStrict,
             });
         }
-        engine.stopSession();
+        await engine.stopSession();
+        isSavingSession.current = false;
     };
 
     const confirmEndSession = async () => {
+        if (isSavingSession.current) return;
+        isSavingSession.current = true;
+        
         setIsEndModalVisible(false);
         if (engine.sessionStartTime) {
             const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
@@ -107,7 +114,8 @@ export default function Index() {
                 });
             }
         }
-        engine.stopSession();
+        await engine.stopSession();
+        isSavingSession.current = false;
     };
 
     const handleFocusPress = () => {

@@ -89,7 +89,7 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                             accessibilityLabel={isStrict ? "Use Emergency Skip" : "End session"}
                         >
                             <Text
-                                className={`font-black text-sm tracking-wider uppercase ${isButtonDisabled ? "text-textMuted" : "text-text"
+                                className={`font-black text-sm tracking-wider uppercase ${isButtonDisabled ? "text-textMuted" : "text-white"
                                     }`}
                             >
                                 {isStrict

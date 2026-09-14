@@ -1,6 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface ToastContextType {
     showToast: (message: string) => void;
@@ -77,22 +78,32 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                     <View
                         style={{
                             backgroundColor: colors.surfaceElevated,
-                            borderRadius: 20,
+                            borderRadius: 100, // Pill shape
                             paddingVertical: 12,
                             paddingHorizontal: 20,
                             borderWidth: 1,
                             borderColor: colors.border,
                             shadowColor: "#000",
-                            shadowOpacity: 0.2,
-                            shadowRadius: 8,
-                            elevation: 8,
+                            shadowOffset: { width: 0, height: 6 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 12,
+                            elevation: 10,
+                            flexDirection: "row", // Align icon and text horizontally
+                            alignItems: "center",
                         }}
                     >
+                        <Ionicons 
+                            name="checkmark-circle" 
+                            size={18} 
+                            color={colors.accent} 
+                            style={{ marginRight: 8 }} 
+                        />
                         <Text
                             style={{
                                 color: colors.text,
-                                fontSize: 13,
-                                fontWeight: "600",
+                                fontSize: 14,
+                                fontWeight: "700",
+                                letterSpacing: 0.3,
                             }}
                         >
                             {message}

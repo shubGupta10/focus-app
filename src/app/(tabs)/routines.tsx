@@ -85,10 +85,14 @@ export default function RoutinesTab() {
             `Are you sure you want to delete "${name}"?`,
             [
                 { text: "Cancel", style: "cancel" },
-                { text: "Delete", style: "destructive", onPress: () => removeRoutine(id) }
+                {
+                    text: "Delete", style: "destructive", onPress: () => {
+                        showToast(`${name} routine deleted`)
+                        removeRoutine(id)
+                    }
+                }
             ]
         );
-        showToast(`${name} routine deleted`)
     }, [engine.isSessionActive, removeRoutine]);
 
     const renderRoutineItem = useCallback(({ item }: { item: Routine }) => (
