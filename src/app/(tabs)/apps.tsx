@@ -63,7 +63,7 @@ export default function AppsTab() {
     }, [engine.isSessionActive, engine.selectedApps, showToast, engine.toggleApp]);
 
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row justify-between items-center px-6 pt-5 pb-3">
                 <View className="flex-1">
                     <Text className="text-text font-black text-3xl tracking-tight">Block List</Text>

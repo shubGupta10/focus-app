@@ -160,115 +160,101 @@ export default function Index() {
     };
 
     if (isCheckingOnboarding) {
-        return <SafeAreaView className="flex-1 bg-background" style={activeStyle} />
+        return <SafeAreaView className="flex-1 bg-surface" style={activeStyle} />
     }
 
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
             {!engine.isSessionActive && (
-                <View className="flex-row justify-between items-center px-6 pt-3 pb-2 w-full">
-                    <Text className="text-text font-black text-3xl tracking-tight">Lockout</Text>
+                <View className="flex-row justify-between items-center px-6 pt-5 pb-2 w-full">
+                    <View>
+                        <Text className="text-text font-black text-3xl tracking-tight leading-none">Lockout</Text>
+                    </View>
 
-                    <Pressable
-                        onPress={() => router.push("/settings")}
-                        className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70 border border-border"
-                        accessibilityRole="button"
-                        accessibilityLabel="Open Settings"
-                    >
-                        <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
-                    </Pressable>
+                    <View className="flex-row items-center">
+                        <Pressable
+                            onPress={() => router.push("/palette")}
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-2"
+                            accessibilityRole="button"
+                        >
+                            <Ionicons name="color-palette-outline" size={20} color={colors.textSecondary} />
+                        </Pressable>
+                        <Pressable
+                            onPress={() => router.push("/settings")}
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                            accessibilityRole="button"
+                            accessibilityLabel="Open Settings"
+                        >
+                            <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+                        </Pressable>
+                    </View>
                 </View>
             )}
 
             {!engine.isSessionActive ? (
                 <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
-                    <View className="items-center">
-                        <Text className="text-text text-4xl font-black tracking-tight text-center">
-                            {!hasSelectedApps
-                                ? "Set up your focus"
-                                : !hasAllPermissions
-                                    ? "Almost ready"
-                                    : "Ready to focus?"}
-                        </Text>
-
-                        <Pressable
-                            onPress={() => {
-                                if (!hasSelectedApps) {
-                                    router.push("/(tabs)/apps");
-                                } else if (!hasAllPermissions) {
-                                    setShowPermission(true);
-                                } else {
-                                    router.push("/(tabs)/apps");
-                                }
-                            }}
-                            className="flex-row items-center bg-surface px-4 py-2 rounded-full border border-border mt-3 active:opacity-75"
-                            accessibilityRole="button"
-                            accessibilityLabel={
-                                !hasSelectedApps
-                                    ? "Step 1 of 2: Choose apps to guard"
-                                    : !hasAllPermissions
-                                        ? "Step 2 of 2: Enable permissions to guard apps"
-                                        : `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} guarded. Tap to change.`
-                            }
-                        >
-                            <Ionicons
-                                name={
-                                    !hasSelectedApps
-                                        ? "apps-outline"
-                                        : !hasAllPermissions
-                                            ? "shield-outline"
-                                            : "shield-checkmark-outline"
-                                }
-                                size={15}
-                                color={colors.accent}
-                                style={{ marginRight: 6 }}
-                            />
-                            <Text className="text-text font-semibold text-xs mr-1">
-                                {!hasSelectedApps
-                                    ? "1. Choose apps to guard"
-                                    : !hasAllPermissions
-                                        ? "2. Enable permissions"
-                                        : `${engine.selectedApps.length} ${engine.selectedApps.length === 1 ? "app" : "apps"} guarded`}
+                    
+                    {/* Setup Warnings (Only shown if setup incomplete) */}
+                    {(!hasSelectedApps || !hasAllPermissions) ? (
+                        <View className="items-center mt-2">
+                            <Pressable
+                                onPress={() => {
+                                    if (!hasSelectedApps) {
+                                        router.push("/(tabs)/apps");
+                                    } else if (!hasAllPermissions) {
+                                        setShowPermission(true);
+                                    }
+                                }}
+                                className="flex-row items-center bg-surface px-4 py-2.5 rounded-full border border-border mt-3 active:opacity-75 shadow-sm"
+                            >
+                                <Ionicons
+                                    name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
+                                    size={16}
+                                    color={colors.accent}
+                                    style={{ marginRight: 8 }}
+                                />
+                                <Text className="text-text font-bold text-sm mr-1">
+                                    {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
+                                </Text>
+                                <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <View className="items-center mt-6 mb-2">
+                            <Text className="text-text font-extrabold text-2xl tracking-tight mb-1">{greeting}</Text>
+                            <Text className="text-textSecondary text-[15px] font-semibold">
+                                <Text className="text-text font-bold">{todayTimeString}</Text> focused today · <Text className="text-text font-bold">{todayStats.today_sessions}</Text> sessions
                             </Text>
-                            <Ionicons name="chevron-forward" size={13} color={colors.textSecondary} />
-                        </Pressable>
-                    </View>
+                        </View>
+                    )}
 
                     {/* Central Orb */}
                     <View className="items-center justify-center my-auto">
                         <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
-                        <Text className="text-textSecondary text-xs font-medium text-center mt-3">
-                            {!hasSelectedApps
-                                ? "Tap the orb to choose apps"
-                                : !hasAllPermissions
-                                    ? "Tap the orb to grant permissions"
-                                    : "Tap the orb to begin"}
-                        </Text>
+                        {(!hasSelectedApps || !hasAllPermissions) && (
+                            <Text className="text-textSecondary text-xs font-medium text-center mt-6">
+                                {!hasSelectedApps ? "Tap to choose apps" : "Tap to grant permissions"}
+                            </Text>
+                        )}
                     </View>
 
-                    {/* Bottom Section: Today's Metrics */}
-                    <View className="w-full flex-row items-center justify-around px-6 pb-2">
-                        <View className="items-center">
-                            <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
-                                {todayTimeString}
+                    {/* Bottom App Selection Button */}
+                    <View className="w-full mb-8 mt-auto">
+                        <Pressable
+                            onPress={() => router.push("/(tabs)/apps")}
+                            className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"
+                        >
+                            <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
+                            <Text className="text-text font-bold text-sm">
+                                {engine.selectedApps.length} Apps blocked
                             </Text>
-                            <Text className="text-textSecondary text-xs font-medium mt-1">
-                                Focused today
-                            </Text>
-                        </View>
-
-                        <View className="w-[1px] h-10 bg-border opacity-50" />
-
-                        <View className="items-center">
-                            <Text className="text-text text-4xl font-black tracking-tight tabular-nums">
-                                {todayStats.today_sessions}
-                            </Text>
-                            <Text className="text-textSecondary text-xs font-medium mt-1">
-                                Sessions
-                            </Text>
-                        </View>
+                            <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
+                        </Pressable>
                     </View>
                 </View>
             ) : (

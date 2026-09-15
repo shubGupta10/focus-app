@@ -20,7 +20,7 @@ function TabIcon({
     colors: ThemeColors;
     isDarkMode: boolean;
 }) {
-    const pillBg = focused ? colors.accentMuted : "transparent";
+    const pillBg = "transparent";
 
     return (
         <View className="items-center justify-center">

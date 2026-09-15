@@ -65,24 +65,21 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 try { Vibration.vibrate(8); } catch { }
                                 setSelectedMinutes(-1);
                             }}
-                            className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border ${
-                                selectedMinutes === -1
+                            className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border ${selectedMinutes === -1
                                     ? "bg-accent border-accent"
                                     : "bg-surfaceElevated border-border"
-                            }`}
+                                }`}
                             accessibilityRole="button"
                             accessibilityLabel="Select infinite mode — counts up until you stop"
                             accessibilityState={{ selected: selectedMinutes === -1 }}
                         >
                             <View className="flex-1 mr-3">
-                                <Text className={`font-black text-lg mb-0.5 ${
-                                    selectedMinutes === -1 ? "text-accentForeground" : "text-text"
-                                }`}>
+                                <Text className={`font-black text-lg mb-0.5 ${selectedMinutes === -1 ? "text-accentForeground" : "text-text"
+                                    }`}>
                                     Infinite Mode
                                 </Text>
-                                <Text className={`text-sm font-medium ${
-                                    selectedMinutes === -1 ? "text-accentForeground/80" : "text-textSecondary"
-                                }`}>
+                                <Text className={`text-sm font-medium ${selectedMinutes === -1 ? "text-accentForeground/80" : "text-textSecondary"
+                                    }`}>
                                     Counts up until you stop
                                 </Text>
                             </View>
@@ -126,14 +123,12 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         })}
                     </ScrollView>
 
-                    <View className={`bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border ${
-                        selectedMinutes === -1 ? "opacity-40" : ""
-                    }`}>
+                    <View className={`bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border ${selectedMinutes === -1 ? "opacity-40" : ""
+                        }`}>
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1 mr-3">
-                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
-                                    isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surface border border-border'
-                                }`}>
+                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surface border border-border'
+                                    }`}>
                                     <Ionicons
                                         name={isStrict && selectedMinutes !== -1 ? "shield-checkmark" : "shield-outline"}
                                         size={20}
@@ -210,8 +205,8 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                             {selectedMinutes === -1
                                 ? "Start Infinite Session"
                                 : isStrict
-                                ? `Start ${selectedMinutes}m Strict Session`
-                                : `Start ${selectedMinutes}m Session`}
+                                    ? `Start ${selectedMinutes}m Strict Session`
+                                    : `Start ${selectedMinutes}m Session`}
                         </Text>
                     </Pressable>
                 </View>

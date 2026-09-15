@@ -107,6 +107,7 @@
 - [x] Fix session double/triple-saving concurrency bug during `handleCompleteSession` / `confirmEndSession` (React `useEffect` un-memoized dependency loop).
 - [x] Fix stale closure bug in `useFocusEngine.ts` preventing immediate routine tracking updates.
 - [x] Resolve Android resource linking issues in `AndroidManifest.xml`.
+- [x] Refine Progress screen UI: perfect mathematical centering for split statistics and unified formatting for All-Time Stats.
 
 ## Phase 17: Advanced Analytics & Deep Insights
 - [ ] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.

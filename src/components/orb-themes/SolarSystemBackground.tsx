@@ -17,16 +17,10 @@ export function SolarSystemBackground({
     const innerAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        if (!isActive) {
-            outerAnim.setValue(0);
-            innerAnim.setValue(0);
-            return;
-        }
-
         const outerLoop = Animated.loop(
             Animated.timing(outerAnim, {
                 toValue: 1,
-                duration: 60000,
+                duration: isActive ? 60000 : 120000,
                 easing: Easing.linear,
                 useNativeDriver: true,
             })
@@ -35,7 +29,7 @@ export function SolarSystemBackground({
         const innerLoop = Animated.loop(
             Animated.timing(innerAnim, {
                 toValue: 1,
-                duration: 45000,
+                duration: isActive ? 45000 : 90000,
                 easing: Easing.linear,
                 useNativeDriver: true,
             })
@@ -78,64 +72,64 @@ export function SolarSystemBackground({
         return dots;
     };
 
-    const outerDots = generateUniformDots(outerRadius, 10, 4, 0.8, 0);
-    const innerDots = generateUniformDots(innerRadius, 8, 3, 0.6, 12);
+    const outerDots = generateUniformDots(outerRadius, 10, 4, isActive ? 0.8 : 0.25, 0);
+    const innerDots = generateUniformDots(innerRadius, 8, 3, isActive ? 0.6 : 0.15, 12);
 
     return (
         <View style={{ width: 340, height: 340 }}>
-            {isActive && (
-                <>
-                    <Animated.View
-                        style={{
-                            position: "absolute",
-                            width: 340,
-                            height: 340,
-                            transform: [{ rotate: outerRotate }]
-                        }}
-                    >
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            {outerDots.map((dot, index) => {
-                                const pos = getDotCoords(dot.radius, dot.angle);
-                                return (
-                                    <Circle
-                                        key={`outer-${index}`}
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={dot.size}
-                                        fill={colorAccent}
-                                        opacity={dot.opacity}
-                                    />
-                                );
-                            })}
-                        </Svg>
-                    </Animated.View>
+            <Animated.View
+                style={{
+                    position: "absolute",
+                    width: 340,
+                    height: 340,
+                    transform: [{ rotate: outerRotate }]
+                }}
+            >
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    {/* Faint track line */}
+                    <Circle cx="170" cy="170" r={outerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={isActive ? 0.2 : 0.05} />
+                    {outerDots.map((dot, index) => {
+                        const pos = getDotCoords(dot.radius, dot.angle);
+                        return (
+                            <Circle
+                                key={`outer-${index}`}
+                                cx={pos.x}
+                                cy={pos.y}
+                                r={dot.size}
+                                fill={colorAccent}
+                                opacity={dot.opacity}
+                            />
+                        );
+                    })}
+                </Svg>
+            </Animated.View>
 
-                    <Animated.View
-                        style={{
-                            position: "absolute",
-                            width: 340,
-                            height: 340,
-                            transform: [{ rotate: innerRotate }]
-                        }}
-                    >
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            {innerDots.map((dot, index) => {
-                                const pos = getDotCoords(dot.radius, dot.angle);
-                                return (
-                                    <Circle
-                                        key={`inner-${index}`}
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={dot.size}
-                                        fill={colorAccent}
-                                        opacity={dot.opacity}
-                                    />
-                                );
-                            })}
-                        </Svg>
-                    </Animated.View>
-                </>
-            )}
+            <Animated.View
+                style={{
+                    position: "absolute",
+                    width: 340,
+                    height: 340,
+                    transform: [{ rotate: innerRotate }]
+                }}
+            >
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    {/* Faint track line */}
+                    <Circle cx="170" cy="170" r={innerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={isActive ? 0.15 : 0.03} />
+                    {innerDots.map((dot, index) => {
+                        const pos = getDotCoords(dot.radius, dot.angle);
+                        return (
+                            <Circle
+                                key={`inner-${index}`}
+                                cx={pos.x}
+                                cy={pos.y}
+                                r={dot.size}
+                                fill={colorAccent}
+                                opacity={dot.opacity}
+                            />
+                        );
+                    })}
+                </Svg>
+            </Animated.View>
         </View>
     );
 }

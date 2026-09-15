@@ -21,8 +21,8 @@ export const Colors = {
   },
   dark: {
     background: '#161517',
-    surface: '#201E20',
-    surfaceElevated: '#2A272B',
+    surface: '#161517',
+    surfaceElevated: '#201E20',
     text: '#F0EDEC',
     textSecondary: '#A09896',
     textMuted: '#7A7170',

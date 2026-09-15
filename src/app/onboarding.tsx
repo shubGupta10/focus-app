@@ -66,7 +66,7 @@ export default function OnboardingScreen() {
     const allPermissionsGranted = engine.hasUsage && engine.hasOverlay && engine.hasBattery;
 
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="px-6 pt-4 pb-2 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
                     {[1, 2, 3].map((s) => (

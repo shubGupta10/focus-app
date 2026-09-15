@@ -50,7 +50,7 @@ export default function ProgressTab() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="px-6 pt-5 pb-2">
                 <Text className="text-text font-black text-3xl tracking-tight">Progress</Text>
             </View>

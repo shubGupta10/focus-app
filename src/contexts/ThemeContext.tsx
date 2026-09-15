@@ -66,13 +66,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             ? {
                 ...Colors.dark,
                 background: palette?.system_neutral1?.[11] ?? Colors.dark.background,
-                surface: palette?.system_neutral1?.[10] ?? Colors.dark.surface,
-                surfaceElevated: palette?.system_neutral1?.[9] ?? Colors.dark.surfaceElevated,
+                surface: palette?.system_neutral1?.[11] ?? Colors.dark.surface,
+                surfaceElevated: palette?.system_neutral1?.[10] ?? Colors.dark.surfaceElevated,
                 border: palette?.system_neutral2?.[9] ?? Colors.dark.border,
                 text: palette?.system_neutral1?.[1] ?? Colors.dark.text,
                 textSecondary: palette?.system_neutral2?.[4] ?? Colors.dark.textSecondary,
                 textMuted: palette?.system_neutral2?.[6] ?? Colors.dark.textMuted,
-                accent: palette?.system_accent1?.[4] ?? Colors.dark.accent,
+                accent: palette?.system_accent1?.[5] ?? Colors.dark.accent,
                 accentMuted: palette?.system_accent1?.[10] ?? Colors.dark.accentMuted,
                 icon: palette?.system_neutral1?.[2] ?? Colors.dark.icon,
             }

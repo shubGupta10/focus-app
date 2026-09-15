@@ -259,20 +259,27 @@ export function CentralFocusOrb({
                     </Pressable>
                 </Animated.View>
             ) : (
-                /* Idle Home Orb: Play button */
+                /* Idle Home Orb */
                 <Pressable
                     onPress={() => {
                         try { Vibration.vibrate(12); } catch { }
                         onStartPress?.();
                     }}
-                    className="w-44 h-44 rounded-full bg-accent items-center justify-center shadow-2xl active:opacity-85"
+                    className="w-44 h-44 rounded-full bg-accent items-center justify-center active:opacity-85"
+                    style={{
+                        shadowColor: colorAccent,
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.4,
+                        shadowRadius: 16,
+                        elevation: 12,
+                    }}
                     accessibilityRole="button"
                     accessibilityLabel="Start focus session"
                     accessibilityHint="Double tap to configure and begin a focus session"
                 >
-                    <View className="items-center justify-center ml-1.5">
-                        <Ionicons name="play" size={72} color={colors.accentForeground} />
-                    </View>
+                    <Text className="text-accentForeground font-black text-xl tracking-[0.25em] ml-1 uppercase">
+                        Start
+                    </Text>
                 </Pressable>
             )}
         </View>
