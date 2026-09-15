@@ -14,6 +14,21 @@ export type TodayStats = {
     today_coins: number;
 }
 
+export interface SessionHistoryItem {
+    id: number;
+    start_time: number;
+    duration_seconds: number;
+    coins_earned: number;
+    is_strict: number;
+    session_date: string;
+}
+
+export interface BlockedAttemptItem {
+    id: number;
+    package_name: string;
+    timestamp: number;
+}
+
 export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
     const stats = await db.getFirstAsync<UserStats>("SELECT * FROM user_stats WHERE id = 1");
 
@@ -106,3 +121,33 @@ export async function getTodayStats(db: SQLiteDatabase): Promise<TodayStats> {
 
     return result || { today_focus_seconds: 0, today_sessions: 0, today_coins: 0 };
 }
+
+export async function getRecentSessions(db: SQLiteDatabase, limit: number = 4): Promise<SessionHistoryItem[]> {
+    const results = await db.getAllAsync<SessionHistoryItem>(
+        `SELECT id, start_time, duration_seconds, coins_earned, is_strict, session_date 
+         FROM sessions 
+         WHERE is_completed = 1 
+         ORDER BY start_time DESC 
+         LIMIT ?`,
+        [limit]
+    );
+    return results || [];
+}
+
+export async function getTotalSessionsCount(db: SQLiteDatabase): Promise<number> {
+    const result = await db.getFirstAsync<{ total_sessions: number }>(
+        `SELECT COUNT(id) as total_sessions FROM sessions WHERE is_completed = 1`
+    );
+    return result?.total_sessions ?? 0;
+}
+
+export async function getRecentBlockedAttempts(db: SQLiteDatabase, limit: number = 5): Promise<BlockedAttemptItem[]> {
+    const results = await db.getAllAsync<BlockedAttemptItem>(
+        `SELECT id, package_name, timestamp 
+         FROM blocked_attempts 
+         ORDER BY timestamp DESC 
+         LIMIT ?`,
+        [limit]
+    );
+    return results || [];
+}

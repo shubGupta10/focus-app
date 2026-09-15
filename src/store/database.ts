@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 5;
+    const DATABASE_VERSION = 6;
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
@@ -55,6 +55,12 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
           created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         );
 
+        CREATE TABLE IF NOT EXISTS blocked_attempts (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         package_name TEXT NOT NULL,
+         timestamp INTEGER NOT NULL
+        );
+
         -- Insert the default stats row if it doesn't exist
         INSERT OR IGNORE INTO user_stats (id, total_coins, current_streak, longest_streak)
         VALUES (1, 0, 0, 0);`
@@ -75,6 +81,21 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             await db.execAsync("ALTER TABLE sessions ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
         } catch (error) {
 
+        }
+        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+    }
+
+    if (currentVersion < 6) {
+        try {
+            await db.execAsync(`
+                CREATE TABLE IF NOT EXISTS blocked_attempts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    package_name TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL
+                );
+            `);
+        } catch (error) {
+            console.error("Failed to migrate blocked_attempts", error);
         }
         await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     }

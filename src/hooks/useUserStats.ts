@@ -1,4 +1,4 @@
-import { getTodayStats, getUserStats, recordSession, TodayStats, UserStats } from "@/store/statsRepository";
+import { getRecentSessions, getTodayStats, getTotalSessionsCount, getUserStats, recordSession, SessionHistoryItem, TodayStats, UserStats } from "@/store/statsRepository";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,6 +16,8 @@ export function useUserStats() {
         today_sessions: 0,
         today_coins: 0,
     });
+    const [recentSessions, setRecentSessions] = useState<SessionHistoryItem[]>([]);
+    const [totalSessionsCount, setTotalSessionsCount] = useState<number>(0);
 
     const refreshStats = useCallback(async () => {
         try {
@@ -23,6 +25,10 @@ export function useUserStats() {
             setStats(currentStats);
             const currentToday = await getTodayStats(db);
             setTodayStats(currentToday);
+            const recent = await getRecentSessions(db, 4);
+            setRecentSessions(recent);
+            const totalCount = await getTotalSessionsCount(db);
+            setTotalSessionsCount(totalCount);
         } catch (error) {
             console.error("Error refreshing stats:", error);
         }
@@ -30,7 +36,7 @@ export function useUserStats() {
 
     useEffect(() => {
         refreshStats();
-    }, [refreshStats])
+    }, [refreshStats]);
 
     const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false) => {
         try {
@@ -41,12 +47,14 @@ export function useUserStats() {
             console.error("Error recording session:", error);
             throw error;
         }
-    }
+    };
 
     return {
         stats,
         refreshStats,
         savedCompletedSession,
-        todayStats
-    }
-}
+        todayStats,
+        recentSessions,
+        totalSessionsCount,
+    };
+}

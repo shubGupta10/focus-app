@@ -303,6 +303,7 @@ class FocusService : Service() {
                 windowManager?.addView(container, windowLayoutParams)
                 overlayView = container
                 isOverlayShowing = true
+                logBlockedAttempt(blockedPackage)
             } catch (e: Exception) {
                 Log.e("FocusBlocker", "Failed to add overlay", e)
             }
@@ -311,6 +312,30 @@ class FocusService : Service() {
 
     private var titleView: TextView? = null
     private var subtitleView: TextView? = null
+
+    private fun logBlockedAttempt(packageName: String) {
+        Thread {
+            try {
+                val dbFile = java.io.File(java.io.File(filesDir, "SQLite"), "focus.db")
+                if (dbFile.exists()) {
+                    val db = android.database.sqlite.SQLiteDatabase.openDatabase(
+                        dbFile.path,
+                        null,
+                        android.database.sqlite.SQLiteDatabase.OPEN_READWRITE
+                    )
+                    val timestamp = System.currentTimeMillis()
+                    val values = android.content.ContentValues().apply {
+                        put("package_name", packageName)
+                        put("timestamp", timestamp)
+                    }
+                    db.insert("blocked_attempts", null, values)
+                    db.close()
+                }
+            } catch (e: Exception) {
+                Log.e("FocusBlocker", "Failed to log blocked attempt", e)
+            }
+        }.start()
+    }
 
     private fun hideBlockOverlay() {
         if (!isOverlayShowing) return
