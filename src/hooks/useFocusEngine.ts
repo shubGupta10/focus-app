@@ -1,11 +1,12 @@
-import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState } from "react";
-import { AppState, PermissionsAndroid, Platform } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSQLiteContext } from "expo-sqlite";
+import { useEffect, useState, useRef } from "react";
+import { AppState, PermissionsAndroid, Platform } from "react-native";
 import FocusBlocker, { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
 import { recordSession } from '../store/statsRepository';
 
 const engineListeners = new Set<() => void>();
+let isProcessingExpiredSession = false;
 
 export function notifyEngineListeners() {
     engineListeners.forEach((listener) => {
@@ -30,6 +31,16 @@ export function useFocusEngine() {
     const [hasUsage, setHasUsage] = useState(false);
     const [hasOverlay, setHasOverlay] = useState(false);
     const [hasBattery, setHasBattery] = useState(false);
+
+    const isSessionActiveRef = useRef(isSessionActive);
+    const sessionStartTimeRef = useRef(sessionStartTime);
+    const sessionEndTimeRef = useRef(sessionEndTime);
+
+    useEffect(() => {
+        isSessionActiveRef.current = isSessionActive;
+        sessionStartTimeRef.current = sessionStartTime;
+        sessionEndTimeRef.current = sessionEndTime;
+    }, [isSessionActive, sessionStartTime, sessionEndTime]);
 
     const loadSelectedApps = async () => {
         try {
@@ -88,7 +99,7 @@ export function useFocusEngine() {
 
             const now = Date.now();
             const endTime = durationMs > 0 ? now + durationMs : -1;
-            
+
             await AsyncStorage.setItem('active_session', JSON.stringify({
                 startTime: now,
                 endTime: endTime,
@@ -119,7 +130,7 @@ export function useFocusEngine() {
                 if (nativeSession.endTime !== -1 && now >= nativeSession.endTime) {
                 }
 
-                if (isSessionActive && sessionStartTime === nativeSession.startTime && sessionEndTime === nativeSession.endTime) {
+                if (isSessionActiveRef.current && sessionStartTimeRef.current === nativeSession.startTime && sessionEndTimeRef.current === nativeSession.endTime) {
                     return;
                 }
 
@@ -134,21 +145,27 @@ export function useFocusEngine() {
                 const storedSession = await AsyncStorage.getItem('active_session');
                 if (storedSession) {
                     const parsed = JSON.parse(storedSession);
-                    
+
                     if (parsed.endTime !== -1 && now >= parsed.endTime) {
-                        const durationSeconds = Math.floor((parsed.endTime - parsed.startTime) / 1000);
+                        if (isSessionActiveRef.current) return;
+                        if (isProcessingExpiredSession) return;
+                        isProcessingExpiredSession = true;
+
+                        const durationSeconds = Math.round((parsed.endTime - parsed.startTime) / 1000);
                         try {
                             await recordSession(db, durationSeconds, parsed.isStrict);
                         } catch (e) {
                             console.error("Failed to record background session", e);
                         }
                         await AsyncStorage.removeItem('active_session');
+                        await stopSession();
+                        isProcessingExpiredSession = false;
                     } else {
                         let appsToBlock: string[] = [];
                         try {
                             const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
                             appsToBlock = rows.map(row => row.package_name);
-                        } catch (e) {}
+                        } catch (e) { }
 
                         if (parsed.isStrict) {
                             const systemApps = ["com.android.settings", "com.android.vending", "com.google.android.packageinstaller"];
@@ -159,7 +176,7 @@ export function useFocusEngine() {
 
                         const remainingMs = parsed.endTime !== -1 ? parsed.endTime - now : -1;
                         await FocusBlocker.startService(appsToBlock, remainingMs, parsed.isStrict);
-                        
+
                         setSessionStartTime(parsed.startTime);
                         setSessionEndTime(parsed.endTime);
                         setIsStrictSession(parsed.isStrict);

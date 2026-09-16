@@ -67,8 +67,8 @@ export default function Index() {
         isSavingSession.current = true;
         if (engine.sessionStartTime) {
             const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                ? Math.floor((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
-                : Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+                ? Math.round((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                : Math.round((Date.now() - engine.sessionStartTime) / 1000);
 
             const wasStrict = engine.isStrictSession;
             const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
@@ -89,7 +89,7 @@ export default function Index() {
 
         setIsEndModalVisible(false);
         if (engine.sessionStartTime) {
-            const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
+            const durationSeconds = Math.round((Date.now() - engine.sessionStartTime) / 1000);
             const wasStrict = engine.isStrictSession;
             const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
 

@@ -13,7 +13,7 @@ interface TimerSelectionModalProps {
 }
 
 
-const PRESET_TIMES = [5, 15, 25, 30, 45, 60, 90, 120];
+const PRESET_TIMES = [2, 5, 15, 25, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const { colors, isDarkMode } = useTheme();

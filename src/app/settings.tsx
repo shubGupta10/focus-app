@@ -2,15 +2,18 @@ import { Material3Switch } from "@/components/Material3Switch";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { AppState, Pressable, Text, View } from "react-native";
+import { Alert, AppState, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 export default function SettingsTab() {
     const { isMaterialYou, setIsMaterialYou, isDarkMode, toggleDarkMode, activeStyle, colors } = useTheme();
     const [permissionModalVisible, setPermissionModalVisible] = useState(false);
+    const db = useSQLiteContext();
 
     const [hasUsage, setHasUsage] = useState(false);
     const [hasOverlay, setHasOverlay] = useState(false);
@@ -29,6 +32,33 @@ export default function SettingsTab() {
         });
         return () => sub.remove();
     }, []);
+
+    const resetAllData = () => {
+        Alert.alert(
+            "Reset All Data",
+            "This will permanently delete all sessions, stats, coins, and cached data. This cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Reset Everything",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await db.execAsync(`
+                                DELETE FROM sessions;
+                                DELETE FROM blocked_attempts;
+                                UPDATE user_stats SET total_coins = 0, current_streak = 0, longest_streak = 0, last_active_date = NULL, total_focus_seconds = 0 WHERE id = 1;
+                            `);
+                            await AsyncStorage.removeItem('active_session');
+                            Alert.alert("Done", "All data has been reset.");
+                        } catch (e: any) {
+                            Alert.alert("Error", e.message);
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     const allPermissionsGranted = hasUsage && hasOverlay && hasBattery;
 
@@ -128,6 +158,26 @@ export default function SettingsTab() {
                     <Text className="text-text font-bold text-xs uppercase tracking-wider">
                         Revisit
                     </Text>
+                </Pressable>
+            </View>
+
+            <View className="mx-6 mt-6">
+                <Text className="text-destructive font-bold text-xs tracking-wider uppercase mb-3">
+                    Danger Zone
+                </Text>
+                <Pressable
+                    onPress={resetAllData}
+                    className="bg-surfaceElevated rounded-2xl p-5 flex-row items-center justify-between active:opacity-70"
+                >
+                    <View className="flex-1 pr-4">
+                        <Text className="text-text font-bold text-lg mb-1">Reset All Data</Text>
+                        <Text className="text-textSecondary text-sm leading-5">
+                            Delete all sessions, stats, coins, and cached data.
+                        </Text>
+                    </View>
+                    <View className="bg-destructive/10 p-2.5 rounded-xl">
+                        <Ionicons name="trash-outline" size={20} color={colors.destructive} />
+                    </View>
                 </Pressable>
             </View>
         </SafeAreaView>
