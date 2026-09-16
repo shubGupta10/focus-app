@@ -20,7 +20,7 @@ export function SolarSystemBackground({
         const outerLoop = Animated.loop(
             Animated.timing(outerAnim, {
                 toValue: 1,
-                duration: isActive ? 60000 : 120000,
+                duration: 60000,
                 easing: Easing.linear,
                 useNativeDriver: true,
             })
@@ -29,7 +29,7 @@ export function SolarSystemBackground({
         const innerLoop = Animated.loop(
             Animated.timing(innerAnim, {
                 toValue: 1,
-                duration: isActive ? 45000 : 90000,
+                duration: 45000,
                 easing: Easing.linear,
                 useNativeDriver: true,
             })
@@ -42,7 +42,7 @@ export function SolarSystemBackground({
             outerLoop.stop();
             innerLoop.stop();
         };
-    }, [isActive, outerAnim, innerAnim]);
+    }, [outerAnim, innerAnim]);
 
     const outerRotate = outerAnim.interpolate({
         inputRange: [0, 1],
@@ -72,8 +72,8 @@ export function SolarSystemBackground({
         return dots;
     };
 
-    const outerDots = generateUniformDots(outerRadius, 10, 4, isActive ? 0.8 : 0.25, 0);
-    const innerDots = generateUniformDots(innerRadius, 8, 3, isActive ? 0.6 : 0.15, 12);
+    const outerDots = generateUniformDots(outerRadius, 10, 4, 0.8, 0);
+    const innerDots = generateUniformDots(innerRadius, 8, 3, 0.6, 12);
 
     return (
         <View style={{ width: 340, height: 340 }}>
@@ -87,7 +87,7 @@ export function SolarSystemBackground({
             >
                 <Svg width="340" height="340" viewBox="0 0 340 340">
                     {/* Faint track line */}
-                    <Circle cx="170" cy="170" r={outerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={isActive ? 0.2 : 0.05} />
+                    <Circle cx="170" cy="170" r={outerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={0.2} />
                     {outerDots.map((dot, index) => {
                         const pos = getDotCoords(dot.radius, dot.angle);
                         return (
@@ -114,7 +114,7 @@ export function SolarSystemBackground({
             >
                 <Svg width="340" height="340" viewBox="0 0 340 340">
                     {/* Faint track line */}
-                    <Circle cx="170" cy="170" r={innerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={isActive ? 0.15 : 0.03} />
+                    <Circle cx="170" cy="170" r={innerRadius} stroke={colorAccent} strokeWidth="1" fill="none" opacity={0.15} />
                     {innerDots.map((dot, index) => {
                         const pos = getDotCoords(dot.radius, dot.angle);
                         return (

@@ -64,35 +64,15 @@ export default function AppsTab() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <View className="flex-row justify-between items-center px-6 pt-5 pb-3">
+            <View className="flex-row justify-between items-center px-6 pt-5 pb-4">
                 <View className="flex-1">
                     <Text className="text-text font-black text-3xl tracking-tight">Block List</Text>
-                    <Text className="text-textSecondary text-sm mt-0.5 font-medium">
-                        {engine.selectedApps.length === 0
-                            ? "No apps guarded yet"
-                            : `${engine.selectedApps.length} of ${engine.installedApps.length} apps guarded`}
-                    </Text>
-                </View>
-
-                <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-border">
-                    <View
-                        style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: 4,
-                            backgroundColor: engine.selectedApps.length > 0 ? colors.success : colors.textMuted,
-                            marginRight: 6,
-                        }}
-                    />
-                    <Text className="text-textSecondary text-xs font-semibold">
-                        {engine.selectedApps.length > 0 ? "Auto-saved" : "Ready"}
-                    </Text>
                 </View>
             </View>
 
             {engine.selectedApps.length === 0 && !engine.isSessionActive && (
                 <View className="px-6 mb-3">
-                    <View className="bg-surface rounded-2xl p-4 border border-border flex-row items-center">
+                    <View className="bg-surfaceElevated rounded-2xl p-4 flex-row items-center">
                         <Ionicons name="shield-outline" size={20} color={colors.accent} style={{ marginRight: 12 }} />
                         <Text className="text-textSecondary text-xs leading-5 flex-1 font-medium">
                             Choose the apps that distract you most. Lockout will guard them when you start a focus session.
@@ -102,7 +82,7 @@ export default function AppsTab() {
             )}
 
             <View className="px-6 mb-3">
-                <View className="flex-row items-center bg-surface rounded-2xl px-4 py-2.5 border border-border">
+                <View className="flex-row items-center bg-surfaceElevated rounded-2xl px-4 py-2.5">
                     <Ionicons name="search" size={18} color={colors.textSecondary} />
                     <TextInput
                         className="flex-1 ml-2.5 text-text text-sm font-medium"
@@ -132,7 +112,7 @@ export default function AppsTab() {
                     onPress={() => setFilterMode("all")}
                     className={`px-3.5 py-1.5 rounded-full border ${filterMode === "all"
                         ? "bg-accent border-accent"
-                        : "bg-surface border-border active:opacity-75"
+                        : "bg-surfaceElevated active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show all apps"
@@ -149,7 +129,7 @@ export default function AppsTab() {
                     onPress={() => setFilterMode("guarded")}
                     className={`px-3.5 py-1.5 rounded-full border ${filterMode === "guarded"
                         ? "bg-accent border-accent"
-                        : "bg-surface border-border active:opacity-75"
+                        : "bg-surfaceElevated active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show guarded apps only"
@@ -186,7 +166,7 @@ export default function AppsTab() {
                     </View>
                 ) : filteredApps.length === 0 ? (
                     <View className="py-12 items-center justify-center">
-                        <View className="w-12 h-12 rounded-2xl bg-surface items-center justify-center mb-3 border border-border">
+                        <View className="w-12 h-12 rounded-2xl bg-surfaceElevated items-center justify-center mb-3">
                             <Ionicons name="apps-outline" size={22} color={colors.textSecondary} />
                         </View>
                         <Text className="text-text font-bold text-base">No apps found</Text>
@@ -196,7 +176,7 @@ export default function AppsTab() {
                         {searchQuery.length > 0 && (
                             <Pressable
                                 onPress={() => setSearchQuery("")}
-                                className="mt-4 px-4 py-2 rounded-xl bg-surface border border-border active:opacity-75"
+                                className="mt-4 px-4 py-2 rounded-xl bg-surfaceElevated active:opacity-75"
                                 accessibilityRole="button"
                                 accessibilityLabel="Clear search and show all apps"
                             >
@@ -209,7 +189,7 @@ export default function AppsTab() {
                         data={filteredApps}
                         keyExtractor={(app) => app.packageName}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 24 }}
+                        contentContainerStyle={{ paddingBottom: 130 }}
                         initialNumToRender={15}
                         renderItem={({ item: app }) => (
                             <AppListItem

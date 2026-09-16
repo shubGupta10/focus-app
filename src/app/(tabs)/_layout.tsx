@@ -11,50 +11,29 @@ function TabIcon({
     outlineName,
     badgeCount,
     colors,
-    isDarkMode,
 }: {
     focused: boolean;
     name: keyof typeof Ionicons.glyphMap;
     outlineName: keyof typeof Ionicons.glyphMap;
     badgeCount?: number;
     colors: ThemeColors;
-    isDarkMode: boolean;
 }) {
-    const pillBg = "transparent";
-
     return (
         <View className="items-center justify-center">
-            <View
-                style={{
-                    backgroundColor: pillBg,
-                    width: 60,
-                    height: 32,
-                    borderRadius: 16,
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <Ionicons
-                    name={focused ? name : outlineName}
-                    size={22}
-                    color={focused ? colors.accent : colors.textSecondary}
+            <Ionicons
+                name={focused ? name : outlineName}
+                size={22}
+                color={focused ? colors.accent : colors.textSecondary}
+            />
+            {badgeCount !== undefined && badgeCount > 0 && (
+                <View
+                    className="absolute top-0 right-[-6px] w-2 h-2 rounded-full border-[1.5px]"
+                    style={{
+                        backgroundColor: colors.warning,
+                        borderColor: colors.surfaceElevated,
+                    }}
                 />
-                {badgeCount !== undefined && badgeCount > 0 && (
-                    <View
-                        style={{
-                            backgroundColor: colors.warning,
-                            borderColor: colors.surface,
-                            width: 8,
-                            height: 8,
-                            borderRadius: 4,
-                            borderWidth: 1.5,
-                            position: "absolute",
-                            top: 0,
-                            right: 10,
-                        }}
-                    />
-                )}
-            </View>
+            )}
         </View>
     );
 }
@@ -73,20 +52,29 @@ export default function TabLayout() {
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
                 tabBarStyle: {
-                    backgroundColor: colors.surface,
-                    borderTopWidth: 1,
-                    borderTopColor: colors.border,
-                    height: 64 + bottomPadding,
+                    position: "absolute",
+                    bottom: insets.bottom + 16,
+                    left: 0,
+                    right: 0,
+                    marginHorizontal: 32,
+                    backgroundColor: colors.surfaceElevated,
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    height: 72,
                     paddingTop: 8,
-                    paddingBottom: bottomPadding,
-                    elevation: 0,
-                    shadowOpacity: 0,
+                    paddingBottom: 8,
+                    elevation: 8,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: isDarkMode ? 0.2 : 0.05,
+                    shadowRadius: 12,
                 },
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: "600",
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.2,
                     marginTop: 4,
                 },
                 tabBarActiveTintColor: colors.accent,
@@ -101,13 +89,13 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     title: "Home",
+                    tabBarAccessibilityLabel: "Home tab",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
                             name="home"
                             outlineName="home-outline"
                             colors={colors}
-                            isDarkMode={isDarkMode}
                         />
                     ),
                 }}
@@ -117,13 +105,13 @@ export default function TabLayout() {
                 name="routines"
                 options={{
                     title: "Routines",
+                    tabBarAccessibilityLabel: "Routines tab",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
                             name="calendar"
                             outlineName="calendar-outline"
                             colors={colors}
-                            isDarkMode={isDarkMode}
                         />
                     )
                 }}
@@ -133,6 +121,7 @@ export default function TabLayout() {
                 name="apps"
                 options={{
                     title: "Apps",
+                    tabBarAccessibilityLabel: "Apps tab",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
@@ -140,7 +129,6 @@ export default function TabLayout() {
                             outlineName="apps-outline"
                             badgeCount={engine.selectedApps.length === 0 ? 1 : undefined}
                             colors={colors}
-                            isDarkMode={isDarkMode}
                         />
                     ),
                 }}
@@ -150,13 +138,13 @@ export default function TabLayout() {
                 name="progress"
                 options={{
                     title: "Progress",
+                    tabBarAccessibilityLabel: "Progress tab",
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
                             focused={focused}
                             name="bar-chart"
                             outlineName="bar-chart-outline"
                             colors={colors}
-                            isDarkMode={isDarkMode}
                         />
                     ),
                 }}

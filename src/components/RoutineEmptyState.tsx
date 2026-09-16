@@ -45,7 +45,7 @@ export function RoutineEmptyState({
             showsVerticalScrollIndicator={false}
         >
             <View className="items-center pt-8 pb-8">
-                <View className="w-16 h-16 rounded-3xl bg-surface items-center justify-center mb-4">
+                <View className="w-16 h-16 rounded-3xl bg-surfaceElevated items-center justify-center mb-4">
                     <Ionicons name="calendar-outline" size={28} color={colors.accent} />
                 </View>
                 <Text className="text-text font-black text-2xl text-center tracking-tight mb-2">
@@ -79,13 +79,13 @@ export function RoutineEmptyState({
                     <Pressable
                         key={template.name}
                         onPress={() => onSelectTemplate(template)}
-                        className="bg-surface rounded-3xl p-5 mb-3 active:opacity-80"
+                        className="bg-surfaceElevated rounded-3xl p-5 mb-3 active:opacity-80"
                         accessibilityRole="button"
                         accessibilityLabel={`Use template ${template.name}`}
                     >
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1 mr-3">
-                                <View className="w-11 h-11 rounded-2xl bg-surfaceElevated items-center justify-center mr-3.5">
+                                <View className="w-11 h-11 rounded-2xl bg-surface items-center justify-center mr-3.5">
                                     <Ionicons name={template.icon} size={22} color={colors.accent} />
                                 </View>
                                 <View className="flex-1">

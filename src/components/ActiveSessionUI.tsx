@@ -40,9 +40,9 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 if (minutes >= 60) {
                     const hours = Math.floor(minutes / 60);
                     const remainingMinutes = minutes % 60;
-                    setTimeLeft(`${hours}h ${remainingMinutes}m`);
+                    setTimeLeft(`${hours}:${String(remainingMinutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
                 } else {
-                    setTimeLeft(`${minutes}m ${String(seconds).padStart(2, "0")}s`);
+                    setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
                 }
                 setSessionProgress(1);
                 const msInMinute = diffMs % 60000;
@@ -68,9 +68,9 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 if (minutes >= 60) {
                     const hours = Math.floor(minutes / 60);
                     const remainingMinutes = minutes % 60;
-                    setTimeLeft(`${hours}h ${remainingMinutes}m`);
+                    setTimeLeft(`${hours}:${String(remainingMinutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
                 } else {
-                    setTimeLeft(`${minutes}m ${String(seconds).padStart(2, "0")}s`);
+                    setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
                 }
                 setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, diffMs / totalDuration)) : 0);
 
@@ -90,11 +90,10 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
 
     return (
         <View className="flex-1 items-center justify-between px-6 py-10 w-full max-w-md mx-auto">
-            {/* Top Section: Status Badges & Deep Focus Title */}
             <View className="items-center w-full pt-6">
                 <View className="flex-row items-center justify-center gap-3 mb-6">
                     {isStrict && (
-                        <View className="flex-row items-center bg-accent/15 px-4 py-2 rounded-lg">
+                        <View className="flex-row items-center bg-accentMuted px-4 py-2 rounded-lg">
                             <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 6 }} />
                             <Text className="text-accent text-[13px] font-bold tracking-widest uppercase">
                                 Strict Mode
@@ -102,7 +101,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                         </View>
                     )}
 
-                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-lg border border-border shadow-sm">
+                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-lg shadow-sm">
                         <Ionicons name="apps-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
                         <Text className="text-textSecondary text-[13px] font-bold">
                             {blockedAppsCount && blockedAppsCount > 0
@@ -120,8 +119,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 </Text>
             </View>
 
-            {/* Center Section: Unified Focus Orb with Live Clock & Progress */}
-            <View className="items-center justify-center flex-1 w-full">
+            <View className="items-center justify-center flex-1 w-full pb-8">
                 <CentralFocusOrb
                     isActive={true}
                     timeLeft={timeLeft}
@@ -133,40 +131,39 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     skipsRemaining={skipsRemaining ?? 1}
                     onStopPress={onStopPress}
                 />
-            </View>
 
-            {/* Bottom Section: Live Coins Earned & Friction Guide */}
-            <View className="items-center justify-center pb-6 w-full gap-6">
-                <View className="flex-row items-center justify-center">
-                    <Text className="text-2xl mr-2">🪙</Text>
-                    <Text className="text-text font-black text-xl">
-                        +{earnedCoins} coins earned
-                    </Text>
-                </View>
+                <View className="items-center justify-center mt-12 w-full gap-4">
+                    <View className="flex-row items-center justify-center">
+                        <Text className="text-2xl mr-2">🪙</Text>
+                        <Text className="text-text font-black text-xl">
+                            +{earnedCoins} coins earned
+                        </Text>
+                    </View>
 
-                <View className="flex-row items-center justify-center">
-                    {isStrict && (skipsRemaining ?? 1) <= 0 ? (
-                        <>
-                            <Ionicons name="lock-closed" size={16} color={colors.warning} style={{ marginRight: 6 }} />
-                            <Text className="text-textSecondary text-sm font-medium">
-                                Session locked · Unlocks at 00:00
-                            </Text>
-                        </>
-                    ) : isStrict && (skipsRemaining ?? 1) > 0 ? (
-                        <>
-                            <Ionicons name="alert-circle-outline" size={16} color={colors.warning} style={{ marginRight: 6 }} />
-                            <Text className="text-textSecondary text-sm font-medium">
-                                {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold orb to skip
-                            </Text>
-                        </>
-                    ) : (
-                        <>
-                            <Ionicons name="finger-print-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
-                            <Text className="text-textSecondary text-sm font-medium">
-                                Press and hold orb to end session
-                            </Text>
-                        </>
-                    )}
+                    <View className="flex-row items-center justify-center">
+                        {isStrict && (skipsRemaining ?? 1) <= 0 ? (
+                            <>
+                                <Ionicons name="lock-closed" size={16} color={colors.warning} style={{ marginRight: 6 }} />
+                                <Text className="text-textSecondary text-sm font-medium">
+                                    Session locked · Unlocks at 00:00
+                                </Text>
+                            </>
+                        ) : isStrict && (skipsRemaining ?? 1) > 0 ? (
+                            <>
+                                <Ionicons name="alert-circle-outline" size={16} color={colors.warning} style={{ marginRight: 6 }} />
+                                <Text className="text-textSecondary text-sm font-medium">
+                                    {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold orb to skip
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Ionicons name="finger-print-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                                <Text className="text-textSecondary text-sm font-medium">
+                                    Press and hold orb to end session
+                                </Text>
+                            </>
+                        )}
+                    </View>
                 </View>
             </View>
         </View>

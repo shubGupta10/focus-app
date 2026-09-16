@@ -42,12 +42,12 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surface rounded-t-3xl p-6 border-t border-border">
+                <View className="bg-surfaceElevated rounded-t-3xl p-6">
                     <View className="flex-row justify-between items-center mb-6">
                         <Text className="text-text text-xl font-black tracking-tight">New Focus Session</Text>
 
                         <Pressable
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 border border-border"
+                            className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70"
                             onPress={onClose}
                             hitSlop={12}
                             accessibilityRole="button"
@@ -58,16 +58,16 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     </View>
 
 
-                    <View className="mb-6 pb-6 border-b border-border">
+                    <View className="mb-6">
                         <Text className="text-textSecondary font-bold mb-2.5 tracking-wider text-xs uppercase">No Timer</Text>
                         <Pressable
                             onPress={() => {
                                 try { Vibration.vibrate(8); } catch { }
                                 setSelectedMinutes(-1);
                             }}
-                            className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between border ${selectedMinutes === -1
-                                    ? "bg-accent border-accent"
-                                    : "bg-surfaceElevated border-border"
+                            className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between ${selectedMinutes === -1
+                                    ? "bg-accent"
+                                    : "bg-surface"
                                 }`}
                             accessibilityRole="button"
                             accessibilityLabel="Select infinite mode — counts up until you stop"
@@ -78,7 +78,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                     }`}>
                                     Infinite Mode
                                 </Text>
-                                <Text className={`text-sm font-medium ${selectedMinutes === -1 ? "text-accentForeground/80" : "text-textSecondary"
+                                <Text className={`text-sm font-medium ${selectedMinutes === -1 ? "text-accentForeground" : "text-textSecondary"
                                     }`}>
                                     Counts up until you stop
                                 </Text>
@@ -107,9 +107,9 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                         try { Vibration.vibrate(8); } catch { }
                                         setSelectedMinutes(mins);
                                     }}
-                                    className={`mr-3 rounded-2xl px-5 py-3.5 border ${isSelected
-                                        ? "bg-accent border-accent"
-                                        : "bg-surfaceElevated border-border active:opacity-80"
+                                    className={`mr-3 rounded-2xl px-5 py-3.5 ${isSelected
+                                        ? "bg-accent"
+                                        : "bg-surface active:opacity-80"
                                         }`}
                                     accessibilityRole="button"
                                     accessibilityLabel={`${mins} minutes`}
@@ -123,11 +123,11 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         })}
                     </ScrollView>
 
-                    <View className={`bg-surfaceElevated rounded-2xl p-4 mb-6 border border-border ${selectedMinutes === -1 ? "opacity-40" : ""
+                    <View className={`bg-surface rounded-2xl p-4 mb-6 ${selectedMinutes === -1 ? "opacity-40" : ""
                         }`}>
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1 mr-3">
-                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surface border border-border'
+                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surfaceElevated'
                                     }`}>
                                     <Ionicons
                                         name={isStrict && selectedMinutes !== -1 ? "shield-checkmark" : "shield-outline"}
@@ -138,7 +138,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 <View className="flex-1">
                                     <View className="flex-row items-center">
                                         <Text className="text-text font-bold text-base mr-2">Strict Mode</Text>
-                                        <View className="bg-accent/15 px-2 py-0.5 rounded-md">
+                                        <View className="bg-accentMuted px-2 py-0.5 rounded-md">
                                             <Text className="text-accent text-[10px] font-bold tracking-wider uppercase">1.5x Coins</Text>
                                         </View>
                                     </View>
@@ -164,7 +164,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         </View>
 
                         {isStrict && selectedMinutes !== -1 && (
-                            <View className="mt-3 pt-3 border-t border-border flex-row items-center">
+                            <View className="mt-3 pt-3 flex-row items-center">
                                 <Ionicons
                                     name={hasSkipAvailable ? "checkmark-circle" : "alert-circle"}
                                     size={14}

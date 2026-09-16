@@ -31,14 +31,12 @@ export function RoutineDaySelector({
                         <Pressable
                             key={day.value}
                             onPress={() => onToggleDay(day.value)}
-                            className={`w-11 h-11 rounded-full items-center justify-center ${
-                                isSelected ? "bg-accent" : "bg-surface"
-                            } active:opacity-80`}
+                            className={`w-11 h-11 rounded-full items-center justify-center ${isSelected ? "bg-accent" : "bg-surface"
+                                } active:opacity-80`}
                         >
                             <Text
-                                className={`font-black text-sm ${
-                                    isSelected ? "text-accentForeground" : "text-textSecondary"
-                                }`}
+                                className={`font-black text-sm ${isSelected ? "text-accentForeground" : "text-textSecondary"
+                                    }`}
                             >
                                 {day.label}
                             </Text>

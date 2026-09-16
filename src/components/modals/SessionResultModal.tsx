@@ -32,14 +32,14 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
 
             <View className="flex-1 justify-center items-center px-6">
                 <View
-                    className="w-full max-w-sm bg-surface rounded-3xl p-6 border border-border shadow-lg"
+                    className="w-full max-w-sm bg-surfaceElevated rounded-3xl p-6 shadow-lg"
                 >
                     <View className="flex-row justify-between items-center mb-5">
                         <Text className="text-text text-xl font-black tracking-tight">
                             {isSuccess ? "Session Completed" : "Session Ended Early"}
                         </Text>
                         <Pressable
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 border border-border"
+                            className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70"
                             onPress={onClose}
                             hitSlop={12}
                             accessibilityRole="button"
@@ -50,7 +50,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                     </View>
 
                     <View className="items-center mb-6 mt-1">
-                        <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-surfaceElevated border border-border">
+                        <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-surface">
                             {/* SR2: 🔔 for interrupted/canceled — clearer than ⏱️ which is just a timer */}
                             <Text className="text-4xl">{isSuccess ? "🎉" : "🔔"}</Text>
                         </View>

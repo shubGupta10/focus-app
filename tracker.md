@@ -61,6 +61,7 @@
 - [x] Unified theme system in `ThemeContext.tsx` supporting seamless transitions between Dark Mode, Light Mode, and Material You dynamic theming.
 - [x] Refined `CentralFocusOrb.tsx`: removed ring cutting artifacts, enhanced circular progress indicators, and added tactile hold-to-cancel gestures.
 - [x] Completed full-app UI/UX audit standardizing typography, spacing, and accessibility roles across all modals and screens.
+- [x] Standardized borderless premium aesthetic across inputs, modals, and settings by utilizing `bg-surfaceElevated` for contrast instead of hard borders.
 
 ## Phase 15: Strict Mode & Weekly Emergency Skip System
 - [x] Create `useStrictMode.ts` hook managing 1 weekly skip, Monday 00:00 reset cadence, and SQLite storage.

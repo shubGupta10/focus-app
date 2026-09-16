@@ -34,7 +34,7 @@ export function RoutineTimePickerCard({
             <View className="flex-row items-center justify-between">
                 <Pressable
                     onPress={onSelectStartTime}
-                    className="flex-1 bg-surface rounded-3xl p-5 mr-2 active:opacity-80"
+                    className="flex-1 bg-surfaceElevated rounded-3xl p-5 mr-2 active:opacity-80"
                     accessibilityRole="button"
                     accessibilityLabel="Select start time"
                 >
@@ -49,7 +49,7 @@ export function RoutineTimePickerCard({
 
                 <Pressable
                     onPress={onSelectEndTime}
-                    className="flex-1 bg-surface rounded-3xl p-5 ml-2 active:opacity-80"
+                    className="flex-1 bg-surfaceElevated rounded-3xl p-5 ml-2 active:opacity-80"
                     accessibilityRole="button"
                     accessibilityLabel="Select end time"
                 >

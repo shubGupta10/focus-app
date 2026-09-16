@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 interface ToastContextType {
     showToast: (message: string) => void;
@@ -92,11 +92,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                             alignItems: "center",
                         }}
                     >
-                        <Ionicons 
-                            name="checkmark-circle" 
-                            size={18} 
-                            color={colors.accent} 
-                            style={{ marginRight: 8 }} 
+                        <Ionicons
+                            name="checkmark-circle"
+                            size={18}
+                            color={colors.accent}
+                            style={{ marginRight: 8 }}
                         />
                         <Text
                             style={{

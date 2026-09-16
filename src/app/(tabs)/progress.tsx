@@ -56,11 +56,11 @@ export default function ProgressTab() {
             </View>
 
             <ScrollView
-                className="flex-1"
-                contentContainerStyle={{ paddingBottom: 110 }}
+                className="flex-1 px-6"
+                contentContainerStyle={{ paddingBottom: 130, paddingTop: 12 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View className="px-6 py-8">
+                <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
                     <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-4">
                         Today's Focus
                     </Text>
@@ -104,41 +104,35 @@ export default function ProgressTab() {
                     )}
                 </View>
 
-                <View className="h-[1px] w-full bg-border/30" />
-
-                <View className="px-6 py-8 flex-row items-stretch">
-                    <View className="w-1/2 pr-6 border-r border-border/30">
+                {/* Day Streak & Apps Blocked Row */}
+                <View className="flex-row items-stretch mb-4" style={{ gap: 16 }}>
+                    <View className="flex-1 bg-surfaceElevated rounded-3xl p-6">
                         <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-3">
                             Day Streak
                         </Text>
-                        <View className="flex-row items-baseline justify-between">
-                            <Text className="text-accent font-black text-4xl tabular-nums leading-none">
-                                {stats.current_streak}
-                            </Text>
-                            <Text className="text-textSecondary text-sm font-medium">
-                                Best: {stats.longest_streak}
-                            </Text>
-                        </View>
+                        <Text className="text-accent font-black text-4xl tabular-nums leading-none mb-1">
+                            {stats.current_streak}
+                        </Text>
+                        <Text className="text-textSecondary text-xs font-medium mt-1">
+                            Best: {stats.longest_streak}
+                        </Text>
                     </View>
 
-                    <View className="w-1/2 pl-6">
+                    <View className="flex-1 bg-surfaceElevated rounded-3xl p-6">
                         <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-3">
                             Apps Blocked
                         </Text>
-                        <View className="flex-row items-baseline justify-between">
-                            <Text className="text-text font-black text-4xl tabular-nums leading-none">
-                                {totalBlockedThisWeek}
-                            </Text>
-                            <Text className="text-textSecondary text-sm font-medium">
-                                This week
-                            </Text>
-                        </View>
+                        <Text className="text-text font-black text-4xl tabular-nums leading-none mb-1">
+                            {totalBlockedThisWeek}
+                        </Text>
+                        <Text className="text-textSecondary text-xs font-medium mt-1">
+                            This week
+                        </Text>
                     </View>
                 </View>
 
-                <View className="h-[1px] w-full bg-border/30" />
-
-                <View className="px-6 py-8">
+                {/* Weekly Rhythm Card */}
+                <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
                     <View className="flex-row justify-between items-baseline mb-6">
                         <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest">
                             Weekly Rhythm
@@ -162,23 +156,21 @@ export default function ProgressTab() {
                     </View>
                 </View>
 
-                <View className="h-[1px] w-full bg-border/30" />
-
-                <View className="px-6 py-8">
+                {/* Recent Interceptions Card */}
+                <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
                     <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-6">
                         Recent Interceptions
                     </Text>
 
                     {recentBlockedAttempts && recentBlockedAttempts.length > 0 ? (
-                        <View>
-                            {recentBlockedAttempts.map((attempt, index) => {
-                                const isLast = index === recentBlockedAttempts.length - 1;
+                        <View className="space-y-4">
+                            {recentBlockedAttempts.map((attempt) => {
                                 const appName = getAppName(attempt.package_name);
 
                                 return (
                                     <View
                                         key={attempt.id}
-                                        className={`py-4 flex-row items-center justify-between ${isLast ? "" : "border-b border-border/30"}`}
+                                        className="flex-row items-center justify-between mb-4"
                                     >
                                         <View className="flex-row items-center flex-1">
                                             <View className="w-10 h-10 rounded-full bg-surface items-center justify-center mr-4">
@@ -201,7 +193,7 @@ export default function ProgressTab() {
                             })}
                         </View>
                     ) : (
-                        <View className="py-6 items-center">
+                        <View className="py-2 items-center">
                             <Ionicons name="shield-outline" size={32} color={colors.textMuted} style={{ marginBottom: 12 }} />
                             <Text className="text-textSecondary text-sm font-medium text-center">
                                 No distractions blocked recently
@@ -210,9 +202,8 @@ export default function ProgressTab() {
                     )}
                 </View>
 
-                <View className="h-[1px] w-full bg-border/30" />
-
-                <View className="px-6 py-8">
+                {/* All-Time Stats Card */}
+                <View className="bg-surfaceElevated rounded-3xl p-6">
                     <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-6">
                         All-Time Stats
                     </Text>
@@ -222,25 +213,29 @@ export default function ProgressTab() {
                             <Text className="text-text font-black text-2xl tracking-tight tabular-nums mb-1">
                                 {allTimeHours}h {allTimeMinutes}m
                             </Text>
-                            <Text className="text-textSecondary text-xs font-semibold">
+                            <Text className="text-textSecondary text-xs font-semibold text-center">
                                 Total Focus
                             </Text>
                         </View>
 
-                        <View className="flex-1 items-center border-l border-border/30">
+                        <View className="w-[2px] h-10 bg-surface self-center mx-2 rounded-full" />
+
+                        <View className="flex-1 items-center">
                             <Text className="text-text font-black text-2xl tracking-tight tabular-nums mb-1">
                                 {totalSessionsCount}
                             </Text>
-                            <Text className="text-textSecondary text-xs font-semibold">
+                            <Text className="text-textSecondary text-xs font-semibold text-center">
                                 Sessions
                             </Text>
                         </View>
 
-                        <View className="flex-1 items-center border-l border-border/30">
+                        <View className="w-[2px] h-10 bg-surface self-center mx-2 rounded-full" />
+
+                        <View className="flex-1 items-center">
                             <Text className="text-text font-black text-2xl tracking-tight tabular-nums mb-1">
                                 {stats.total_coins.toLocaleString()}
                             </Text>
-                            <Text className="text-textSecondary text-xs font-semibold">
+                            <Text className="text-textSecondary text-xs font-semibold text-center">
                                 Coins
                             </Text>
                         </View>

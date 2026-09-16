@@ -86,7 +86,7 @@ export default function Index() {
     const confirmEndSession = async () => {
         if (isSavingSession.current) return;
         isSavingSession.current = true;
-        
+
         setIsEndModalVisible(false);
         if (engine.sessionStartTime) {
             const durationSeconds = Math.floor((Date.now() - engine.sessionStartTime) / 1000);
@@ -177,13 +177,13 @@ export default function Index() {
                     </View>
 
                     <View className="flex-row items-center">
-                        <Pressable
+                        {/* <Pressable
                             onPress={() => router.push("/palette")}
                             className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-2"
                             accessibilityRole="button"
                         >
                             <Ionicons name="color-palette-outline" size={20} color={colors.textSecondary} />
-                        </Pressable>
+                        </Pressable> */}
                         <Pressable
                             onPress={() => router.push("/settings")}
                             className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
@@ -198,8 +198,7 @@ export default function Index() {
 
             {!engine.isSessionActive ? (
                 <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
-                    
-                    {/* Setup Warnings (Only shown if setup incomplete) */}
+
                     {(!hasSelectedApps || !hasAllPermissions) ? (
                         <View className="items-center mt-2">
                             <Pressable
@@ -210,7 +209,7 @@ export default function Index() {
                                         setShowPermission(true);
                                     }
                                 }}
-                                className="flex-row items-center bg-surface px-4 py-2.5 rounded-full border border-border mt-3 active:opacity-75 shadow-sm"
+                                className="flex-row items-center bg-surfaceElevated px-4 py-2.5 rounded-full mt-3 active:opacity-75 shadow-sm"
                             >
                                 <Ionicons
                                     name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
@@ -228,12 +227,11 @@ export default function Index() {
                         <View className="items-center mt-6 mb-2">
                             <Text className="text-text font-extrabold text-2xl tracking-tight mb-1">{greeting}</Text>
                             <Text className="text-textSecondary text-[15px] font-semibold">
-                                <Text className="text-text font-bold">{todayTimeString}</Text> focused today · <Text className="text-text font-bold">{todayStats.today_sessions}</Text> sessions
+                                <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
                             </Text>
                         </View>
                     )}
 
-                    {/* Central Orb */}
                     <View className="items-center justify-center my-auto">
                         <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
                         {(!hasSelectedApps || !hasAllPermissions) && (
@@ -243,8 +241,7 @@ export default function Index() {
                         )}
                     </View>
 
-                    {/* Bottom App Selection Button */}
-                    <View className="w-full mb-8 mt-auto">
+                    <View className="w-full mb-[120px] mt-auto">
                         <Pressable
                             onPress={() => router.push("/(tabs)/apps")}
                             className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"

@@ -217,9 +217,9 @@ export function CentralFocusOrb({
                         }}
                         onPressIn={handlePressIn}
                         onPressOut={handlePressOut}
-                        className={`w-48 h-48 rounded-full items-center justify-center border shadow-2xl ${isHolding
-                            ? "bg-destructiveMuted/30 border-destructive"
-                            : "bg-surfaceElevated border-border"
+                        className={`w-48 h-48 rounded-full items-center justify-center shadow-2xl ${isHolding
+                            ? "bg-destructiveMuted"
+                            : "bg-surfaceElevated"
                             }`}
                         accessibilityRole="button"
                         accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
@@ -244,7 +244,7 @@ export function CentralFocusOrb({
 
                         {/* Hero Digital Timer */}
                         <Text
-                            className="text-text font-black text-5xl tracking-tight tabular-nums text-center"
+                            className="text-text font-black text-5xl tracking-tighter tabular-nums text-center"
                             adjustsFontSizeToFit
                             minimumFontScale={0.75}
                             numberOfLines={1}

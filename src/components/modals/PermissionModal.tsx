@@ -41,7 +41,7 @@ export function PermissionRow({
 
     return (
         <TouchableOpacity
-            className={`p-4 rounded-2xl flex-row justify-between items-center border ${isGranted ? 'bg-surfaceElevated border-success/40' : 'bg-surfaceElevated border-border/80'
+            className={`p-4 rounded-2xl flex-row justify-between items-center ${isGranted ? 'bg-successMuted' : 'bg-surfaceElevated'
                 }`}
             onPress={isGranted ? undefined : onRequest}
             disabled={isGranted}
@@ -84,11 +84,11 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surface w-full max-w-sm rounded-3xl p-6 border border-border">
+                <View className="bg-surfaceElevated w-full max-w-sm rounded-3xl p-6">
                     <View className="flex-row justify-between items-center mb-3">
                         <Text className="text-text text-xl font-black tracking-tight">Permissions Required</Text>
                         <TouchableOpacity
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center border border-border"
+                            className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             onPress={onClose}
                             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                             accessibilityRole="button"

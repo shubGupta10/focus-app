@@ -45,9 +45,9 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                 />
                 <View style={{ backgroundColor: colors.scrim }} className="absolute inset-0" />
 
-                <View className="bg-surface w-[88%] max-w-sm rounded-3xl p-6 border border-border shadow-2xl">
+                <View className="bg-surfaceElevated w-[88%] max-w-sm rounded-3xl p-6 shadow-2xl">
                     <View className="flex-row items-center mb-3">
-                        <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict ? "bg-warningMuted border border-warning" : "bg-surfaceElevated border border-border"
+                        <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict ? "bg-warningMuted" : "bg-surface"
                             }`}>
                             <Ionicons
                                 name={isStrict ? "alert-circle" : "stopwatch-outline"}
@@ -82,7 +82,7 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                             onPress={isButtonDisabled ? undefined : onConfirmEnd}
                             disabled={isButtonDisabled}
                             className={`py-3.5 rounded-xl items-center justify-center ${isButtonDisabled
-                                ? "bg-surfaceElevated border border-border opacity-50"
+                                ? "bg-surface opacity-50"
                                 : "bg-destructive active:opacity-80"
                                 }`}
                             accessibilityRole="button"

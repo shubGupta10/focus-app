@@ -37,7 +37,7 @@ export default function SettingsTab() {
             <View className="flex-row items-center px-6 pt-5 pb-5 border-b border-border">
                 <Pressable
                     onPress={() => router.back()}
-                    className="mr-4 w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70 border border-border"
+                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
                     accessibilityRole="button"
                     accessibilityLabel="Go back to Home"
                 >
@@ -51,7 +51,7 @@ export default function SettingsTab() {
                     Appearance
                 </Text>
 
-                <View className="bg-surface rounded-2xl p-5 mb-3.5 flex-row items-center justify-between border border-border">
+                <View className="bg-surfaceElevated rounded-2xl p-5 mb-3.5 flex-row items-center justify-between">
                     <View className="flex-1 pr-4">
                         <Text className="text-text font-bold text-lg mb-1">Dark Mode</Text>
                         <Text className="text-textSecondary text-sm leading-5">
@@ -64,7 +64,7 @@ export default function SettingsTab() {
                     />
                 </View>
 
-                <View className="bg-surface rounded-2xl p-5 mb-6 flex-row items-center justify-between border border-border">
+                <View className="bg-surfaceElevated rounded-2xl p-5 mb-6 flex-row items-center justify-between">
                     <View className="flex-1 pr-4">
                         <Text className="text-text font-bold text-lg mb-1">Dynamic Colors</Text>
                         <Text className="text-textSecondary text-sm leading-5">
@@ -81,7 +81,7 @@ export default function SettingsTab() {
                     Device
                 </Text>
 
-                <View className="bg-surface rounded-2xl p-5 border border-border">
+                <View className="bg-surfaceElevated rounded-2xl p-5">
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-text font-bold text-lg">System Permissions</Text>
                         <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-transparent' : 'bg-warningMuted border-warning/40'}`}>
@@ -114,7 +114,7 @@ export default function SettingsTab() {
                 hasBattery={hasBattery}
             />
 
-            <View className="mx-6 mt-4 bg-surface rounded-2xl p-5 border border-border flex-row items-center justify-between">
+            <View className="mx-6 mt-4 bg-surfaceElevated rounded-2xl p-5 flex-row items-center justify-between">
                 <View className="flex-1 pr-4">
                     <Text className="text-text font-bold text-lg mb-1">Onboarding Guide</Text>
                     <Text className="text-textSecondary text-sm leading-5">
@@ -123,7 +123,7 @@ export default function SettingsTab() {
                 </View>
                 <Pressable
                     onPress={() => router.push("/onboarding")}
-                    className="bg-surface border border-border px-3.5 py-2 rounded-xl active:opacity-75"
+                    className="bg-surface px-3.5 py-2 rounded-xl active:opacity-75"
                 >
                     <Text className="text-text font-bold text-xs uppercase tracking-wider">
                         Revisit

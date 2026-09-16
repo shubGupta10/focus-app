@@ -19,7 +19,7 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
         <Pressable
             onPress={() => onToggle(app.packageName)}
             disabled={disabled}
-            className={`flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surface border border-border ${disabled ? "opacity-50" : "active:opacity-80"
+            className={`flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surfaceElevated ${disabled ? "opacity-50" : "active:opacity-80"
                 }`}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
@@ -30,10 +30,10 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
                 {app.icon ? (
                     <Image
                         source={{ uri: `data:image/png;base64,${app.icon}` }}
-                        className="w-11 h-11 rounded-xl mr-3.5 bg-surface"
+                        className="w-11 h-11 rounded-xl mr-3.5"
                     />
                 ) : (
-                    <View className="w-11 h-11 rounded-xl bg-surfaceElevated border border-border items-center justify-center mr-3.5">
+                    <View className="w-11 h-11 rounded-xl bg-surface items-center justify-center mr-3.5">
                         <Ionicons name="help" size={20} color={colors.textMuted} />
                     </View>
                 )}

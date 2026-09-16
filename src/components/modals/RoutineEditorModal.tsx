@@ -183,7 +183,7 @@ export function RoutineEditorModal({
                             }}
                             placeholder="e.g. Workday Focus"
                             placeholderTextColor={colors.textMuted}
-                            className="bg-surface rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
+                            className="bg-surfaceElevated rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
                         />
 
                         <View className="flex-row flex-wrap gap-2 px-1">
@@ -191,7 +191,7 @@ export function RoutineEditorModal({
                                 <Pressable
                                     key={preset}
                                     onPress={() => setName(preset)}
-                                    className="bg-surface px-3.5 py-2 rounded-full active:opacity-75"
+                                    className="bg-surfaceElevated px-3.5 py-2 rounded-full active:opacity-75"
                                 >
                                     <Text className="text-textSecondary text-xs font-semibold">{preset}</Text>
                                 </Pressable>
@@ -212,7 +212,7 @@ export function RoutineEditorModal({
                         onToggleDay={toggleDay}
                     />
 
-                    <View className="bg-surface rounded-3xl p-5 flex-row items-center justify-between mb-8">
+                    <View className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center justify-between mb-8">
                         <View className="flex-1 pr-4">
                             <View className="flex-row items-center mb-1">
                                 <Text className="text-text font-bold text-base mr-2">Strict Mode</Text>
