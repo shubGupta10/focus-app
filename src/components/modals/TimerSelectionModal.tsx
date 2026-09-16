@@ -13,7 +13,7 @@ interface TimerSelectionModalProps {
 }
 
 
-const PRESET_TIMES = [15, 25, 30, 45, 60, 90, 120];
+const PRESET_TIMES = [5, 15, 25, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const { colors, isDarkMode } = useTheme();
@@ -66,8 +66,8 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 setSelectedMinutes(-1);
                             }}
                             className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between ${selectedMinutes === -1
-                                    ? "bg-accent"
-                                    : "bg-surface"
+                                ? "bg-accent"
+                                : "bg-surface"
                                 }`}
                             accessibilityRole="button"
                             accessibilityLabel="Select infinite mode — counts up until you stop"

@@ -1,7 +1,9 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import FocusBlocker, { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
+import { recordSession } from '../store/statsRepository';
 
 const engineListeners = new Set<() => void>();
 
@@ -43,7 +45,7 @@ export function useFocusEngine() {
     const stopSession = async () => {
         try {
             await FocusBlocker.stopService();
-            await db.runAsync("DELETE FROM active_session WHERE id = 1");
+            await AsyncStorage.removeItem('active_session');
             setIsSessionActive(false);
             setIsStrictSession(false);
             setSessionStartTime(null);
@@ -86,11 +88,13 @@ export function useFocusEngine() {
 
             const now = Date.now();
             const endTime = durationMs > 0 ? now + durationMs : -1;
+            
+            await AsyncStorage.setItem('active_session', JSON.stringify({
+                startTime: now,
+                endTime: endTime,
+                isStrict: isStrict
+            }));
 
-            await db.runAsync(
-                "INSERT OR REPLACE INTO active_session(id, start_time, end_time, is_strict) VALUES (1, ?, ?, ?)",
-                [now, endTime, isStrict ? 1 : 0]
-            );
             setSessionStartTime(now);
             setSessionEndTime(durationMs > 0 ? now + durationMs : -1);
             setIsStrictSession(isStrict);
@@ -113,8 +117,6 @@ export function useFocusEngine() {
 
             if (nativeSession && nativeSession.isActive) {
                 if (nativeSession.endTime !== -1 && now >= nativeSession.endTime) {
-                    await stopSession();
-                    return;
                 }
 
                 if (isSessionActive && sessionStartTime === nativeSession.startTime && sessionEndTime === nativeSession.endTime) {
@@ -125,67 +127,54 @@ export function useFocusEngine() {
                 setSessionEndTime(nativeSession.endTime);
                 setIsStrictSession(Boolean(nativeSession.isStrict));
                 setIsSessionActive(true);
-
-                try {
-                    await db.runAsync(
-                        "INSERT OR REPLACE INTO active_session(id, start_time, end_time, is_strict) VALUES (1, ?, ?, ?)",
-                        [nativeSession.startTime, nativeSession.endTime, nativeSession.isStrict ? 1 : 0]
-                    );
-                } catch (e) {
-                }
                 return;
             }
 
-            let active: { start_time: number; end_time: number; is_strict?: number } | null = null;
             try {
-                active = await db.getFirstAsync<{ start_time: number; end_time: number; is_strict?: number }>("SELECT * FROM active_session WHERE id = 1");
-            } catch (e) {
-            }
-
-            if (active) {
-                const now = Date.now();
-                if (active.end_time !== -1 && now >= active.end_time) {
-                    await stopSession();
-                    return;
-                }
-
-                if (isSessionActive && sessionStartTime === active.start_time && sessionEndTime === active.end_time) {
-                    return;
-                }
-
-                setSessionStartTime(active.start_time);
-                setSessionEndTime(active.end_time);
-                setIsStrictSession(Boolean(active.is_strict));
-                setIsSessionActive(true);
-
-                let appsToBlock: string[] = [];
-                try {
-                    const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
-                    appsToBlock = rows.map(row => row.package_name);
-                } catch (e) {
-                }
-
-                if (Boolean(active.is_strict)) {
-                    const systemApps = [
-                        "com.android.settings",
-                        "com.android.vending",
-                        "com.google.android.packageinstaller"
-                    ];
-                    systemApps.forEach(app => {
-                        if (!appsToBlock.includes(app)) {
-                            appsToBlock.push(app);
+                const storedSession = await AsyncStorage.getItem('active_session');
+                if (storedSession) {
+                    const parsed = JSON.parse(storedSession);
+                    
+                    if (parsed.endTime !== -1 && now >= parsed.endTime) {
+                        const durationSeconds = Math.floor((parsed.endTime - parsed.startTime) / 1000);
+                        try {
+                            await recordSession(db, durationSeconds, parsed.isStrict);
+                        } catch (e) {
+                            console.error("Failed to record background session", e);
                         }
-                    });
-                }
+                        await AsyncStorage.removeItem('active_session');
+                    } else {
+                        let appsToBlock: string[] = [];
+                        try {
+                            const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
+                            appsToBlock = rows.map(row => row.package_name);
+                        } catch (e) {}
 
-                const durationMs = active.end_time !== -1 ? active.end_time - now : -1;
-                await FocusBlocker.startService(appsToBlock, durationMs, Boolean(active.is_strict));
-            } else {
-                setSessionStartTime(null);
-                setSessionEndTime(null);
-                setIsStrictSession(false);
-                setIsSessionActive(false);
+                        if (parsed.isStrict) {
+                            const systemApps = ["com.android.settings", "com.android.vending", "com.google.android.packageinstaller"];
+                            systemApps.forEach(app => {
+                                if (!appsToBlock.includes(app)) appsToBlock.push(app);
+                            });
+                        }
+
+                        const remainingMs = parsed.endTime !== -1 ? parsed.endTime - now : -1;
+                        await FocusBlocker.startService(appsToBlock, remainingMs, parsed.isStrict);
+                        
+                        setSessionStartTime(parsed.startTime);
+                        setSessionEndTime(parsed.endTime);
+                        setIsStrictSession(parsed.isStrict);
+                        setIsSessionActive(true);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error("Error handling AsyncStorage session fallback", error);
             }
+
+            setSessionStartTime(null);
+            setSessionEndTime(null);
+            setIsStrictSession(false);
+            setIsSessionActive(false);
         } catch (error) {
             console.error("Error loading active session:", error);
         }
