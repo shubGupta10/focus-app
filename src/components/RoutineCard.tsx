@@ -38,7 +38,7 @@ export function RoutineCardInner({
     return (
         <Pressable
             onPress={onPress}
-            className={`bg-surface rounded-3xl p-5 mb-3.5 ${isEnabled ? "" : "opacity-55"
+            className={`bg-surfaceElevated rounded-3xl p-5 mb-3.5 ${isEnabled ? "" : "opacity-55"
                 } active:opacity-80`}
             accessibilityRole="button"
             accessibilityLabel={`Routine ${routine.name}`}

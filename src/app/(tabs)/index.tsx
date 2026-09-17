@@ -65,57 +65,63 @@ export default function Index() {
     const handleCompleteSession = async () => {
         if (isSavingSession.current) return;
         isSavingSession.current = true;
-        if (engine.sessionStartTime) {
-            const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                ? Math.round((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
-                : Math.round((Date.now() - engine.sessionStartTime) / 1000);
+        try {
+            if (engine.sessionStartTime) {
+                const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
+                    ? Math.round((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
+                    : Math.round((Date.now() - engine.sessionStartTime) / 1000);
 
-            const wasStrict = engine.isStrictSession;
-            const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
-            setSessionResult({
-                type: "completed",
-                coins: earnedCoins,
-                durationSeconds,
-                isStrict: wasStrict,
-            });
+                const wasStrict = engine.isStrictSession;
+                const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
+                setSessionResult({
+                    type: "completed",
+                    coins: earnedCoins,
+                    durationSeconds,
+                    isStrict: wasStrict,
+                });
+            }
+            await engine.stopSession();
+        } finally {
+            isSavingSession.current = false;
         }
-        await engine.stopSession();
-        isSavingSession.current = false;
     };
 
     const confirmEndSession = async () => {
         if (isSavingSession.current) return;
         isSavingSession.current = true;
 
-        setIsEndModalVisible(false);
-        if (engine.sessionStartTime) {
-            const durationSeconds = Math.round((Date.now() - engine.sessionStartTime) / 1000);
-            const wasStrict = engine.isStrictSession;
-            const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
+        try {
+            setIsEndModalVisible(false);
+            if (engine.sessionStartTime) {
+                const durationSeconds = Math.round((Date.now() - engine.sessionStartTime) / 1000);
+                const wasStrict = engine.isStrictSession;
+                const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
 
-            if (isCountdown) {
-                if (wasStrict) {
-                    await useEmergencySkip();
+                if (isCountdown) {
+                    if (wasStrict) {
+                        await useEmergencySkip();
+                    }
+
+                    setSessionResult({
+                        type: "canceled",
+                        coins: 0,
+                        durationSeconds,
+                        isStrict: wasStrict,
+                    });
+                } else {
+                    const { earnedCoins } = await savedCompletedSession(durationSeconds, false);
+                    setSessionResult({
+                        type: "completed",
+                        coins: earnedCoins,
+                        durationSeconds,
+                        isStrict: false,
+                    });
                 }
-
-                setSessionResult({
-                    type: "canceled",
-                    coins: 0,
-                    durationSeconds,
-                    isStrict: wasStrict,
-                });
-            } else {
-                const { earnedCoins } = await savedCompletedSession(durationSeconds, false);
-                setSessionResult({
-                    type: "completed",
-                    coins: earnedCoins,
-                    durationSeconds,
-                    isStrict: false,
-                });
             }
+            await engine.stopSession();
+        } finally {
+            isSavingSession.current = false;
         }
-        await engine.stopSession();
-        isSavingSession.current = false;
     };
 
     const handleFocusPress = () => {

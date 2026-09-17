@@ -14,6 +14,7 @@ export default function ProgressTab() {
     const { stats, todayStats, totalSessionsCount, refreshStats } = useUserStats();
     const { weeklyData, totalBlockedThisWeek, recentBlockedAttempts, refreshAnalytics } = useAnalytics();
     const { installedApps } = useFocusEngine();
+    const { todaySessionList } = useUserStats();
 
     useFocusEffect(
         useCallback(() => {
@@ -104,7 +105,6 @@ export default function ProgressTab() {
                     )}
                 </View>
 
-                {/* Day Streak & Apps Blocked Row */}
                 <View className="flex-row items-stretch mb-4" style={{ gap: 16 }}>
                     <View className="flex-1 bg-surfaceElevated rounded-3xl p-6">
                         <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-3">
@@ -131,15 +131,14 @@ export default function ProgressTab() {
                     </View>
                 </View>
 
-                {/* Weekly Rhythm Card */}
                 <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
                     <View className="flex-row justify-between items-baseline mb-6">
                         <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest">
                             Weekly Rhythm
                         </Text>
-                        <Text className="text-text font-bold text-sm tabular-nums">
+                        {/* <Text className="text-text font-bold text-sm tabular-nums">
                             {weeklyHours}h {weeklyMinutes}m total
-                        </Text>
+                        </Text> */}
                     </View>
 
                     <View className="flex-row items-end justify-between h-32">
@@ -156,7 +155,6 @@ export default function ProgressTab() {
                     </View>
                 </View>
 
-                {/* Recent Interceptions Card */}
                 <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
                     <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-6">
                         Recent Interceptions

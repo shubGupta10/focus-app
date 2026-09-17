@@ -155,7 +155,7 @@ export default function RoutinesTab() {
                     data={routines}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 6, paddingBottom: 130, backgroundColor: `${colors.surfaceElevated}` }}
+                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 6, paddingBottom: 130 }}
                     renderItem={renderRoutineItem}
                 />
             )}

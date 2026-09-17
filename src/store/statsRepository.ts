@@ -150,4 +150,20 @@ export async function getRecentBlockedAttempts(db: SQLiteDatabase, limit: number
         [limit]
     );
     return results || [];
-}
+}
+
+export async function getTodaySessionList(db: SQLiteDatabase): Promise<SessionHistoryItem[]> {
+    const now = new Date();
+
+    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+    const result = await db.getAllAsync<SessionHistoryItem>(
+        `SELECT id, start_time, duration_seconds, coins_earned,
+        is_strict, session_date
+        FROM sessions
+        WHERE is_completed = 1 AND session_date = ?
+        ORDER BY start_time DESC`,
+        [today]
+    );
+    return result || [];
+}
