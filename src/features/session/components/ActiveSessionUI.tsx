@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { formatTimerDisplay } from "../../../utils/timeUtils";
 import { CentralFocusOrb } from "./CentralFocusOrb";
 
 interface ActiveSessionUIProps {
@@ -35,19 +36,13 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
             if (infinite) {
                 const diffMs = now - startTime;
                 const totalSeconds = Math.floor(diffMs / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                if (minutes >= 60) {
-                    const hours = Math.floor(minutes / 60);
-                    const remainingMinutes = minutes % 60;
-                    setTimeLeft(`${hours}:${String(remainingMinutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
-                } else {
-                    setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
-                }
+
+                setTimeLeft(formatTimerDisplay(totalSeconds));
+
                 setSessionProgress(1);
                 const msInMinute = diffMs % 60000;
                 setMinuteProgress(msInMinute / 60000);
-                setEarnedCoins(minutes);
+                setEarnedCoins(Math.floor(totalSeconds / 60));
             } else if (endTime && endTime > 0) {
                 const totalDuration = endTime - startTime;
                 const diffMs = endTime - now;
@@ -63,15 +58,9 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     return;
                 }
                 const totalSeconds = Math.floor(diffMs / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                if (minutes >= 60) {
-                    const hours = Math.floor(minutes / 60);
-                    const remainingMinutes = minutes % 60;
-                    setTimeLeft(`${hours}:${String(remainingMinutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
-                } else {
-                    setTimeLeft(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
-                }
+
+                setTimeLeft(formatTimerDisplay(totalSeconds));
+
                 setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, diffMs / totalDuration)) : 0);
 
                 const msInMinute = diffMs % 60000;

@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 6;
+    const DATABASE_VERSION = 7;
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
@@ -25,6 +25,11 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             is_strict INTEGER NOT NULL DEFAULT 0,
             session_date TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        );
+
+        CREATE TABLE IF NOT EXISTS shop_purchases (
+         item_id TEXT PRIMARY KEY,
+         purchased_at INTEGER NOT NULL
         );
 
 
@@ -89,6 +94,20 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             `);
         } catch (error) {
             console.error("Failed to migrate blocked_attempts", error);
+        }
+        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+    }
+
+    if (currentVersion < 7) {
+        try {
+            await db.execAsync(
+                ` CREATE TABLE IF NOT EXISTS shop_purchases (
+                    item_id TEXT PRIMARY KEY,
+                    purchased_at INTEGER NOT NULL
+                );`
+            );
+        } catch (error) {
+            console.error("Failed to migrate shop_purchases", error);
         }
         await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     }

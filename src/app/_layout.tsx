@@ -49,6 +49,13 @@ export default function Layout() {
               />
 
               <Stack.Screen
+                name="shop"
+                options={{
+                  animation: "default"
+                }}
+              />
+
+              <Stack.Screen
                 name="settings"
                 options={{
                   animation: "default"

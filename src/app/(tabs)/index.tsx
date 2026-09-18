@@ -1,29 +1,44 @@
-import { ActiveSessionUI } from "@/components/ActiveSessionUI";
-import { CentralFocusOrb } from "@/components/CentralFocusOrb";
-import { EndSessionModal } from "@/components/modals/EndSessionModal";
 import { PermissionModal } from "@/components/modals/PermissionModal";
-import { SessionResultModal } from "@/components/modals/SessionResultModal";
-import TimerSelectionModal from "@/components/modals/TimerSelectionModal";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { ActiveSessionUI } from "@/features/session/components/ActiveSessionUI";
+import { CentralFocusOrb } from "@/features/session/components/CentralFocusOrb";
+import { EndSessionModal } from "@/features/session/components/modals/EndSessionModal";
+import { SessionResultModal } from "@/features/session/components/modals/SessionResultModal";
+import TimerSelectionModal from "@/features/session/components/modals/TimerSelectionModal";
 import { useSettings } from "@/hooks/useSettings";
-import { useStrictMode } from "@/hooks/useStrictMode";
-import { useUserStats } from "@/hooks/useUserStats";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSessionController } from "../../features/session/hooks/useSessionController";
+import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 
 export default function Index() {
-    const engine = useFocusEngine();
     const { getSetting } = useSettings();
-    const { stats, savedCompletedSession, todayStats } = useUserStats();
     const { activeStyle, colors, isDarkMode } = useTheme();
-    const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-    const isSavingSession = useRef(false);
+
+    const {
+        engine,
+        hasAllPermissions,
+        hasSelectedApps,
+        showPermission,
+        setShowPermission,
+        isTimerModalVisible,
+        setIsTimerModalVisible,
+        isEndModalVisible,
+        setIsEndModalVisible,
+        sessionResult,
+        setSessionResult,
+        confirmEndSession,
+        handleFocusPress,
+        handleClosePermissionModal,
+        skipsRemaining,
+        resetCountdownText,
+        todayStats
+    } = useSessionController();
 
     useEffect(() => {
         const checkFirstRun = async () => {
@@ -45,125 +60,8 @@ export default function Index() {
         }, [])
     );
 
-    const hasAllPermissions = engine.hasUsage && engine.hasOverlay && engine.hasBattery;
-    const hasSelectedApps = engine.selectedApps.length > 0;
-
-    const todayHours = Math.floor(todayStats.today_focus_seconds / 3600);
-    const todayMinutes = Math.floor((todayStats.today_focus_seconds % 3600) / 60);
+    const { hours: todayHours, minutes: todayMinutes } = secondsToHoursAndMinutes(todayStats.today_focus_seconds);
     const todayTimeString = todayStats.today_focus_seconds === 0 ? "0h" : (todayHours > 0 ? `${todayHours}h ${todayMinutes}m` : `${todayMinutes}m`);
-
-    const [showPermission, setShowPermission] = useState(false);
-    const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
-    const [isEndModalVisible, setIsEndModalVisible] = useState(false);
-    const [sessionResult, setSessionResult] = useState<{
-        type: "completed" | "canceled";
-        coins: number;
-        durationSeconds: number;
-        isStrict?: boolean;
-    } | null>(null);
-
-    const handleCompleteSession = async () => {
-        if (isSavingSession.current) return;
-        isSavingSession.current = true;
-        try {
-            if (engine.sessionStartTime) {
-                const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                    ? Math.round((Math.min(Date.now(), engine.sessionEndTime) - engine.sessionStartTime) / 1000)
-                    : Math.round((Date.now() - engine.sessionStartTime) / 1000);
-
-                const wasStrict = engine.isStrictSession;
-                const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
-                setSessionResult({
-                    type: "completed",
-                    coins: earnedCoins,
-                    durationSeconds,
-                    isStrict: wasStrict,
-                });
-            }
-            await engine.stopSession();
-        } finally {
-            isSavingSession.current = false;
-        }
-    };
-
-    const confirmEndSession = async () => {
-        if (isSavingSession.current) return;
-        isSavingSession.current = true;
-
-        try {
-            setIsEndModalVisible(false);
-            if (engine.sessionStartTime) {
-                const durationSeconds = Math.round((Date.now() - engine.sessionStartTime) / 1000);
-                const wasStrict = engine.isStrictSession;
-                const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
-
-                if (isCountdown) {
-                    if (wasStrict) {
-                        await useEmergencySkip();
-                    }
-
-                    setSessionResult({
-                        type: "canceled",
-                        coins: 0,
-                        durationSeconds,
-                        isStrict: wasStrict,
-                    });
-                } else {
-                    const { earnedCoins } = await savedCompletedSession(durationSeconds, false);
-                    setSessionResult({
-                        type: "completed",
-                        coins: earnedCoins,
-                        durationSeconds,
-                        isStrict: false,
-                    });
-                }
-            }
-            await engine.stopSession();
-        } finally {
-            isSavingSession.current = false;
-        }
-    };
-
-    const handleFocusPress = () => {
-        if (engine.isSessionActive) {
-            if (engine.sessionEndTime && engine.sessionEndTime > 0 && Date.now() >= engine.sessionEndTime) {
-                handleCompleteSession();
-                return;
-            }
-
-            if (engine.isStrictSession && skipsRemaining <= 0) {
-                Alert.alert(
-                    "Strict Mode Active",
-                    `This session is locked in Strict Mode and you have 0 emergency skips left this week (${resetCountdownText}). It will unlock when the timer finishes.`
-                );
-                return;
-            }
-
-            setIsEndModalVisible(true);
-            return;
-        }
-
-        if (!hasSelectedApps) {
-            router.push("/(tabs)/apps");
-            return;
-        }
-
-        engine.checkPermissions();
-        if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
-            setShowPermission(true);
-            return;
-        }
-
-        setIsTimerModalVisible(true);
-    };
-
-    const handleClosePermissionModal = () => {
-        setShowPermission(false);
-        engine.checkPermissions();
-        if (hasSelectedApps && engine.hasUsage && engine.hasOverlay && engine.hasBattery) {
-            setIsTimerModalVisible(true);
-        }
-    };
 
     if (isCheckingOnboarding) {
         return <SafeAreaView className="flex-1 bg-surface" style={activeStyle} />
@@ -183,13 +81,16 @@ export default function Index() {
                     </View>
 
                     <View className="flex-row items-center">
-                        {/* <Pressable
-                            onPress={() => router.push("/palette")}
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-2"
+
+                        <Pressable
+                            onPress={() => router.push("/shop")}
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opactiy-70 mr-3"
                             accessibilityRole="button"
+                            accessibilityLabel="Open Shop"
                         >
-                            <Ionicons name="color-palette-outline" size={20} color={colors.textSecondary} />
-                        </Pressable> */}
+                            <Ionicons name="cart-outline" size={20} color={colors.textSecondary} />
+                        </Pressable>
+
                         <Pressable
                             onPress={() => router.push("/settings")}
                             className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"

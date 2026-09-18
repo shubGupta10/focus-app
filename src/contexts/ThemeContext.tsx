@@ -16,6 +16,7 @@ interface ThemeContextType {
     colors: ThemeColors;
     activeStyle: any;
     palette: any;
+    setGlobalOrbTheme: (val: string) => void;
     switchColors: {
         trackActive: string;
         thumbActive: string;
@@ -30,8 +31,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const palette = useMaterialYouPalette();
     const { getSetting, setSetting } = useSettings();
     const { colorScheme, setColorScheme } = useColorScheme();
+    const [orbTheme, setOrbTheme] = useState("theme_default");
 
     useEffect(() => {
+        getSetting("equipped_orb_theme").then((val) => {
+            if (val) setOrbTheme(val);
+        });
         getSetting("isMaterialYou").then((val) => {
             if (val !== null) {
                 setIsMaterialYouState(val === "true");
@@ -61,7 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const baseTheme = isDarkMode ? Colors.dark : Colors.light;
 
-    const colors: ThemeColors = isMaterialYouActive
+    let colors: ThemeColors = isMaterialYouActive
         ? isDarkMode
             ? {
                 ...Colors.dark,
@@ -90,6 +95,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 icon: palette?.system_neutral1?.[10] ?? Colors.light.icon,
             }
         : baseTheme;
+
+    if (orbTheme !== "theme_default") {
+        let customAccent = colors.accent;
+        switch (orbTheme) {
+            case "theme_ocean": customAccent = "#0ea5e9"; break;
+            case "theme_forest": customAccent = "#22c55e"; break;
+            case "theme_sunset": customAccent = "#f97316"; break;
+        }
+        
+        colors = {
+            ...colors,
+            accent: customAccent,
+        };
+    }
 
     const activeStyle = vars({
         "--color-background": colors.background,
@@ -146,6 +165,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 activeStyle,
                 palette,
                 switchColors,
+                setGlobalOrbTheme: setOrbTheme,
             }}
         >
             {children}

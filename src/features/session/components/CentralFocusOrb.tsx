@@ -1,6 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from "react";
+import { useSettings } from "@/hooks/useSettings";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, Vibration, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { ClassicProgressBackground } from "./orb-themes/ClassicProgressBackground";
@@ -34,6 +35,8 @@ export function CentralFocusOrb({
     onStopPress,
 }: CentralFocusOrbProps) {
     const { colors } = useTheme();
+    const { getSetting } = useSettings();
+    const [orbTheme, setOrbTheme] = useState("theme_default");
     const holdProgress = useRef(new Animated.Value(0)).current;
     const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const latestOnStopPress = useRef(onStopPress);
@@ -43,6 +46,16 @@ export function CentralFocusOrb({
     useEffect(() => {
         latestOnStopPress.current = onStopPress;
     }, [onStopPress]);
+
+
+    useFocusEffect(
+        useCallback(() => {
+            getSetting("equipped_orb_theme").then(val => {
+                if (val) setOrbTheme(val);
+            })
+        }, [getSetting])
+    )
+
     const breathAnim = useRef(new Animated.Value(1)).current;
     const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -53,7 +66,6 @@ export function CentralFocusOrb({
     const outerRadius = 156;
     const innerRadius = 126;
 
-    // Subtle, serene breathing animation when active
     useEffect(() => {
         if (!isActive) {
             breathAnim.setValue(1);
@@ -265,8 +277,9 @@ export function CentralFocusOrb({
                         try { Vibration.vibrate(12); } catch { }
                         onStartPress?.();
                     }}
-                    className="w-44 h-44 rounded-full bg-accent items-center justify-center active:opacity-85"
+                    className="w-44 h-44 rounded-full items-center justify-center active:opacity-85"
                     style={{
+                        backgroundColor: colorAccent,
                         shadowColor: colorAccent,
                         shadowOffset: { width: 0, height: 8 },
                         shadowOpacity: 0.4,

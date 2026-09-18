@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { memo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
+import { AppInfo } from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 
 interface AppListItemProps {
     app: AppInfo;

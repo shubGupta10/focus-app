@@ -120,6 +120,7 @@ class FocusService : Service() {
             while (isRunning) {
                 if (endTime > 0 && System.currentTimeMillis() >= endTime) {
                     Log.d("FocusBlocker", "Time expired! Auto-stopping service")
+                    sendSessionEndNotification()
                     stopSelf()
                     break
                 }
@@ -376,5 +377,25 @@ class FocusService : Service() {
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(serviceChannel)
         }
+    }
+
+    private fun sendSessionEndNotification() {
+        val manager = getSystemService(NotificationManager::class.java)
+        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("Focus Session Complete")
+                .setContentText("Great job! Your focus session has ended.")
+                .setSmallIcon(android.R.drawable.ic_secure)
+                .setAutoCancel(true)
+                .build()
+        } else {
+            Notification.Builder(this)
+                .setContentTitle("Focus Session Complete")
+                .setContentText("Great job! Your focus session has ended.")
+                .setSmallIcon(android.R.drawable.ic_secure)
+                .setAutoCancel(true)
+                .build()
+        }
+        manager?.notify(2, notification)
     }
 }

@@ -1,9 +1,10 @@
+import { getDurationSeconds } from "../utils/timeUtils";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState, useRef } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
 import FocusBlocker, { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
-import { recordSession } from '../store/statsRepository';
+
 
 const engineListeners = new Set<() => void>();
 let isProcessingExpiredSession = false;
@@ -147,19 +148,11 @@ export function useFocusEngine() {
                     const parsed = JSON.parse(storedSession);
 
                     if (parsed.endTime !== -1 && now >= parsed.endTime) {
-                        if (isSessionActiveRef.current) return;
-                        if (isProcessingExpiredSession) return;
-                        isProcessingExpiredSession = true;
-
-                        const durationSeconds = Math.round((parsed.endTime - parsed.startTime) / 1000);
-                        try {
-                            await recordSession(db, durationSeconds, parsed.isStrict);
-                        } catch (e) {
-                            console.error("Failed to record background session", e);
-                        }
-                        await AsyncStorage.removeItem('active_session');
-                        await stopSession();
-                        isProcessingExpiredSession = false;
+                        setSessionStartTime(parsed.startTime);
+                        setSessionEndTime(parsed.endTime);
+                        setIsStrictSession(parsed.isStrict);
+                        setIsSessionActive(false);
+                        return;
                     } else {
                         let appsToBlock: string[] = [];
                         try {

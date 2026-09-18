@@ -1,6 +1,6 @@
 import { Material3Switch } from "@/components/Material3Switch";
-import { RoutineDaySelector } from "@/components/modals/RoutineDaySelector";
-import { RoutineTimePickerCard } from "@/components/modals/RoutineTimePickerCard";
+import { RoutineDaySelector } from "../RoutineDaySelector";
+import { RoutineTimePickerCard } from "../RoutineTimePickerCard";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Routine, RoutineInput } from "@/types/routine";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,7 +14,7 @@ import {
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FocusBlocker from "../../../modules/focus-blocker/src/FocusBlockerModule";
+import FocusBlocker from "../../../../../modules/focus-blocker/src/FocusBlockerModule";
 
 interface RoutineEditorModalProps {
     visible: boolean;

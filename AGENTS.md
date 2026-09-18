@@ -746,6 +746,28 @@ The goal is to make Lockout feel like a **coherent, intentional, reliable produc
 
 ---
 
+# Architecture & Code Organization
+
+Avoid the "God Component" anti-pattern where a single screen/route file handles UI rendering, state management, complex math, database calls, and permission checks simultaneously.
+
+Adopt a **Feature-Based Modular Architecture** combined with the **Container/Presenter Pattern**.
+
+## 1. Extract Business Logic
+- Extract complex logic out of UI components and into single-purpose custom hooks (e.g., `useSessionController`, `usePermissionManager`).
+- UI components should primarily consume data and call functions provided by these hooks.
+
+## 2. Feature-Based Folder Structure
+Group code by domain features rather than flat technical directories.
+- `src/app/` should only contain thin routing components composing smaller feature views.
+- `src/features/[feature_name]/` should contain `components/`, `hooks/`, and `utils/` specific to that feature (e.g., `session`, `stats`).
+- `src/shared/` should contain universally used components (Generic Buttons), utils (`timeUtils.ts`), and global stores.
+
+## 3. Incremental Refactoring
+- Follow the "Prefer the smallest clean change" rule.
+- Do not rewrite large chunks of the application at once. Refactor incrementally, extracting one feature module or one custom hook at a time to ensure application stability.
+
+---
+
 # Definition of Done
 
 A task is complete only when:

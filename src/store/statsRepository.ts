@@ -1,4 +1,5 @@
 import { SQLiteDatabase } from "expo-sqlite";
+import { getTodayDateString } from "../utils/timeUtils";
 
 export type UserStats = {
     total_coins: number;
@@ -49,7 +50,7 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number,
     const earnedCoins = isStrict ? Math.floor(baseCoins * 1.5) : baseCoins;
 
     const now = new Date();
-    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+    const today = getTodayDateString();
 
     const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const yesterday = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
@@ -102,8 +103,7 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number,
 }
 
 export async function getTodayStats(db: SQLiteDatabase): Promise<TodayStats> {
-    const now = new Date();
-    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+    const today = getTodayDateString();
 
     const result = await db.getFirstAsync<{
         today_focus_seconds: number,
@@ -153,9 +153,7 @@ export async function getRecentBlockedAttempts(db: SQLiteDatabase, limit: number
 }
 
 export async function getTodaySessionList(db: SQLiteDatabase): Promise<SessionHistoryItem[]> {
-    const now = new Date();
-
-    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+    const today = getTodayDateString();
 
     const result = await db.getAllAsync<SessionHistoryItem>(
         `SELECT id, start_time, duration_seconds, coins_earned,

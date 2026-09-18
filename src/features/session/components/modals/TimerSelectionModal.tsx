@@ -3,8 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, Vibration, View } from "react-native";
-import { useTheme } from "../../contexts/ThemeContext";
-import { Material3Switch } from "../Material3Switch";
+import { useTheme } from "../../../../contexts/ThemeContext";
+import { Material3Switch } from "../../../../components/Material3Switch";
 
 interface TimerSelectionModalProps {
     visible: boolean
