@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/Colors";
+import { SHOP_CATALOG } from "@/features/shop/data/shopCatalog";
 import { useSettings } from "@/hooks/useSettings";
 import { useMaterialYouPalette } from "@assembless/react-native-material-you";
 import { useColorScheme, vars } from "nativewind";
@@ -98,15 +99,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     if (orbTheme !== "theme_default") {
         let customAccent = colors.accent;
-        switch (orbTheme) {
-            case "theme_ocean": customAccent = "#0ea5e9"; break;
-            case "theme_forest": customAccent = "#22c55e"; break;
-            case "theme_sunset": customAccent = "#f97316"; break;
+        const shopTheme = SHOP_CATALOG.find(t => t.id === orbTheme);
+
+        if (shopTheme?.hexColor) {
+            customAccent = shopTheme.hexColor;
         }
-        
+
         colors = {
             ...colors,
             accent: customAccent,
+            accentMuted: customAccent + "33",
         };
     }
 
@@ -131,7 +133,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         "--color-scrim": colors.scrim,
     });
 
-    const switchColors = isMaterialYouActive
+    const switchColors = isMaterialYouActive && orbTheme === "theme_default"
         ? isDarkMode
             ? {
                 trackActive: palette?.system_accent1?.[5] ?? colors.accent,

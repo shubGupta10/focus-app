@@ -37,6 +37,7 @@ export function CentralFocusOrb({
     const { colors } = useTheme();
     const { getSetting } = useSettings();
     const [orbTheme, setOrbTheme] = useState("theme_default");
+    const [orbAnimation, setOrbAnimation] = useState("animation_solar");
     const holdProgress = useRef(new Animated.Value(0)).current;
     const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const latestOnStopPress = useRef(onStopPress);
@@ -52,6 +53,9 @@ export function CentralFocusOrb({
         useCallback(() => {
             getSetting("equipped_orb_theme").then(val => {
                 if (val) setOrbTheme(val);
+            })
+            getSetting("equipped_orb_animation").then(val => {
+                if (val) setOrbAnimation(val);
             })
         }, [getSetting])
     )
@@ -160,14 +164,12 @@ export function CentralFocusOrb({
         }).start();
     };
 
-    // Core active radius for hold feedback ring
     const coreRadius = 96;
 
     return (
         <View className="items-center justify-center w-[340px] h-[340px]">
-            {/* Background Orb Theme */}
             <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                {theme === 'solar' ? (
+                {orbAnimation === 'animation_solar' ? (
                     <SolarSystemBackground
                         isActive={isActive}
                         colorAccent={colorAccent}

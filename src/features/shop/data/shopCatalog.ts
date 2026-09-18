@@ -5,9 +5,10 @@ export type ShopItem = {
     name: string;
     description: string;
     cost: number;
-    type: 'theme'
+    type: 'theme' | 'animation';
     themeValue: string;
     icon: keyof typeof Ionicons.glyphMap;
+    hexColor?: string;
 }
 
 
@@ -28,7 +29,8 @@ export const SHOP_CATALOG: ShopItem[] = [
         cost: 50,
         type: "theme",
         themeValue: "ocean",
-        icon: "water-outline"
+        icon: "water-outline",
+        hexColor: "#0ea5e9",
     },
     {
         id: "theme_forest",
@@ -38,6 +40,7 @@ export const SHOP_CATALOG: ShopItem[] = [
         type: "theme",
         themeValue: "forest",
         icon: "leaf-outline",
+        hexColor: "#22c55e",
     },
     {
         id: "theme_sunset",
@@ -47,5 +50,54 @@ export const SHOP_CATALOG: ShopItem[] = [
         type: "theme",
         themeValue: "sunset",
         icon: "sunny-outline",
+        hexColor: "#f97316",
+    },
+    {
+        id: "theme_crimson",
+        name: "Crimson Focus",
+        description: "An intense, high-energy crimson for deep work.",
+        cost: 150,
+        type: "theme",
+        themeValue: "crimson",
+        icon: "flame-outline",
+        hexColor: "#e11d48",
+    },
+    {
+        id: "theme_monochrome",
+        name: "Monochrome Minimal",
+        description: "A sleek, distraction-free grayscale aesthetic.",
+        cost: 200,
+        type: "theme",
+        themeValue: "monochrome",
+        icon: "contrast-outline",
+        hexColor: "#64748b",
+    },
+    {
+        id: "theme_cyberpunk",
+        name: "Neon Cyberpunk",
+        description: "A vibrant, high-contrast neon magenta.",
+        cost: 300,
+        type: "theme",
+        themeValue: "cyberpunk",
+        icon: "flash-outline",
+        hexColor: "#d946ef",
+    },
+    {
+        id: "animation_solar",
+        name: "Solar System",
+        description: "The default orbiting planetary rings.",
+        cost: 0,
+        type: "animation",
+        themeValue: "solar",
+        icon: "planet-outline",
+    },
+    {
+        id: "animation_classic",
+        name: "Classic Progress",
+        description: "A clean, minimalist circular progress ring.",
+        cost: 500,
+        type: "animation",
+        themeValue: "classic",
+        icon: "radio-button-on-outline",
     }
 ]

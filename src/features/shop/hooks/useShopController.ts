@@ -14,17 +14,22 @@ export function useShopController() {
     const { getSetting, setSetting } = useSettings();
     const { setGlobalOrbTheme } = useTheme();
 
-    const [purchasedItems, setPurchasedItems] = useState<Set<string>>(new Set(["theme_default"]));
+    const [purchasedItems, setPurchasedItems] = useState<Set<string>>(new Set(["theme_default", "animation_solar"]));
     const [equippedTheme, setEquippedTheme] = useState<string>("theme_default");
+    const [equippedAnimation, setEquippedAnimation] = useState<string>("animation_solar");
     const [isProcessing, setIsProcessing] = useState(false);
 
 
     const loadShopData = useCallback(async () => {
         const items = await getPurchasedItems(db);
-        setPurchasedItems(new Set(["theme_default", ...items]));
+        setPurchasedItems(new Set(["theme_default", "animation_solar", ...items]));
         const currentTheme = await getSetting("equipped_orb_theme");
         if (currentTheme) {
             setEquippedTheme(currentTheme);
+        }
+        const currentAnimation = await getSetting("equipped_orb_animation");
+        if (currentAnimation) {
+            setEquippedAnimation(currentAnimation);
         }
     }, [db, getSetting]);
 
@@ -70,9 +75,17 @@ export function useShopController() {
     };
 
     const handleEquipItem = async (itemId: string) => {
-        await setSetting("equipped_orb_theme", itemId);
-        setEquippedTheme(itemId);
-        setGlobalOrbTheme(itemId);
+        const item = SHOP_CATALOG.find(i => i.id === itemId);
+        if (!item) return;
+        if (item.type === "theme") {
+            await setSetting("equipped_orb_theme", itemId);
+            setEquippedTheme(itemId);
+            setGlobalOrbTheme(itemId);
+        } else if (item.type === "animation") {
+            await setSetting("equipped_orb_animation", itemId);
+            setEquippedAnimation(itemId);
+        }
+
     }
 
 
@@ -80,6 +93,7 @@ export function useShopController() {
         catalog: SHOP_CATALOG,
         purchasedItems,
         equippedTheme,
+        equippedAnimation,
         totalCoins: stats.total_coins,
         isProcessing,
         handleBuyItem,

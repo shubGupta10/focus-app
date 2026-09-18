@@ -4,7 +4,7 @@ import { useShopController } from "@/features/shop/hooks/useShopController";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShopScreen() {
@@ -13,6 +13,7 @@ export default function ShopScreen() {
         catalog,
         purchasedItems,
         equippedTheme,
+        equippedAnimation,
         totalCoins,
         isProcessing,
         handleBuyItem,
@@ -32,7 +33,7 @@ export default function ShopScreen() {
                     >
                         <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
                     </Pressable>
-                    <Text className="text-text font-bold text-2xl tracking-tight">Coin Shop</Text>
+                    <Text className="text-text font-bold text-2xl tracking-tight">Shop</Text>
                 </View>
 
                 <View className='flex-row items-center bg-surfaceElevated px-3 py-1.5 rounded-full border border-border'>
@@ -41,26 +42,62 @@ export default function ShopScreen() {
                 </View>
             </View>
 
-            <FlatList
-                data={catalog}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{
-                    paddingHorizontal: 24,
-                    paddingBottom: 40,
-                    paddingTop: 8
-                }}
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 40, paddingTop: 8 }}
                 showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                    <ShopItemCard
-                        item={item}
-                        isOwned={purchasedItems.has(item.id)}
-                        isEquipped={equippedTheme === item.id}
-                        isProcessing={isProcessing}
-                        onBuy={() => handleBuyItem(item)}
-                        onEquip={() => handleEquipItem(item.id)}
-                    />
-                )}
-            />
+            >
+                <View className="px-6 mb-3 mt-4">
+                    <Text className="text-text font-black text-xl tracking-tight">Color Palettes</Text>
+                    <Text className="text-textSecondary text-sm mt-1">Change the glow and accent color of your app.</Text>
+                </View>
+
+                <FlatList
+                    horizontal
+                    data={catalog.filter(item => item.type === "theme")}
+                    keyExtractor={(item) => item.id}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 8 }}
+                    ItemSeparatorComponent={() => <View className="w-4" />}
+                    renderItem={({ item }) => (
+                        <View className="w-[280px]">
+                            <ShopItemCard
+                                item={item}
+                                isOwned={purchasedItems.has(item.id)}
+                                isEquipped={equippedTheme === item.id}
+                                isProcessing={isProcessing}
+                                onBuy={() => handleBuyItem(item)}
+                                onEquip={() => handleEquipItem(item.id)}
+                            />
+                        </View>
+                    )}
+                />
+
+                <View className="px-6 mb-3 mt-8">
+                    <Text className="text-text font-black text-xl tracking-tight">Focus Animations</Text>
+                    <Text className="text-textSecondary text-sm mt-1">Change how your timer moves and breathes.</Text>
+                </View>
+
+                <FlatList
+                    horizontal
+                    data={catalog.filter(item => item.type === "animation")}
+                    keyExtractor={(item) => item.id}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 24 }}
+                    ItemSeparatorComponent={() => <View className="w-4" />}
+                    renderItem={({ item }) => (
+                        <View className="w-[280px]">
+                            <ShopItemCard
+                                item={item}
+                                isOwned={purchasedItems.has(item.id)}
+                                isEquipped={equippedAnimation === item.id}
+                                isProcessing={isProcessing}
+                                onBuy={() => handleBuyItem(item)}
+                                onEquip={() => handleEquipItem(item.id)}
+                            />
+                        </View>
+                    )}
+                />
+            </ScrollView>
         </SafeAreaView>
     )
 }

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useEffect } from 'react';
 import { Pressable } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface Material3SwitchProps {
     value: boolean;
@@ -31,9 +31,6 @@ export function Material3Switch({ value, onValueChange, disabled }: Material3Swi
     const thumbStyle = useAnimatedStyle(() => {
         const size = value ? 24 : 16;
         const margin = value ? 4 : 8;
-        // Total width is 52. 
-        // When progress is 0, translateX is 0 (left edge + margin).
-        // When progress is 1, translateX is max travel distance.
         const translateX = progress.value * (52 - size - (margin * 2));
 
         return {
