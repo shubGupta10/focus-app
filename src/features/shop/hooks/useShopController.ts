@@ -31,7 +31,7 @@ export function useShopController() {
 
     useFocusEffect(
         useCallback(() => {
-            db.runAsync("UPDATE user_stats SET total_coins = 1000 WHERE id = 1");
+            // db.runAsync("UPDATE user_stats SET total_coins = 1000 WHERE id = 1");
             loadShopData();
             refreshStats();
         }, [loadShopData, refreshStats, db])
