@@ -1,4 +1,3 @@
-import React from "react";
 import Svg, { Circle } from "react-native-svg";
 import { OrbBackgroundProps } from "./OrbBackgroundProps";
 

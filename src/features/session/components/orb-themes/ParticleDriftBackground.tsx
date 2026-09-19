@@ -24,6 +24,8 @@ export function ParticleDriftBackground({
     const anims = useRef(particles.map(() => new Animated.Value(0))).current;
 
     useEffect(() => {
+        if (!isActive) return;
+
         const loops = particles.map((p, i) => {
             anims[i].setValue(0);
             return Animated.loop(
@@ -38,7 +40,7 @@ export function ParticleDriftBackground({
 
         loops.forEach(l => l.start());
         return () => loops.forEach(l => l.stop());
-    }, [anims, particles]);
+    }, [anims, particles, isActive]);
 
     return (
         <View style={{ width: 340, height: 340 }}>

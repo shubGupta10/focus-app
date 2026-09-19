@@ -89,6 +89,8 @@ export function WaveformPulseBackground({
     const secondarySpin = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
+        if (!isActive) return;
+
         const primaryLoop = Animated.loop(
             Animated.timing(primarySpin, {
                 toValue: 1,
@@ -114,7 +116,7 @@ export function WaveformPulseBackground({
             primaryLoop.stop();
             secondaryLoop.stop();
         };
-    }, [primarySpin, secondarySpin]);
+    }, [primarySpin, secondarySpin, isActive]);
 
     const primaryRotate = primarySpin.interpolate({
         inputRange: [0, 1],

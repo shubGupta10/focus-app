@@ -54,7 +54,7 @@ export function CentralFocusOrb({
                 if (val) setOrbTheme(val);
             })
             getSetting("equipped_orb_animation").then(val => {
-                if (val) setOrbAnimation(val);
+                setOrbAnimation(val || "animation_solar");
             })
         }, [getSetting])
     )
@@ -70,6 +70,7 @@ export function CentralFocusOrb({
     const innerRadius = 126;
 
     useEffect(() => {
+
         if (!isActive) {
             breathAnim.setValue(1);
             return;
@@ -209,7 +210,6 @@ export function CentralFocusOrb({
                 </View>
             )}
 
-            {/* Center Interactive Orb */}
             {isActive ? (
                 <Animated.View
                     style={{
@@ -230,7 +230,6 @@ export function CentralFocusOrb({
                         accessibilityRole="button"
                         accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
                     >
-                        {/* Top Indicator (Fixed height to prevent shift) */}
                         <View className="flex-row items-center justify-center h-4 mb-2">
                             <Text
                                 className={`font-black text-[12px] tracking-widest uppercase ${isStrict && skipsRemaining <= 0 ? "text-warning" : "text-destructive"
@@ -248,7 +247,6 @@ export function CentralFocusOrb({
                             </Text>
                         </View>
 
-                        {/* Hero Digital Timer */}
                         <Text
                             className="text-text font-black text-5xl tracking-tighter tabular-nums text-center"
                             adjustsFontSizeToFit
@@ -258,14 +256,12 @@ export function CentralFocusOrb({
                             {timeLeft}
                         </Text>
 
-                        {/* Bottom Label */}
                         <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
                             {isInfinite ? "Elapsed" : "Remaining"}
                         </Text>
                     </Pressable>
                 </Animated.View>
             ) : (
-                /* Idle Home Orb */
                 <Pressable
                     onPress={() => {
                         try { Vibration.vibrate(12); } catch { }

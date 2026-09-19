@@ -68,6 +68,8 @@ export function ConstellationBackground({
     ).current;
 
     useEffect(() => {
+        if (!isActive) return;
+
         const driftLoop = Animated.loop(
             Animated.timing(drift, {
                 toValue: 1,
@@ -106,7 +108,7 @@ export function ConstellationBackground({
             driftLoop.stop();
             twinkleLoops.forEach(l => l.stop());
         };
-    }, [drift, groupAnims]);
+    }, [drift, groupAnims, isActive]);
 
     const rotation = drift.interpolate({
         inputRange: [0, 1],

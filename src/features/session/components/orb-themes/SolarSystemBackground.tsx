@@ -17,6 +17,8 @@ export function SolarSystemBackground({
     const innerAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
+        if (!isActive) return;
+
         const outerLoop = Animated.loop(
             Animated.timing(outerAnim, {
                 toValue: 1,
@@ -42,7 +44,7 @@ export function SolarSystemBackground({
             outerLoop.stop();
             innerLoop.stop();
         };
-    }, [outerAnim, innerAnim]);
+    }, [outerAnim, innerAnim, isActive]);
 
     const outerRotate = outerAnim.interpolate({
         inputRange: [0, 1],

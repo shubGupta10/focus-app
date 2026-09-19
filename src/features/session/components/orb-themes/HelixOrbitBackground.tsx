@@ -49,6 +49,8 @@ export function HelixOrbitBackground({
     const rungs = useMemo(() => generateRungs(strandA, strandB), [strandA, strandB]);
 
     useEffect(() => {
+        if (!isActive) return;
+
         const loop = Animated.loop(
             Animated.timing(spin, {
                 toValue: 1,
@@ -60,7 +62,7 @@ export function HelixOrbitBackground({
 
         loop.start();
         return () => loop.stop();
-    }, [spin]);
+    }, [spin, isActive]);
 
     const rotation = spin.interpolate({
         inputRange: [0, 1],
