@@ -609,6 +609,7 @@ Do not:
 - Add tracking without explicit product approval
 - Store secrets in source code
 - Collect data without a product reason
+- Do not run any kind of terminal task and do not do npm install or any unuthorized terminal task, 
 
 Request only the permissions required for the feature.
 

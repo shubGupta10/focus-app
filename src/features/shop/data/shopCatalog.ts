@@ -21,6 +21,7 @@ export const SHOP_CATALOG: ShopItem[] = [
         type: "theme",
         themeValue: "default",
         icon: "color-palette-outline",
+        hexColor: "#A35265",
     },
     {
         id: "theme_ocean",
