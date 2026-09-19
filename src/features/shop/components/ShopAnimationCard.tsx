@@ -8,14 +8,15 @@ interface ShopAnimationCardProps {
     isOwned: boolean;
     isEquipped: boolean;
     isProcessing: boolean;
+    isActive?: boolean;
     onAction: () => void;
 }
 
-export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, onAction }: ShopAnimationCardProps) {
+export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isActive = true, onAction }: ShopAnimationCardProps) {
     const { colors } = useTheme();
 
     const previewProps = {
-        isActive: true,
+        isActive: isActive,
         colorAccent: colors.accent,
         colorTrack: colors.border,
         colorDotCenter: colors.text,

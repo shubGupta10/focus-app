@@ -4,11 +4,25 @@ import { useShopController } from "@/features/shop/hooks/useShopController";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShopScreen() {
     const { activeStyle, colors, isDarkMode } = useTheme();
+    const [isReady, setIsReady] = useState(false);
+    const [visibleAnimationId, setVisibleAnimationId] = useState<string | null>(null);
+
+    const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+        if (viewableItems.length > 0) {
+            setVisibleAnimationId(viewableItems[0].item.id);
+        }
+    }).current;
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 50
+    }).current;
+
     const {
         catalog,
         purchasedItems,
@@ -22,6 +36,13 @@ export default function ShopScreen() {
 
     const themes = catalog.filter(item => item.type === "theme");
     const animations = catalog.filter(item => item.type === "animation");
+
+    useEffect(() => {
+        const handle = requestIdleCallback(() => {
+            setIsReady(true);
+        });
+        return () => cancelIdleCallback(handle);
+    }, []);
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
@@ -106,8 +127,13 @@ export default function ShopScreen() {
                             <Text className="text-text font-bold text-lg tracking-tight">Animation Style</Text>
                         </View>
 
-                        <FlatList
-                            horizontal
+                        {!isReady ? (
+                            <View className="h-[340px] items-center justify-center">
+                                <ActivityIndicator size="large" color={colors.accent} />
+                            </View>
+                        ) : (
+                            <FlatList
+                                horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ paddingHorizontal: 24 }}
                             data={animations}
@@ -115,7 +141,9 @@ export default function ShopScreen() {
                             ItemSeparatorComponent={() => <View className="w-6" />}
                             snapToInterval={324}
                             decelerationRate="fast"
-                            renderItem={({ item }) => {
+                            onViewableItemsChanged={onViewableItemsChanged}
+                            viewabilityConfig={viewabilityConfig}
+                            renderItem={({ item, index }) => {
                                 const isOwned = purchasedItems.has(item.id);
                                 const isEquipped = equippedAnimation === item.id;
 
@@ -125,6 +153,7 @@ export default function ShopScreen() {
                                         isOwned={isOwned}
                                         isEquipped={isEquipped}
                                         isProcessing={isProcessing}
+                                        isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
                                         onAction={() => {
                                             if (!isOwned) handleBuyItem(item);
                                             else if (!isEquipped) handleEquipItem(item.id);
@@ -133,6 +162,7 @@ export default function ShopScreen() {
                                 );
                             }}
                         />
+                        )}
                     </View>
 
                     <View className="px-6 mt-auto pt-8">
