@@ -48,7 +48,7 @@ export default function ShopScreen() {
                 <View className="flex-1">
 
                     <View className="px-6 mt-2 mb-8">
-                        <Text className="text-text font-black text-4xl tracking-tighter mb-2">Customise</Text>
+                        <Text className="text-text font-black text-4xl tracking-tighter mb-2">SHOP</Text>
                         <Text className="text-textSecondary text-base leading-relaxed">
                             Spend your focus coins to personalise your experience.
                         </Text>

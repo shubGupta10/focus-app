@@ -1,8 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import { getOrbBackground } from "@/features/session/components/orb-themes";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { ClassicProgressBackground } from "../../session/components/orb-themes/ClassicProgressBackground";
-import { SolarSystemBackground } from "../../session/components/orb-themes/SolarSystemBackground";
 import { ShopItem } from "../data/shopCatalog";
 
 interface ShopAnimationCardProps {
@@ -34,11 +32,10 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, onA
         >
             <View className="w-full aspect-square bg-background items-center justify-center overflow-hidden">
                 <View style={{ transform: [{ scale: 0.85 }] }}>
-                    {item.themeValue === 'solar' ? (
-                        <SolarSystemBackground {...previewProps} />
-                    ) : (
-                        <ClassicProgressBackground {...previewProps} />
-                    )}
+                    {(() => {
+                        const Preview = getOrbBackground(item.themeValue);
+                        return <Preview {...previewProps} />;
+                    })()}
                 </View>
             </View>
 

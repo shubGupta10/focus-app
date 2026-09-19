@@ -4,8 +4,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, Vibration, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import { ClassicProgressBackground } from "./orb-themes/ClassicProgressBackground";
-import { SolarSystemBackground } from "./orb-themes/SolarSystemBackground";
+import { getOrbBackground } from "./orb-themes";
 
 interface CentralFocusOrbProps {
     isActive?: boolean;
@@ -37,7 +36,7 @@ export function CentralFocusOrb({
     const { colors } = useTheme();
     const { getSetting } = useSettings();
     const [orbTheme, setOrbTheme] = useState("theme_default");
-    const [orbAnimation, setOrbAnimation] = useState("animation_solar");
+    const [orbAnimation, setOrbAnimation] = useState<string | null>(null);
     const holdProgress = useRef(new Animated.Value(0)).current;
     const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const latestOnStopPress = useRef(onStopPress);
@@ -169,32 +168,25 @@ export function CentralFocusOrb({
     return (
         <View className="items-center justify-center w-[340px] h-[340px]">
             <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                {orbAnimation === 'animation_solar' ? (
-                    <SolarSystemBackground
-                        isActive={isActive}
-                        colorAccent={colorAccent}
-                        colorTrack={colorTrack}
-                        colorDotCenter={colorDotCenter}
-                        outerRadius={outerRadius}
-                        innerRadius={innerRadius}
-                        sessionProgress={sessionProgress}
-                        minuteProgress={minuteProgress}
-                    />
-                ) : (
-                    <ClassicProgressBackground
-                        isActive={isActive}
-                        colorAccent={colorAccent}
-                        colorTrack={colorTrack}
-                        colorDotCenter={colorDotCenter}
-                        outerRadius={outerRadius}
-                        innerRadius={innerRadius}
-                        sessionProgress={sessionProgress}
-                        minuteProgress={minuteProgress}
-                    />
-                )}
+                {orbAnimation && (() => {
+                    const OrbBg = getOrbBackground(
+                        orbAnimation.replace("animation_", "")
+                    );
+                    return (
+                        <OrbBg
+                            isActive={isActive}
+                            colorAccent={colorAccent}
+                            colorTrack={colorTrack}
+                            colorDotCenter={colorDotCenter}
+                            outerRadius={outerRadius}
+                            innerRadius={innerRadius}
+                            sessionProgress={sessionProgress}
+                            minuteProgress={minuteProgress}
+                        />
+                    )
+                })()}
             </View>
 
-            {/* Active Hold Progress Ring (sweeps around the center disc) */}
             {isActive && (
                 <View className="absolute inset-0 items-center justify-center pointer-events-none">
                     <Svg width="340" height="340" viewBox="0 0 340 340">
