@@ -1,5 +1,6 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { BlockedAttemptItem, getRecentBlockedAttempts } from "../store/statsRepository";
 
 export interface DailyAnalytics {
@@ -72,6 +73,12 @@ export function useAnalytics() {
             console.error("Failed to load analytics", error);
         }
     }, [db]);
+
+    useFocusEffect(
+        useCallback(() => {
+            refreshAnalytics();
+        }, [refreshAnalytics])
+    );
 
     return {
         weeklyData,

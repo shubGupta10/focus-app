@@ -1,10 +1,11 @@
+import { useSettings } from "@/hooks/useSettings";
 import { useStrictMode } from "@/hooks/useStrictMode";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, Vibration, View } from "react-native";
-import { useTheme } from "../../../../contexts/ThemeContext";
 import { Material3Switch } from "../../../../components/Material3Switch";
+import { useTheme } from "../../../../contexts/ThemeContext";
 
 interface TimerSelectionModalProps {
     visible: boolean
@@ -13,19 +14,27 @@ interface TimerSelectionModalProps {
 }
 
 
-const PRESET_TIMES = [2, 5, 15, 25, 30, 45, 60, 90, 120];
+const PRESET_TIMES = [5, 15, 25, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
     const { colors, isDarkMode } = useTheme();
     const { skipsRemaining, resetCountdownText, refreshStrictMode } = useStrictMode();
+    const { getSetting } = useSettings();
     const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
     const [isStrict, setIsStrict] = useState<boolean>(false);
+
 
     useEffect(() => {
         if (visible) {
             refreshStrictMode();
+
+            getSetting("default_timer").then(val => {
+                if (val !== null) {
+                    setSelectedMinutes(parseInt(val, 10));
+                }
+            })
         }
-    }, [visible, refreshStrictMode]);
+    }, [visible, refreshStrictMode, getSetting]);
 
     if (!visible) return null;
 

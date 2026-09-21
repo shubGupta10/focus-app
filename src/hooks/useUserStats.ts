@@ -1,6 +1,7 @@
 import { getRecentSessions, getTodaySessionList, getTodayStats, getTotalSessionsCount, getUserStats, recordSession, SessionHistoryItem, TodayStats, UserStats } from "@/store/statsRepository";
 import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 
 export function useUserStats() {
     const db = useSQLiteContext();
@@ -37,9 +38,11 @@ export function useUserStats() {
         }
     }, [db]);
 
-    useEffect(() => {
-        refreshStats();
-    }, [refreshStats]);
+    useFocusEffect(
+        useCallback(() => {
+            refreshStats();
+        }, [refreshStats])
+    );
 
     const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false) => {
         try {

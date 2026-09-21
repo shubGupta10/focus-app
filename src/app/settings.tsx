@@ -1,13 +1,16 @@
 import { useTheme } from "@/contexts/ThemeContext";
+import { SettingsAboutCard } from "@/features/settings/components/SettingsAboutCard";
+import { SettingNotificationCard } from "@/features/settings/components/SettingsNotificationsCard";
+import { SettingsSessionCard } from "@/features/settings/components/SettingsSessionCard";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSettingsController } from "../features/settings/hooks/useSettingsController";
 import { SettingsAppearanceCard } from "../features/settings/components/SettingsAppearanceCard";
-import { SettingsPermissionsCard } from "../features/settings/components/SettingsPermissionsCard";
-import { SettingsNavigationCard } from "../features/settings/components/SettingsNavigationCard";
 import { SettingsDangerZoneCard } from "../features/settings/components/SettingsDangerZoneCard";
+import { SettingsNavigationCard } from "../features/settings/components/SettingsNavigationCard";
+import { SettingsPermissionsCard } from "../features/settings/components/SettingsPermissionsCard";
+import { useSettingsController } from "../features/settings/hooks/useSettingsController";
 
 export default function SettingsTab() {
     const { activeStyle, colors } = useTheme();
@@ -38,6 +41,9 @@ export default function SettingsTab() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
                 <SettingsAppearanceCard />
 
+                <SettingsSessionCard />
+                <SettingNotificationCard />
+
                 <SettingsPermissionsCard
                     allPermissionsGranted={allPermissionsGranted}
                     hasUsage={hasUsage}
@@ -50,6 +56,8 @@ export default function SettingsTab() {
                 <SettingsNavigationCard />
 
                 <SettingsDangerZoneCard resetAllData={resetAllData} />
+
+                <SettingsAboutCard />
             </ScrollView>
         </SafeAreaView>
     );

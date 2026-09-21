@@ -1,15 +1,19 @@
-import { useState, useRef, useEffect } from "react";
-import { Alert } from "react-native";
-import { router } from "expo-router";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { useUserStats } from "@/hooks/useUserStats";
+import { useSettings } from "@/hooks/useSettings";
 import { useStrictMode } from "@/hooks/useStrictMode";
+import { useUserStats } from "@/hooks/useUserStats";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
 import { getDurationSeconds } from "../../../utils/timeUtils";
 
 export function useSessionController() {
+    ``
     const engine = useFocusEngine();
     const { savedCompletedSession, todayStats, refreshStats } = useUserStats();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
+    const { getSetting } = useSettings();
 
     const [showPermission, setShowPermission] = useState(false);
     const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
@@ -22,6 +26,22 @@ export function useSessionController() {
     } | null>(null);
 
     const isSavingSession = useRef(false);
+
+    const playCompletionFeedback = async (isSuccess: boolean) => {
+        try {
+            const hapticsEnabled = await getSetting("haptics_enabled") !== "false";
+
+            if (hapticsEnabled) {
+                await Haptics.notificationAsync(
+                    isSuccess
+                        ? Haptics.NotificationFeedbackType.Success
+                        : Haptics.NotificationFeedbackType.Warning
+                );
+            }
+        } catch (error) {
+            console.error("Failed to play feedback", error);
+        }
+    };
 
     const handleCompleteSession = async () => {
         if (isSavingSession.current) return;
@@ -40,6 +60,7 @@ export function useSessionController() {
                     durationSeconds,
                     isStrict: wasStrict,
                 });
+                playCompletionFeedback(true);
             }
             await engine.stopSession();
         } finally {
@@ -75,6 +96,7 @@ export function useSessionController() {
                         durationSeconds,
                         isStrict: wasStrict,
                     });
+                    playCompletionFeedback(false);
                 } else {
                     const { earnedCoins } = await savedCompletedSession(durationSeconds, false);
                     setSessionResult({
@@ -83,6 +105,7 @@ export function useSessionController() {
                         durationSeconds,
                         isStrict: false,
                     });
+                    playCompletionFeedback(true);
                 }
             }
             await engine.stopSession();

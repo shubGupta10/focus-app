@@ -6,12 +6,8 @@ import { RecentInterceptionsCard } from "../../features/stats/components/cards/R
 import { StreakAndBlockedCard } from "../../features/stats/components/cards/StreakAndBlockedCard";
 import { TodayFocusCard } from "../../features/stats/components/cards/TodayFocusCard";
 import { WeeklyRhythmCard } from "../../features/stats/components/cards/WeeklyRhythmCard";
-import { useProgressController } from "../../features/stats/hooks/useProgressController";
-
 export default function ProgressTab() {
     const { activeStyle } = useTheme();
-
-    useProgressController();
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
