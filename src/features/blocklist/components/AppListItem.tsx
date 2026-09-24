@@ -31,7 +31,7 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
                 {app.icon ? (
                     <Image
                         source={{ uri: `data:image/png;base64,${app.icon}` }}
-                        className="w-11 h-11 rounded-xl mr-3.5"
+                        style={{ width: 44, height: 44, borderRadius: 12, marginRight: 14 }}
                     />
                 ) : (
                     <View className="w-11 h-11 rounded-xl bg-surface items-center justify-center mr-3.5">

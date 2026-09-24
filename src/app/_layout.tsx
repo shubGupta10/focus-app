@@ -1,7 +1,6 @@
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { migrateDbIfNeeded } from "@/store/database";
-import { MaterialYouService, defaultPalette } from "@assembless/react-native-material-you";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -31,40 +30,38 @@ export default function Layout() {
       databaseName="focus.db"
       onInit={migrateDbIfNeeded}
     >
-      <MaterialYouService fallbackPalette={defaultPalette}>
-        <ThemeProvider>
-          <ToastProvider>
-            <Stack screenOptions={{
-              headerShown: false,
-              animation: 'none'
-            }}
-            >
-              <Stack.Screen name="(tabs)" />
+      <ThemeProvider>
+        <ToastProvider>
+          <Stack screenOptions={{
+            headerShown: false,
+            animation: 'none'
+          }}
+          >
+            <Stack.Screen name="(tabs)" />
 
-              <Stack.Screen
-                name="onboarding"
-                options={{
-                  animation: "fade"
-                }}
-              />
+            <Stack.Screen
+              name="onboarding"
+              options={{
+                animation: "fade"
+              }}
+            />
 
-              <Stack.Screen
-                name="shop"
-                options={{
-                  animation: "default"
-                }}
-              />
+            <Stack.Screen
+              name="shop"
+              options={{
+                animation: "default"
+              }}
+            />
 
-              <Stack.Screen
-                name="settings"
-                options={{
-                  animation: "default"
-                }}
-              />
-            </Stack>
-          </ToastProvider>
-        </ThemeProvider>
-      </MaterialYouService>
+            <Stack.Screen
+              name="settings"
+              options={{
+                animation: "default"
+              }}
+            />
+          </Stack>
+        </ToastProvider>
+      </ThemeProvider>
     </SQLiteProvider>
   );
 }

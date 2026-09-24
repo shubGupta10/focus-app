@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Text, View } from "react-native";
 
 export function SettingsAppearanceCard() {
-    const { isMaterialYou, setIsMaterialYou, isDarkMode, toggleDarkMode } = useTheme();
+    const { isDarkMode, toggleDarkMode } = useTheme();
 
     return (
         <View className="px-6 py-5">
@@ -24,7 +24,7 @@ export function SettingsAppearanceCard() {
                 />
             </View>
 
-            <View className="bg-surfaceElevated rounded-2xl p-5 mb-6 flex-row items-center justify-between">
+            {/* <View className="bg-surfaceElevated rounded-2xl p-5 mb-6 flex-row items-center justify-between">
                 <View className="flex-1 pr-4">
                     <Text className="text-text font-bold text-lg mb-1">Dynamic Colors</Text>
                     <Text className="text-textSecondary text-sm leading-5">
@@ -35,7 +35,7 @@ export function SettingsAppearanceCard() {
                     value={isMaterialYou}
                     onValueChange={setIsMaterialYou}
                 />
-            </View>
+            </View> */}
         </View>
     );
 }

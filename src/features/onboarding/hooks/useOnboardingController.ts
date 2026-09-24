@@ -1,7 +1,8 @@
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AppState } from "react-native";
 
 export function useOnboardingController() {
     const engine = useFocusEngine();
@@ -10,6 +11,18 @@ export function useOnboardingController() {
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSet, setSelectedSet] = useState<Set<string>>(new Set(engine.selectedApps));
+
+    useEffect(() => {
+        if (step === 3) {
+            engine.checkPermissions();
+            const subscription = AppState.addEventListener("change", (state) => {
+                if (state === "active") {
+                    engine.checkPermissions();
+                }
+            })
+            return () => subscription.remove();
+        }
+    }, [step])
 
     useEffect(() => {
         if (engine.selectedApps.length > 0 && selectedSet.size === 0) {

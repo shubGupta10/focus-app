@@ -1,7 +1,8 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { AppListItem } from "@/features/blocklist/components/AppListItem";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
-import { useTheme } from "@/contexts/ThemeContext";
+import { FlashList } from "@shopify/flash-list";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 
 interface OnboardingStep2AppsProps {
     searchQuery: string;
@@ -68,7 +69,7 @@ export function OnboardingStep2Apps({
                         <ActivityIndicator color={colors.accent} size="small" />
                     </View>
                 ) : (
-                    <FlatList
+                    <FlashList
                         data={filteredApps}
                         keyExtractor={(item) => item.packageName}
                         showsVerticalScrollIndicator={false}
