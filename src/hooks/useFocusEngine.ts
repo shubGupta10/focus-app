@@ -1,13 +1,12 @@
-import { getDurationSeconds } from "../utils/timeUtils";
+import { useAppStore } from '@/store/useAppStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
-import FocusBlocker, { AppInfo } from "../../modules/focus-blocker/src/FocusBlockerModule";
+import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 
 const engineListeners = new Set<() => void>();
-let isProcessingExpiredSession = false;
 
 export function notifyEngineListeners() {
     engineListeners.forEach((listener) => {
@@ -19,36 +18,29 @@ export function notifyEngineListeners() {
     });
 }
 
-export function useFocusEngine() {
+export function useFocusEngine(isRoot: boolean = false) {
     const db = useSQLiteContext();
 
-    const [installedApps, setInstalledApps] = useState<AppInfo[]>([]);
-    const [selectedApps, setSelectedApps] = useState<string[]>([]);
-    const [isSessionActive, setIsSessionActive] = useState(false);
-    const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-    const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
-    const [isStrictSession, setIsStrictSession] = useState<boolean>(false);
+    const installedApps = useAppStore(state => state.installedApps);
+    const selectedApps = useAppStore(state => state.selectedApps);
+    const isSessionActive = useAppStore(state => state.isSessionActive);
+    const sessionStartTime = useAppStore(state => state.sessionStartTime);
+    const sessionEndTime = useAppStore(state => state.sessionEndTime);
+    const isStrictSession = useAppStore(state => state.isStrictSession);
+    const hasUsage = useAppStore(state => state.hasUsage);
+    const hasOverlay = useAppStore(state => state.hasOverlay);
+    const hasBattery = useAppStore(state => state.hasBattery);
+    const setEngineState = useAppStore(state => state.setEngineState);
+    const setSessionState = useAppStore(state => state.setSessionState);
+    const clearSession = useAppStore(state => state.clearSession);
 
-    const [hasUsage, setHasUsage] = useState(false);
-    const [hasOverlay, setHasOverlay] = useState(false);
-    const [hasBattery, setHasBattery] = useState(false);
-
-    const isSessionActiveRef = useRef(isSessionActive);
-    const sessionStartTimeRef = useRef(sessionStartTime);
-    const sessionEndTimeRef = useRef(sessionEndTime);
-
-    useEffect(() => {
-        isSessionActiveRef.current = isSessionActive;
-        sessionStartTimeRef.current = sessionStartTime;
-        sessionEndTimeRef.current = sessionEndTime;
-    }, [isSessionActive, sessionStartTime, sessionEndTime]);
 
     const loadSelectedApps = async () => {
         try {
             const rows = await db.getAllAsync<{
                 package_name: string
             }>("SELECT package_name FROM selected_apps");
-            setSelectedApps(rows.map(row => row.package_name));
+            setEngineState({ selectedApps: rows.map(row => row.package_name) });
         } catch (error) {
             console.error("Error loading selected apps:", error);
         }
@@ -58,10 +50,7 @@ export function useFocusEngine() {
         try {
             await FocusBlocker.stopService();
             await AsyncStorage.removeItem('active_session');
-            setIsSessionActive(false);
-            setIsStrictSession(false);
-            setSessionStartTime(null);
-            setSessionEndTime(null);
+            clearSession();
             notifyEngineListeners();
         } catch (error: any) {
             alert("Error, stopping:" + error.message);
@@ -71,24 +60,27 @@ export function useFocusEngine() {
     const startSession = async (durationMinutes: number, isStrict: boolean) => {
         try {
             if (Platform.OS === "android" && Platform.Version >= 33) {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-                );
-                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                    alert("Notification permission is required to keep the Focus session running in the background.");
-                    return;
+                const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+                if (!hasPermission) {
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+                    );
+                    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                        alert("Notification permission is required to keep the Focus session running in the background.");
+                        return;
+                    }
                 }
             }
             const durationMs = durationMinutes > 0 ? durationMinutes * 60 * 1000 : -1;
 
-            const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
-            let appsToBlock = rows.map(r => r.package_name);
+            let appsToBlock = [...selectedApps];
+
             if (isStrict) {
                 const systemApps = [
                     "com.android.settings",
                     "com.android.vending",
                     "com.google.android.packageinstaller"
-                ];
+                ]
                 systemApps.forEach(app => {
                     if (!appsToBlock.includes(app)) {
                         appsToBlock.push(app);
@@ -107,11 +99,7 @@ export function useFocusEngine() {
                 isStrict: isStrict
             }));
 
-            setSessionStartTime(now);
-            setSessionEndTime(durationMs > 0 ? now + durationMs : -1);
-            setIsStrictSession(isStrict);
-            setIsSessionActive(true);
-            notifyEngineListeners();
+            setSessionState(true, now, endTime, isStrict);
         } catch (error: any) {
             alert("Error Starting:" + error.message);
         }
@@ -126,19 +114,17 @@ export function useFocusEngine() {
             }
 
             const now = Date.now();
+            const storeState = useAppStore.getState();
 
             if (nativeSession && nativeSession.isActive) {
                 if (nativeSession.endTime !== -1 && now >= nativeSession.endTime) {
                 }
 
-                if (isSessionActiveRef.current && sessionStartTimeRef.current === nativeSession.startTime && sessionEndTimeRef.current === nativeSession.endTime) {
+                if (storeState.isSessionActive && storeState.sessionStartTime === nativeSession.startTime && storeState.sessionEndTime === nativeSession.endTime) {
                     return;
                 }
 
-                setSessionStartTime(nativeSession.startTime);
-                setSessionEndTime(nativeSession.endTime);
-                setIsStrictSession(Boolean(nativeSession.isStrict));
-                setIsSessionActive(true);
+                setSessionState(true, nativeSession.startTime, nativeSession.endTime, Boolean(nativeSession.isStrict));
                 return;
             }
 
@@ -148,10 +134,10 @@ export function useFocusEngine() {
                     const parsed = JSON.parse(storedSession);
 
                     if (parsed.endTime !== -1 && now >= parsed.endTime) {
-                        setSessionStartTime(parsed.startTime);
-                        setSessionEndTime(parsed.endTime);
-                        setIsStrictSession(parsed.isStrict);
-                        setIsSessionActive(false);
+                        setSessionState(false,
+                            parsed.startTime, parsed.endTime,
+                            parsed.isStrict
+                        );
                         return;
                     } else {
                         let appsToBlock: string[] = [];
@@ -170,10 +156,7 @@ export function useFocusEngine() {
                         const remainingMs = parsed.endTime !== -1 ? parsed.endTime - now : -1;
                         await FocusBlocker.startService(appsToBlock, remainingMs, parsed.isStrict);
 
-                        setSessionStartTime(parsed.startTime);
-                        setSessionEndTime(parsed.endTime);
-                        setIsStrictSession(parsed.isStrict);
-                        setIsSessionActive(true);
+                        setSessionState(true, parsed.startTime, parsed.endTime, parsed.isStrict);
                         return;
                     }
                 }
@@ -181,10 +164,9 @@ export function useFocusEngine() {
                 console.error("Error handling AsyncStorage session fallback", error);
             }
 
-            setSessionStartTime(null);
-            setSessionEndTime(null);
-            setIsStrictSession(false);
-            setIsSessionActive(false);
+            if (storeState.isSessionActive) {
+                clearSession();
+            }
         } catch (error) {
             console.error("Error loading active session:", error);
         }
@@ -193,20 +175,27 @@ export function useFocusEngine() {
     const loadApps = async () => {
         try {
             const apps = await FocusBlocker.getInstalledApps();
-            setInstalledApps(apps.sort((a, b) => a.name.localeCompare(b.name)));
+            setEngineState({ installedApps: apps.sort((a, b) => a.name.localeCompare(b.name)) });
         } catch (error) {
             console.error(error);
         }
     };
 
     const checkPermissions = () => {
-        setHasUsage(FocusBlocker.hasUsagePermission());
-        setHasOverlay(FocusBlocker.hasOverlayPermission());
-        setHasBattery(FocusBlocker.hasBatteryPermission());
+        setEngineState({
+            hasUsage: FocusBlocker.hasUsagePermission(),
+            hasOverlay: FocusBlocker.hasOverlayPermission(),
+            hasBattery: FocusBlocker.hasBatteryPermission()
+        })
     };
 
     useEffect(() => {
-        loadApps();
+        if (!isRoot) return;
+
+        setTimeout(() => {
+            loadApps();
+        }, 500);
+
         checkPermissions();
         loadSelectedApps();
         checkActiveSession();
@@ -236,7 +225,7 @@ export function useFocusEngine() {
             clearInterval(syncInterval);
             engineListeners.delete(handleSync);
         };
-    }, []);
+    }, [isRoot]);
 
     const toggleApp = async (packageName: string) => {
         try {
@@ -244,12 +233,12 @@ export function useFocusEngine() {
                 await db.runAsync("DELETE FROM selected_apps WHERE package_name = $packageName", {
                     $packageName: packageName
                 });
-                setSelectedApps(prev => prev.filter(p => p !== packageName));
+                setEngineState({ selectedApps: selectedApps.filter(p => p !== packageName) });
             } else {
                 await db.runAsync("INSERT INTO selected_apps (package_name) VALUES ($packageName)", {
                     $packageName: packageName
                 });
-                setSelectedApps(prev => [...prev, packageName]);
+                setEngineState({ selectedApps: [...selectedApps, packageName] });
             }
             notifyEngineListeners();
         } catch (error) {

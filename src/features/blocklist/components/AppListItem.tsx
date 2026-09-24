@@ -1,8 +1,9 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { memo } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { AppInfo } from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 
 interface AppListItemProps {

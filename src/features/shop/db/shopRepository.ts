@@ -14,25 +14,23 @@ export async function getPurchasedItems(db: SQLiteDatabase): Promise<string[]> {
 
 export async function purchasedItem(db: SQLiteDatabase, itemId: string, cost: number): Promise<boolean> {
     try {
-        await db.execAsync("BEGIN TRANSACTION;");
+        await db.withTransactionAsync(async () => {
+            const updatedResult = await db.runAsync(
+                "UPDATE user_stats SET total_coins = total_coins - ? WHERE id = 1 AND total_coins >= ?",
+                [cost, cost]
+            );
+            if (updatedResult.changes === 0 && cost > 0) {
+                throw new Error("Not enough coins");
+            }
 
-        const updatedResult = await db.runAsync(
-            "UPDATE user_stats SET total_coins = total_coins - ? WHERE id = 1 AND total_coins >= ?",
-            [cost, cost]
-        );
-        if (updatedResult.changes === 0 && cost > 0) {
-            throw new Error("Not enough coins");
-        }
+            await db.runAsync(
+                "INSERT INTO shop_purchases (item_id, purchased_at) VALUES (?, ?)",
+                [itemId, Date.now()]
+            );
+        });
 
-        await db.runAsync(
-            "INSERT INTO shop_purchases (item_id, purchased_at) VALUES (?, ?)",
-            [itemId, Date.now()]
-        );
-
-        await db.execAsync("COMMIT;");
         return true;
     } catch (error) {
-        await db.execAsync("ROLLBACK;");
         console.error("Failed to purchase item", error);
         return false;
     }

@@ -1,6 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { AppListItem } from "./AppListItem";
 
 interface AppListProps {
@@ -60,12 +61,11 @@ export function AppList({
     }
 
     return (
-        <FlatList
+        <FlashList
             data={filteredApps}
             keyExtractor={(app) => app.packageName}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 130 }}
-            initialNumToRender={15}
             renderItem={({ item: app }) => (
                 <AppListItem
                     app={app}

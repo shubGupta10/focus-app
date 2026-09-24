@@ -116,6 +116,7 @@ class FocusService : Service() {
         Thread {
             val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as android.app.usage.UsageStatsManager
             var currentForegroundApp = ""
+            var lastForegroundApp = ""
 
             while (isRunning) {
                 if (endTime > 0 && System.currentTimeMillis() >= endTime) {
@@ -124,6 +125,7 @@ class FocusService : Service() {
                     stopSelf()
                     break
                 }
+
                 val nowTime = System.currentTimeMillis()
                 val startTime = nowTime - 10000
 
@@ -132,8 +134,17 @@ class FocusService : Service() {
 
                 while (usageEvents.hasNextEvent()) {
                     usageEvents.getNextEvent(event)
+
                     if (event.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                        if (currentForegroundApp != event.packageName) {
+                            lastForegroundApp = currentForegroundApp
+                        }
                         currentForegroundApp = event.packageName
+
+                    } else if (event.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                        if (event.packageName == currentForegroundApp) {
+                            currentForegroundApp = lastForegroundApp
+                        }
                     }
                 }
 
@@ -150,7 +161,7 @@ class FocusService : Service() {
                     hideBlockOverlay()
                 }
 
-                Thread.sleep(500)
+                Thread.sleep(200)
             }
         }.start()
     }

@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSettings } from "@/hooks/useSettings";
 import { useUserStats } from "@/hooks/useUserStats";
-import { getPurchasedItems, purchasedItem } from "@/store/shopRepository";
+import { getPurchasedItems, purchasedItem } from "@/features/shop/db/shopRepository";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";

@@ -1,4 +1,5 @@
-import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine } from "@/store/routineRepository";
+import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine } from "@/features/routines/db/routineRepository";
+import { useAppStore } from "@/store/useAppStore";
 import { Routine, RoutineInput } from "@/types/routine";
 import { calculateNextTrigger, getRoutineDurationMinutes } from "@/utils/routineScheduler";
 import { useSQLiteContext } from "expo-sqlite";
@@ -16,12 +17,8 @@ export function useRoutine() {
             const trigger = calculateNextTrigger(routine);
             if (trigger) {
                 const durationMinutes = getRoutineDurationMinutes(routine.start_time, routine.end_time);
-                let apps: string[] = [];
-                try {
-                    const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
-                    apps = rows.map(r => r.package_name);
-                } catch (e) {
-                }
+
+                const apps = useAppStore.getState().selectedApps;
                 FocusBlocker.scheduleRoutineAlarm(
                     routine.id,
                     trigger,

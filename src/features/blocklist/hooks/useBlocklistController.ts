@@ -1,6 +1,5 @@
 import { useToast } from "@/contexts/ToastContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Vibration } from "react-native";
 
@@ -9,14 +8,6 @@ export function useBlocklistController() {
     const { showToast } = useToast();
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"all" | "guarded">("all");
-
-    useFocusEffect(
-        useCallback(() => {
-            if (engine.refreshSessionState) {
-                engine.refreshSessionState();
-            }
-        }, [engine])
-    );
 
     const filteredApps = engine.installedApps.filter((app) => {
         const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());

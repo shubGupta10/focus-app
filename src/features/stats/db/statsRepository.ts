@@ -1,5 +1,5 @@
 import { SQLiteDatabase } from "expo-sqlite";
-import { getTodayDateString } from "../utils/timeUtils";
+import { getTodayDateString } from "../../../utils/timeUtils";
 
 export type UserStats = {
     total_coins: number;
@@ -46,59 +46,68 @@ export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
 }
 
 export async function recordSession(db: SQLiteDatabase, durationSeconds: number, isStrict: boolean = false): Promise<{ earnedCoins: number, newStreak: number }> {
-    const baseCoins = Math.floor(durationSeconds / 60);
-    const earnedCoins = isStrict ? Math.floor(baseCoins * 1.5) : baseCoins;
+    let finalEarnedCoins = 0;
+    let finalNewStreak = 0;
 
-    const now = new Date();
-    const today = getTodayDateString();
+    await db.withTransactionAsync(async () => {
 
-    const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const yesterday = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+        const baseCoins = Math.floor(durationSeconds / 60);
+        const earnedCoins = isStrict ? Math.floor(baseCoins * 1.5) : baseCoins;
 
-    const currentStats = await getUserStats(db);
-    let newStreak = currentStats.current_streak;
+        const now = new Date();
+        const today = getTodayDateString();
 
-    if (currentStats.last_active_date === today) {
-        newStreak = currentStats.current_streak;
-    } else if (currentStats.last_active_date === yesterday) {
-        newStreak += 1;
-    } else {
-        newStreak = 1;
-    }
+        const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yesterday = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
 
-    const newLongestStreak = Math.max(currentStats.longest_streak, newStreak);
+        const currentStats = await getUserStats(db);
+        let newStreak = currentStats.current_streak;
 
-    await db.runAsync(
-        `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, is_strict, session_date)
+        if (currentStats.last_active_date === today) {
+            newStreak = currentStats.current_streak;
+        } else if (currentStats.last_active_date === yesterday) {
+            newStreak += 1;
+        } else {
+            newStreak = 1;
+        }
+
+        const newLongestStreak = Math.max(currentStats.longest_streak, newStreak);
+
+        await db.runAsync(
+            `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, is_strict, session_date)
         VALUES(?, ?, ?, ?, ?, ?, ?)`,
-        [
-            Date.now() - durationSeconds * 1000,
-            Date.now(),
-            durationSeconds,
-            1,
-            earnedCoins,
-            isStrict ? 1 : 0,
-            today,
-        ]
-    );
+            [
+                Date.now() - durationSeconds * 1000,
+                Date.now(),
+                durationSeconds,
+                1,
+                earnedCoins,
+                isStrict ? 1 : 0,
+                today,
+            ]
+        );
 
-    const newTotalCoins = currentStats.total_coins + earnedCoins;
-    const newTotalFocus = currentStats.total_focus_seconds + durationSeconds;
+        const newTotalCoins = currentStats.total_coins + earnedCoins;
+        const newTotalFocus = currentStats.total_focus_seconds + durationSeconds;
 
-    await db.runAsync(
-        `UPDATE user_stats SET 
+        await db.runAsync(
+            `UPDATE user_stats SET 
             total_coins = ?, 
             current_streak = ?, 
             longest_streak = ?, 
             last_active_date = ?, 
             total_focus_seconds = ? 
         WHERE id = 1`,
-        [newTotalCoins, newStreak, newLongestStreak, today, newTotalFocus]
-    );
+            [newTotalCoins, newStreak, newLongestStreak, today, newTotalFocus]
+        );
+
+        finalEarnedCoins = earnedCoins;
+        finalNewStreak = newStreak;
+    });
 
     return {
-        earnedCoins,
-        newStreak
+        earnedCoins: finalEarnedCoins,
+        newStreak: finalNewStreak,
     }
 }
 

@@ -1,7 +1,7 @@
+import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
-import { useFocusEffect } from "expo-router";
-import { BlockedAttemptItem, getRecentBlockedAttempts } from "../store/statsRepository";
+import { BlockedAttemptItem, getRecentBlockedAttempts } from "../features/stats/db/statsRepository";
 
 export interface DailyAnalytics {
     dayOfWeek: string;

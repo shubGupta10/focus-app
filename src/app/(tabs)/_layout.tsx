@@ -39,11 +39,9 @@ function TabIcon({
 }
 
 export default function TabLayout() {
-    const engine = useFocusEngine();
+    const engine = useFocusEngine(true);
     const { colors, isDarkMode } = useTheme();
     const insets = useSafeAreaInsets();
-
-    const bottomPadding = insets.bottom > 0 ? insets.bottom : 8;
 
     return (
         <Tabs
