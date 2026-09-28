@@ -148,6 +148,14 @@ class FocusBlockerModule : Module() {
             return@Function null
         }
 
+        Function("updateGlobalBlocklist") { apps: List<String> ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                prefs.edit().putString("customBlockedApps", apps.joinToString(",")).apply()
+            }
+        }
+
         AsyncFunction("getInstalledApps") { promise: expo.modules.kotlin.Promise ->
             val context = appContext.reactContext
             if (context != null) {
@@ -290,6 +298,46 @@ class FocusBlockerModule : Module() {
                 }
                 dialog.show()
             }
+        }
+
+        AsyncFunction("getPendingCompletedSession") { promise: expo.modules.kotlin.Promise ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                val duration = prefs.getLong("completed_duration", -1L)
+                if (duration != -1L) {
+                    val isStrict = prefs.getBoolean("completed_isStrict", false)
+                    val endTime = prefs.getLong("completed_endTime", -1L)
+                    promise.resolve(mapOf("durationSeconds" to duration.toDouble(), "isStrict" to isStrict, "endTime" to endTime.toDouble()))
+                    return@AsyncFunction
+                }
+            }
+            promise.resolve(null)
+        }
+
+        AsyncFunction("clearCompletedSession") { promise: expo.modules.kotlin.Promise ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime").apply()
+            }
+            promise.resolve(null)
+        }
+
+        AsyncFunction("claimCompletedSession") { promise: expo.modules.kotlin.Promise ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                val duration = prefs.getLong("completed_duration", -1L)
+                if (duration != -1L) {
+                    val isStrict = prefs.getBoolean("completed_isStrict", false)
+                    val endTime = prefs.getLong("completed_endTime", -1L)
+                    prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime").apply()
+                    promise.resolve(mapOf("durationSeconds" to duration.toDouble(), "isStrict" to isStrict, "endTime" to endTime.toDouble()))
+                    return@AsyncFunction
+                }
+            }
+            promise.resolve(null)
         }
 
     }

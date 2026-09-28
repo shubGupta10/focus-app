@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, Vibration, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Material3Switch } from "../../../../components/Material3Switch";
 import { useTheme } from "../../../../contexts/ThemeContext";
 
@@ -22,6 +23,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
     const { getSetting } = useSettings();
     const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
     const [isStrict, setIsStrict] = useState<boolean>(false);
+    const insets = useSafeAreaInsets();
 
 
     useEffect(() => {
@@ -51,7 +53,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surfaceElevated rounded-t-3xl p-6">
+                <View className="bg-surfaceElevated rounded-t-3xl p-6" style={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}>
                     <View className="flex-row justify-between items-center mb-6">
                         <Text className="text-text text-xl font-black tracking-tight">New Focus Session</Text>
 

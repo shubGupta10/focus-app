@@ -5,11 +5,11 @@ import { useUserStats } from "@/hooks/useUserStats";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, AppState } from "react-native";
+import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 import { getDurationSeconds } from "../../../utils/timeUtils";
 
 export function useSessionController() {
-    ``
     const engine = useFocusEngine();
     const { savedCompletedSession, todayStats, refreshStats } = useUserStats();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
@@ -26,6 +26,7 @@ export function useSessionController() {
     } | null>(null);
 
     const isSavingSession = useRef(false);
+    const lastProcessedEndTime = useRef<number | null>(null);
 
     const playCompletionFeedback = async (isSuccess: boolean) => {
         try {
@@ -46,14 +47,46 @@ export function useSessionController() {
     const handleCompleteSession = async () => {
         if (isSavingSession.current) return;
         isSavingSession.current = true;
-        try {
-            if (engine.sessionStartTime) {
-                const durationSeconds = engine.sessionEndTime && engine.sessionEndTime > 0
-                    ? getDurationSeconds(engine.sessionStartTime, Math.min(Date.now(), engine.sessionEndTime))
-                    : getDurationSeconds(engine.sessionStartTime, Date.now());
 
-                const wasStrict = engine.isStrictSession;
-                const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict);
+        try {
+            const completed = await FocusBlocker.getPendingCompletedSession();
+
+            let durationSeconds = 0;
+            let wasStrict = false;
+            let endTimeMs: number | undefined = undefined;
+
+            if (completed && completed.durationSeconds > 0) {
+                durationSeconds = completed.durationSeconds;
+                wasStrict = completed.isStrict;
+                endTimeMs = completed.endTime;
+            } else if (
+                engine.sessionStartTime &&
+                engine.sessionEndTime &&
+                engine.sessionEndTime > 0 &&
+                Date.now() >= engine.sessionEndTime
+            ) {
+                durationSeconds = getDurationSeconds(engine.sessionStartTime, engine.sessionEndTime);
+                wasStrict = engine.isStrictSession;
+                endTimeMs = engine.sessionEndTime;
+            }
+
+            if (durationSeconds > 0) {
+                if (endTimeMs && lastProcessedEndTime.current === endTimeMs) {
+                    await engine.stopSession();
+                    return;
+                }
+                if (endTimeMs) {
+                    lastProcessedEndTime.current = endTimeMs;
+                }
+
+                const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict, endTimeMs);
+
+                try {
+                    await FocusBlocker.clearCompletedSession();
+                } catch (e) {
+                    console.error("Failed to clear native bookmark", e);
+                }
+
                 setSessionResult({
                     type: "completed",
                     coins: earnedCoins,
@@ -61,12 +94,30 @@ export function useSessionController() {
                     isStrict: wasStrict,
                 });
                 playCompletionFeedback(true);
+
+                await engine.stopSession();
             }
-            await engine.stopSession();
+        } catch (error) {
+            console.error("Failed to complete session", error);
         } finally {
             isSavingSession.current = false;
         }
     };
+
+    const handleCompleteRef = useRef(handleCompleteSession);
+    handleCompleteRef.current = handleCompleteSession;
+
+    useEffect(() => {
+        handleCompleteRef.current();
+
+        const subscription = AppState.addEventListener("change", (nextAppState) => {
+            if (nextAppState === "active") {
+                handleCompleteRef.current();
+            }
+        });
+
+        return () => subscription.remove();
+    }, []);
 
     useEffect(() => {
         if (!engine.isSessionActive && engine.sessionStartTime && engine.sessionEndTime && Date.now() >= engine.sessionEndTime) {

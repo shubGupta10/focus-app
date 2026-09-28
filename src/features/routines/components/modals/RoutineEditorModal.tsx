@@ -1,6 +1,4 @@
 import { Material3Switch } from "@/components/Material3Switch";
-import { RoutineDaySelector } from "../RoutineDaySelector";
-import { RoutineTimePickerCard } from "../RoutineTimePickerCard";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Routine, RoutineInput } from "@/types/routine";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FocusBlocker from "../../../../../modules/focus-blocker/src/FocusBlockerModule";
+import { RoutineDaySelector } from "../RoutineDaySelector";
+import { RoutineTimePickerCard } from "../RoutineTimePickerCard";
+import { RoutineAppSelectionModal } from "./RoutineAppSelectionModal";
 
 interface RoutineEditorModalProps {
     visible: boolean;
@@ -41,6 +42,8 @@ export function RoutineEditorModal({
     const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set([1, 2, 3, 4, 5]));
     const [isStrict, setIsStrict] = useState(false);
     const [errorText, setErrorText] = useState("");
+    const [selectedApps, setSelectedApps] = useState<string[]>([]);
+    const [isAppSelectionVisible, setIsAppSelectionVisible] = useState(false);
 
     useEffect(() => {
         if (routineToEdit) {
@@ -53,6 +56,7 @@ export function RoutineEditorModal({
             setEndMinute(eM || "00");
             setSelectedDays(new Set(routineToEdit.days_of_week.split(",").map(Number)));
             setIsStrict(Boolean(routineToEdit.is_strict));
+            setSelectedApps(routineToEdit.blocked_apps ? routineToEdit.blocked_apps.split(",") : []);
         } else {
             setName("");
             setStartHour("09");
@@ -61,6 +65,7 @@ export function RoutineEditorModal({
             setEndMinute("00");
             setSelectedDays(new Set([1, 2, 3, 4, 5]));
             setIsStrict(false);
+            setSelectedApps([]);
         }
         setErrorText("");
     }, [routineToEdit, visible]);
@@ -125,7 +130,8 @@ export function RoutineEditorModal({
             start_time: startTime,
             end_time: endTime,
             days_of_week: daysOfWeek,
-            is_strict: isStrict
+            is_strict: isStrict,
+            blocked_apps: selectedApps.join(","),
         });
 
         onClose();
@@ -226,8 +232,40 @@ export function RoutineEditorModal({
                         </View>
                         <Material3Switch value={isStrict} onValueChange={setIsStrict} />
                     </View>
+
+                    <Pressable
+                        onPress={() => setIsAppSelectionVisible(true)}
+                        className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center justify-between mb-3 active:opacity-75"
+                    >
+                        <View className="flex-row items-center flex-1">
+                            <View className="w-10 h-10 rounded-full bg-accent/20 items-center justify-center mr-3">
+                                <Ionicons name="apps" size={20} color={colors.accent} />
+                            </View>
+
+                            <View>
+                                <Text className="text-text font-bold text-base mb-0.5">
+                                    Apps to Block
+                                </Text>
+                                <Text className="text-textSecondary text-xs">
+                                    {selectedApps.length > 0 ?
+                                        `${selectedApps.length} Custom Apps Selected` : "Using Global Blocklist"
+                                    }
+                                </Text>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                    </Pressable>
                 </ScrollView>
             </SafeAreaView>
+            <RoutineAppSelectionModal
+                visible={isAppSelectionVisible}
+                initialSelectedApps={selectedApps}
+                onClose={() => setIsAppSelectionVisible(false)}
+                onSave={(apps) => {
+                    setSelectedApps(apps);
+                    setIsAppSelectionVisible(false)
+                }}
+            />
         </Modal>
     );
 }

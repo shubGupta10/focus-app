@@ -21,9 +21,9 @@ export function useUserStats() {
         }, [refreshStats, db])
     );
 
-    const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false) => {
+    const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false, endTimeMs?: number) => {
         try {
-            const { earnedCoins, newStreak } = await recordSession(db, durationSeconds, isStrict);
+            const { earnedCoins, newStreak } = await recordSession(db, durationSeconds, isStrict, endTimeMs);
             updateStatsLocally(earnedCoins, durationSeconds, newStreak);
             refreshStats(db);
             return { earnedCoins, newStreak };

@@ -8,6 +8,7 @@ export interface Routine {
     days_of_week: string;
     is_enabled: number;
     is_strict: number;
+    blocked_apps: string;
     created_at: string;
 }
 
@@ -17,4 +18,5 @@ export interface RoutineInput {
     end_time: string;
     days_of_week: string;
     is_strict?: boolean;
+    blocked_apps?: string;
 }

@@ -1,6 +1,6 @@
 import { useUserStats } from "@/hooks/useUserStats";
-import { secondsToHoursAndMinutes } from "../../../../utils/timeUtils";
 import { Text, View } from "react-native";
+import { secondsToHoursAndMinutes } from "../../../../utils/timeUtils";
 
 export function AllTimeStatsCard() {
     const { stats, totalSessionsCount } = useUserStats();
@@ -8,7 +8,7 @@ export function AllTimeStatsCard() {
 
     return (
         <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
-            <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-6">
+            <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-6">
                 All-Time Stats
             </Text>
 

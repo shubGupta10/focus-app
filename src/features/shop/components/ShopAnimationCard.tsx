@@ -9,10 +9,11 @@ interface ShopAnimationCardProps {
     isEquipped: boolean;
     isProcessing: boolean;
     isActive?: boolean;
+    fullWidth?: boolean;
     onAction: () => void;
 }
 
-export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isActive = true, onAction }: ShopAnimationCardProps) {
+export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isActive = true, fullWidth = false, onAction }: ShopAnimationCardProps) {
     const { colors } = useTheme();
 
     const previewProps = {
@@ -28,7 +29,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
 
     return (
         <View
-            className="w-[300px] bg-surface rounded-[32px] overflow-hidden"
+            className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surface rounded-[32px] overflow-hidden`}
             style={{ shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 }}
         >
             <View className="w-full aspect-square bg-background items-center justify-center overflow-hidden">

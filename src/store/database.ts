@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 7;
+    const DATABASE_VERSION = 8;
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
@@ -50,6 +50,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
           days_of_week TEXT NOT NULL,
           is_enabled INTEGER NOT NULL DEFAULT 1,
           is_strict INTEGER NOT NULL DEFAULT 0,
+          blocked_apps TEXT NOT NULL DEFAULT '',
           created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
         );
 
@@ -111,4 +112,11 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         }
         await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     }
+    try {
+        await db.execAsync("ALTER TABLE routines ADD COLUMN blocked_apps TEXT NOT NULL DEFAULT '';");
+    } catch (error) {
+        // Column likely already exists
+    }
+
+    await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }

@@ -18,6 +18,12 @@ export type ActiveSessionInfo = {
   isStrict: boolean;
 } | null;
 
+export type CompletedSessionInfo = {
+  durationSeconds: number;
+  isStrict: boolean;
+  endTime: number;
+} | null;
+
 export declare class FocusBlockerModule {
   hasUsagePermission(): boolean;
   requestUsagePermission(): void;
@@ -29,9 +35,13 @@ export declare class FocusBlockerModule {
   startService(customBlockedApps: string[], durationMs: number, isStrict?: boolean): Promise<string>;
   stopService(): Promise<string>;
   getActiveSession(): ActiveSessionInfo;
+  getPendingCompletedSession(): Promise<CompletedSessionInfo>;
+  clearCompletedSession(): Promise<void>;
+  claimCompletedSession(): Promise<CompletedSessionInfo>;
   goHome(): void;
 
   getInstalledApps(): Promise<AppInfo[]>;
+  updateGlobalBlocklist(apps: string[]): void;
   scheduleRoutineAlarm(
     routineId: number,
     triggerAtMillis: number,

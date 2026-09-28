@@ -109,10 +109,17 @@
 - [x] Fix stale closure bug in `useFocusEngine.ts` preventing immediate routine tracking updates.
 - [x] Resolve Android resource linking issues in `AndroidManifest.xml`.
 - [x] Refine Progress screen UI: perfect mathematical centering for split statistics and unified formatting for All-Time Stats.
+- [x] **Race Condition Fix**: Architected an intelligent hand-shake polling loop in `useSessionController.ts` to claim and delete native bookmarks, eliminating double-logging bugs when swiping away the app.
+- [x] **Overlay Anti-Trap**: Upgraded `FocusService.kt` buttons with an explicit 2.5s `ignoreBlockingUntil` grace period and `PendingIntent` to bypass Android 14 restrictions and ensure immediate escape.
+- [x] **System Navigation Insets**: Wrapped `TimerSelectionModal.tsx` content in `useSafeAreaInsets` to flawlessly respect 3-button Android bottom navigation bars.
+- [x] **Notification Experience**: Attached `PendingIntent` to session completion notifications for instant deep-linking, and explicitly tinted padlock icons for perfect Dark Mode visibility.
+- [x] **Progressive Disclosure UX**: Embedded contextual "How Coins Work" tutorials inside the empty Progress state and post-session Success modals to organically teach the economy without annoying popups.
+- [x] **Zombie Blocker Loop Fix**: Replaced the leaking, accumulating `activeApps` Set in `FocusService.kt` with real-time foreground package resolution, instant state release on Return to Home / Open Lockout, and screen interactivity / lock-screen guards to completely prevent the blocker overlay from repeatedly reopening on Home.
 
 ## Phase 17: Advanced Analytics & Deep Insights
-- [ ] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
-- [ ] Build rich data visualizations on the Progress tab (weekly/monthly trend charts, daily focus breakdowns).
+- [x] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
+- [x] Build rich data visualizations on the Progress tab (weekly/monthly trend charts, daily focus breakdowns).
+- [x] Complete Progress UI Overhaul: Clean, flat hero design for today's stats, unified typography hierarchy (font-black text-3xl across all tabs, font-medium for section headers), and a dedicated Day Details drill-down.
 - [ ] Distraction metrics: track which apps were blocked most frequently and total bypass attempts thwarted.
 - [ ] Milestone summaries: average session duration, most productive hours, and streak health.
 

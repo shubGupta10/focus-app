@@ -59,6 +59,13 @@ export default function Layout() {
                 animation: "default"
               }}
             />
+
+            <Stack.Screen
+              name="day-details"
+              options={{
+                animation: "default"
+              }}
+            />
           </Stack>
         </ToastProvider>
       </ThemeProvider>

@@ -30,6 +30,15 @@ export interface BlockedAttemptItem {
     timestamp: number;
 }
 
+export interface DayBlockedApp {
+    package_name: string;
+    count: number;
+}
+export interface DayDetailsResult {
+    sessions: SessionHistoryItem[];
+    blockedApps: DayBlockedApp[];
+}
+
 export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
     const stats = await db.getFirstAsync<UserStats>("SELECT * FROM user_stats WHERE id = 1");
 
@@ -45,7 +54,7 @@ export async function getUserStats(db: SQLiteDatabase): Promise<UserStats> {
     return stats
 }
 
-export async function recordSession(db: SQLiteDatabase, durationSeconds: number, isStrict: boolean = false): Promise<{ earnedCoins: number, newStreak: number }> {
+export async function recordSession(db: SQLiteDatabase, durationSeconds: number, isStrict: boolean = false, endTimeMs?: number): Promise<{ earnedCoins: number, newStreak: number }> {
     let finalEarnedCoins = 0;
     let finalNewStreak = 0;
 
@@ -54,18 +63,21 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number,
         const baseCoins = Math.floor(durationSeconds / 60);
         const earnedCoins = isStrict ? Math.floor(baseCoins * 1.5) : baseCoins;
 
-        const now = new Date();
-        const today = getTodayDateString();
+        const finalEndTime = (endTimeMs && endTimeMs > 0) ? endTimeMs : Date.now();
+        const finalStartTime = finalEndTime - (durationSeconds * 1000);
 
-        const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        const yesterday = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+        const sessionDateObj = new Date(finalEndTime);
+        const sessionDateString = new Date(sessionDateObj.getTime() - sessionDateObj.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+        const yesterdayDate = new Date(sessionDateObj.getTime() - 24 * 60 * 60 * 1000);
+        const yesterdayString = new Date(yesterdayDate.getTime() - yesterdayDate.getTimezoneOffset() * 60000).toISOString().split("T")[0];
 
         const currentStats = await getUserStats(db);
         let newStreak = currentStats.current_streak;
 
-        if (currentStats.last_active_date === today) {
+        if (currentStats.last_active_date === sessionDateString) {
             newStreak = currentStats.current_streak;
-        } else if (currentStats.last_active_date === yesterday) {
+        } else if (currentStats.last_active_date === yesterdayString) {
             newStreak += 1;
         } else {
             newStreak = 1;
@@ -77,13 +89,13 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number,
             `INSERT INTO sessions (start_time, end_time, duration_seconds, is_completed, coins_earned, is_strict, session_date)
         VALUES(?, ?, ?, ?, ?, ?, ?)`,
             [
-                Date.now() - durationSeconds * 1000,
-                Date.now(),
+                finalStartTime,
+                finalEndTime,
                 durationSeconds,
                 1,
                 earnedCoins,
                 isStrict ? 1 : 0,
-                today,
+                sessionDateString,
             ]
         );
 
@@ -98,7 +110,7 @@ export async function recordSession(db: SQLiteDatabase, durationSeconds: number,
             last_active_date = ?, 
             total_focus_seconds = ? 
         WHERE id = 1`,
-            [newTotalCoins, newStreak, newLongestStreak, today, newTotalFocus]
+            [newTotalCoins, newStreak, newLongestStreak, sessionDateString, newTotalFocus]
         );
 
         finalEarnedCoins = earnedCoins;
@@ -173,4 +185,34 @@ export async function getTodaySessionList(db: SQLiteDatabase): Promise<SessionHi
         [today]
     );
     return result || [];
+}
+
+export async function getDayDetails(db: SQLiteDatabase, dateStr: string): Promise<DayDetailsResult> {
+    const sessions = await db.getAllAsync<SessionHistoryItem>(
+        `SELECT id, start_time, duration_seconds, coins_earned, is_strict, session_date
+        FROM sessions
+        WHERE session_date = ? AND is_completed = 1
+        ORDER BY start_time ASC
+        `,
+        [dateStr]
+    );
+
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0).getTime();
+    const endOfDay = startOfDay + 86400000 - 1;
+
+    const blockedApps = await db.getAllAsync<DayBlockedApp>(
+        `SELECT package_name, COUNT(id) as count 
+        FROM blocked_attempts
+        WHERE timestamp >= ? AND timestamp <= ?
+        GROUP BY package_name
+        ORDER BY count DESC
+        LIMIT 4`,
+        [startOfDay, endOfDay]
+    );
+
+    return {
+        sessions: sessions || [],
+        blockedApps: blockedApps || [],
+    }
 }

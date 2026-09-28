@@ -1,4 +1,4 @@
-import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine } from "@/features/routines/db/routineRepository";
+import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine, getGlobalSelectedApps } from "@/features/routines/db/routineRepository";
 import { useAppStore } from "@/store/useAppStore";
 import { Routine, RoutineInput } from "@/types/routine";
 import { calculateNextTrigger, getRoutineDurationMinutes } from "@/utils/routineScheduler";
@@ -18,7 +18,10 @@ export function useRoutine() {
             if (trigger) {
                 const durationMinutes = getRoutineDurationMinutes(routine.start_time, routine.end_time);
 
-                const apps = useAppStore.getState().selectedApps;
+                const apps = routine.blocked_apps && routine.blocked_apps.trim().length > 0 
+                    ? routine.blocked_apps.split(",")
+                    : await getGlobalSelectedApps(db);
+
                 FocusBlocker.scheduleRoutineAlarm(
                     routine.id,
                     trigger,
@@ -59,6 +62,7 @@ export function useRoutine() {
             days_of_week: input.days_of_week,
             is_enabled: 1,
             is_strict: input.is_strict ? 1 : 0,
+            blocked_apps: input.blocked_apps || "",
             created_at: new Date().toISOString()
         }
         await syncAlarmForRoutine(newRoutine);
@@ -77,6 +81,7 @@ export function useRoutine() {
             days_of_week: input.days_of_week,
             is_enabled: 1,
             is_strict: input.is_strict ? 1 : 0,
+            blocked_apps: input.blocked_apps || "",
             created_at: ""
         };
         FocusBlocker.cancelRoutineAlarm(id);

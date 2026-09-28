@@ -40,7 +40,9 @@ export function useFocusEngine(isRoot: boolean = false) {
             const rows = await db.getAllAsync<{
                 package_name: string
             }>("SELECT package_name FROM selected_apps");
-            setEngineState({ selectedApps: rows.map(row => row.package_name) });
+            const apps = rows.map(row => row.package_name);
+            setEngineState({ selectedApps: apps });
+            FocusBlocker.updateGlobalBlocklist(apps);
         } catch (error) {
             console.error("Error loading selected apps:", error);
         }
@@ -233,12 +235,16 @@ export function useFocusEngine(isRoot: boolean = false) {
                 await db.runAsync("DELETE FROM selected_apps WHERE package_name = $packageName", {
                     $packageName: packageName
                 });
-                setEngineState({ selectedApps: selectedApps.filter(p => p !== packageName) });
+                const newApps = selectedApps.filter(p => p !== packageName);
+                setEngineState({ selectedApps: newApps });
+                FocusBlocker.updateGlobalBlocklist(newApps);
             } else {
                 await db.runAsync("INSERT INTO selected_apps (package_name) VALUES ($packageName)", {
                     $packageName: packageName
                 });
-                setEngineState({ selectedApps: [...selectedApps, packageName] });
+                const newApps = [...selectedApps, packageName];
+                setEngineState({ selectedApps: newApps });
+                FocusBlocker.updateGlobalBlocklist(newApps);
             }
             notifyEngineListeners();
         } catch (error) {

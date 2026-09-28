@@ -101,10 +101,10 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 </View>
 
                 <Text className="text-text text-4xl font-black tracking-tight text-center mb-1">
-                    {isStrict ? "Strict Lockout" : "Deep Focus"}
+                    {isStrict ? "Locked In" : "Focus Session"}
                 </Text>
                 <Text className="text-textSecondary text-sm font-bold tracking-widest uppercase text-center">
-                    {isInfinite ? "Infinite Mode" : "Session in Progress"}
+                    {isInfinite ? "Open-ended" : "Stay on track"}
                 </Text>
             </View>
 

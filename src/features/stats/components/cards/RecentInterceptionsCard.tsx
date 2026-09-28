@@ -1,9 +1,9 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { useTheme } from "@/contexts/ThemeContext";
-import { formatTimeAgo } from "../../../../utils/timeUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
+import { formatTimeAgo } from "../../../../utils/timeUtils";
 
 export function RecentInterceptionsCard() {
     const { recentBlockedAttempts } = useAnalytics();
@@ -17,7 +17,7 @@ export function RecentInterceptionsCard() {
 
     return (
         <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
-            <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-6">
+            <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-6">
                 Recent Interceptions
             </Text>
 
@@ -36,7 +36,7 @@ export function RecentInterceptionsCard() {
                                         <Ionicons name="shield-checkmark" size={18} color={colors.accent} />
                                     </View>
                                     <View className="flex-1">
-                                        <Text className="text-text font-bold text-base tracking-tight" numberOfLines={1}>
+                                        <Text className="text-text font-medium text-base tracking-tight" numberOfLines={1}>
                                             {appName}
                                         </Text>
                                         <Text className="text-textSecondary text-xs font-medium mt-0.5">

@@ -37,7 +37,9 @@ class RoutineReceiver : BroadcastReceiver() {
 
         try {
             val serviceIntent = Intent(context, FocusService::class.java).apply {
-                putStringArrayListExtra("customBlockedApps", blockedApps)
+                if (blockedApps.isNotEmpty()) {
+                    putStringArrayListExtra("customBlockedApps", blockedApps)
+                }
                 putExtra("durationMs", durationMs)
                 putExtra("isStrict", isStrict)
             }

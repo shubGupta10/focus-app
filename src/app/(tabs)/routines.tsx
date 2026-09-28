@@ -49,7 +49,7 @@ export default function RoutinesTab() {
                 <View className="px-6 mb-4 mt-2">
                     <View className="bg-warningMuted border border-warning rounded-2xl p-4 flex-row items-center">
                         <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 12 }} />
-                        <Text className="text-warning font-bold text-sm flex-1">
+                        <Text className="text-warning font-medium text-sm flex-1">
                             {engine.isStrictSession ? "Routines are locked during a strict session" : "End your current session to modify routines"}
                         </Text>
                     </View>

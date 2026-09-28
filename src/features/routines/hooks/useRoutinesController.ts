@@ -40,6 +40,7 @@ export function useRoutinesController() {
                 days_of_week: template.days_of_week,
                 is_enabled: 1,
                 is_strict: template.is_strict ? 1 : 0,
+                blocked_apps: "",
                 created_at: ""
             });
         } else {

@@ -28,13 +28,14 @@ export async function getRoutineById(db: SQLiteDatabase, id: number): Promise<Ro
 
 export async function createRoutine(db: SQLiteDatabase, input: RoutineInput): Promise<number> {
     const result = await db.runAsync(
-        `INSERT INTO routines (name, start_time, end_time, days_of_week, is_enabled, is_strict) VALUES (?, ?, ?, ?, 1, ?)`,
+        `INSERT INTO routines (name, start_time, end_time, days_of_week, is_enabled, is_strict, blocked_apps) VALUES (?, ?, ?, ?, 1, ?, ?)`,
         [
             input.name.trim(),
             input.start_time,
             input.end_time,
             input.days_of_week,
-            input.is_strict ? 1 : 0
+            input.is_strict ? 1 : 0,
+            input.blocked_apps || "",
         ]
     );
     return result.lastInsertRowId;
@@ -46,13 +47,14 @@ export async function updateRoutine(
     input: RoutineInput
 ): Promise<void> {
     await db.runAsync(
-        `UPDATE routines SET name = ?, start_time = ?, end_time = ?, days_of_week = ?, is_strict = ? WHERE id = ?`,
+        `UPDATE routines SET name = ?, start_time = ?, end_time = ?, days_of_week = ?, is_strict = ?, blocked_apps = ? WHERE id = ?`,
         [
             input.name.trim(),
             input.start_time,
             input.end_time,
             input.days_of_week,
             input.is_strict ? 1 : 0,
+            input.blocked_apps || "",
             id
         ]
     );
@@ -71,4 +73,13 @@ export async function toggleRoutine(
 
 export async function deleteRoutine(db: SQLiteDatabase, id: number): Promise<void> {
     await db.runAsync("DELETE FROM routines WHERE id = ?", [id]);
+}
+
+export async function getGlobalSelectedApps(db: SQLiteDatabase): Promise<string[]> {
+    try {
+        const rows = await db.getAllAsync<{package_name: string}>("SELECT package_name FROM selected_apps");
+        return rows.map(r => r.package_name);
+    } catch {
+        return [];
+    }
 }

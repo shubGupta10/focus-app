@@ -123,8 +123,11 @@ export default function ShopScreen() {
                     </View>
 
                     <View className="mb-4">
-                        <View className="px-6 mb-4">
+                        <View className="px-6 mb-4 flex-row items-center justify-between">
                             <Text className="text-text font-bold text-lg tracking-tight">Animation Style</Text>
+                            <Pressable onPress={() => router.push("/shop-animations")} className="active:opacity-70">
+                                <Text className="text-accent font-medium">View All</Text>
+                            </Pressable>
                         </View>
 
                         {!isReady ? (
@@ -136,7 +139,7 @@ export default function ShopScreen() {
                                 horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ paddingHorizontal: 24 }}
-                            data={animations}
+                            data={animations.slice(0, 5)}
                             keyExtractor={item => item.id}
                             ItemSeparatorComponent={() => <View className="w-6" />}
                             snapToInterval={324}

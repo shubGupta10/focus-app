@@ -1,53 +1,88 @@
 import { useUserStats } from "@/hooks/useUserStats";
-import { secondsToHoursAndMinutes } from "../../../../utils/timeUtils";
 import { Text, View } from "react-native";
+import { secondsToHoursAndMinutes } from "../../../../utils/timeUtils";
 
 export function TodayFocusCard() {
-    const { todayStats } = useUserStats();
-    const { hours: todayHours, minutes: todayMinutes } = secondsToHoursAndMinutes(todayStats.today_focus_seconds);
+    const { todayStats, stats } = useUserStats();
+    const { hours: todayHours, minutes: todayMinutes } = secondsToHoursAndMinutes(
+        todayStats.today_focus_seconds
+    );
+
+    const hasActivity = todayStats.today_sessions > 0;
 
     return (
-        <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
-            <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-widest mb-4">
-                Today's Focus
+        <View className="pb-6 mb-2">
+            {/* Date label */}
+            <Text className="text-textMuted font-semibold text-base mb-3">
+                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </Text>
 
-            <View className="flex-row items-baseline mb-2">
+            {/* Focus time — page hero */}
+            <View className="flex-row items-baseline mb-6 flex-wrap">
                 {todayHours > 0 ? (
                     <>
-                        <Text className="text-text font-black text-6xl tabular-nums tracking-tighter leading-none mr-1">
+                        <Text className="text-text font-black text-7xl tabular-nums tracking-tighter leading-none mr-1">
                             {todayHours}
                         </Text>
-                        <Text className="text-xl text-textSecondary font-bold mr-3">h</Text>
-                        <Text className="text-text font-black text-6xl tabular-nums tracking-tighter leading-none mr-1">
+                        <Text className="text-2xl text-textSecondary font-medium mr-4">h</Text>
+                        <Text className="text-text font-black text-7xl tabular-nums tracking-tighter leading-none mr-1">
                             {todayMinutes}
                         </Text>
-                        <Text className="text-xl text-textSecondary font-bold">m</Text>
+                        <Text className="text-2xl text-textSecondary font-medium mr-3">m</Text>
                     </>
                 ) : (
                     <>
-                        <Text className="text-text font-black text-6xl tabular-nums tracking-tighter leading-none mr-1">
+                        <Text className="text-text font-black text-7xl tabular-nums tracking-tighter leading-none mr-1">
                             {todayMinutes}
                         </Text>
-                        <Text className="text-xl text-textSecondary font-bold">m</Text>
+                        <Text className="text-2xl text-textSecondary font-medium mr-3">m</Text>
                     </>
                 )}
+                <Text className="text-textSecondary font-semibold text-lg">
+                    focused today
+                </Text>
             </View>
 
-            {todayStats.today_sessions > 0 ? (
-                <View className="flex-row items-center">
-                    <Text className="text-text font-semibold text-base mr-2">
-                        {todayStats.today_sessions} {todayStats.today_sessions === 1 ? "session" : "sessions"} today
+            {/* Inline stats row — spread full width */}
+            <View className="flex-row items-center justify-between">
+                <View className="items-center">
+                    <Text className="text-warning font-black text-3xl tabular-nums leading-none">
+                        {hasActivity ? `+${todayStats.today_coins}` : "0"}
                     </Text>
-                    <Text className="text-textSecondary text-base mr-2">•</Text>
-                    <Text className="text-warning font-bold text-base tabular-nums">
-                        +{todayStats.today_coins} coins
+                    <Text className="text-textMuted font-medium text-sm mt-1">coins earned</Text>
+                </View>
+
+                <View className="w-px h-10 bg-border opacity-40" />
+
+                <View className="items-center">
+                    <Text className="text-accent font-black text-3xl tabular-nums leading-none">
+                        {stats.current_streak}
+                    </Text>
+                    <Text className="text-textMuted font-medium text-sm mt-1">day streak</Text>
+                </View>
+
+                <View className="w-px h-10 bg-border opacity-40" />
+
+                <View className="items-center">
+                    <Text className="text-text font-black text-3xl tabular-nums leading-none">
+                        {todayStats.today_sessions}
+                    </Text>
+                    <Text className="text-textMuted font-medium text-sm mt-1">
+                        {todayStats.today_sessions === 1 ? "session" : "sessions"}
                     </Text>
                 </View>
-            ) : (
-                <Text className="text-textSecondary text-base font-medium">
-                    No focus sessions completed yet today
-                </Text>
+            </View>
+
+            {/* First-time hint */}
+            {stats?.total_coins === 0 && (
+                <View className="mt-5 pt-5 border-t border-border/20">
+                    <Text className="text-accent text-xs font-medium uppercase tracking-wider mb-1">
+                        How coins work
+                    </Text>
+                    <Text className="text-textSecondary text-base font-medium leading-6">
+                        Earn 1 coin per minute of focus. Spend them in the Shop.
+                    </Text>
+                </View>
             )}
         </View>
     );

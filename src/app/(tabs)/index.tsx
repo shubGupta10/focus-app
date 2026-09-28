@@ -124,7 +124,7 @@ export default function Index() {
                                     color={colors.accent}
                                     style={{ marginRight: 8 }}
                                 />
-                                <Text className="text-text font-bold text-sm mr-1">
+                                <Text className="text-text font-medium text-sm mr-1">
                                     {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
                                 </Text>
                                 <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
@@ -134,7 +134,7 @@ export default function Index() {
                         <View className="items-center mt-6 mb-2">
                             <Text className="text-text font-extrabold text-2xl tracking-tight mb-1">{greeting}</Text>
                             <Text className="text-textSecondary text-[15px] font-semibold">
-                                <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
+                                <Text className="text-accent font-semibold">{todayTimeString}</Text> focused today · <Text className="text-accent font-semibold">{todayStats.today_sessions}</Text> sessions
                             </Text>
                         </View>
                     )}
@@ -154,7 +154,7 @@ export default function Index() {
                             className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"
                         >
                             <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
-                            <Text className="text-text font-bold text-sm">
+                            <Text className="text-text font-medium text-sm">
                                 {engine.selectedApps.length} Apps blocked
                             </Text>
                             <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />

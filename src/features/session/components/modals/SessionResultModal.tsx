@@ -31,53 +31,48 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
             <View style={{ backgroundColor: colors.scrim }} className="absolute inset-0" />
 
             <View className="flex-1 justify-center items-center px-6">
-                <View
-                    className="w-full max-w-sm bg-surfaceElevated rounded-3xl p-6 shadow-lg"
-                >
-                    <View className="flex-row justify-between items-center mb-5">
-                        <Text className="text-text text-xl font-black tracking-tight">
-                            {isSuccess ? "Session Completed" : "Session Ended Early"}
-                        </Text>
-                        <Pressable
-                            className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70"
-                            onPress={onClose}
-                            hitSlop={12}
-                            accessibilityRole="button"
-                            accessibilityLabel="Close session result modal"
-                        >
-                            <Ionicons name="close" size={20} color={colors.textSecondary} />
-                        </Pressable>
+                <View className="w-full max-w-sm bg-surfaceElevated rounded-[32px] p-8 shadow-xl items-center">
+                    
+                    <View className="w-20 h-20 rounded-[24px] items-center justify-center mb-6 bg-surface">
+                        <Text className="text-5xl">{isSuccess ? "🎉" : "🔔"}</Text>
                     </View>
 
-                    <View className="items-center mb-6 mt-1">
-                        <View className="w-20 h-20 rounded-full items-center justify-center mb-3.5 bg-surface">
-                            {/* SR2: 🔔 for interrupted/canceled — clearer than ⏱️ which is just a timer */}
-                            <Text className="text-4xl">{isSuccess ? "🎉" : "🔔"}</Text>
-                        </View>
+                    <Text className="text-text text-2xl font-black tracking-tight text-center mb-3">
+                        {isSuccess ? "Session Complete" : "Session Ended"}
+                    </Text>
 
-                        <Text className="text-textSecondary text-center leading-5 text-sm px-2 font-medium">
-                            {isSuccess
-                                ? `Great focus session! You stayed locked in for ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`
-                                : `Session ended early · ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} focused. Every minute of focus builds the habit!`}
-                        </Text>
-                    </View>
+                    <Text className="text-textSecondary text-center leading-5 text-base px-2 font-medium mb-6">
+                        {isSuccess
+                            ? `You stayed locked in for ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}. Great work!`
+                            : `You focused for ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}. Every minute counts!`}
+                    </Text>
 
-                    {isSuccess && result.isStrict && (
-                        <View className="flex-row items-center justify-center rounded-full px-3 py-1 mb-3 self-center">
-                            <Ionicons name="shield-checkmark" size={13} color={colors.accent} style={{ marginRight: 5 }} />
-                            <Text className="text-accent text-xs font-bold uppercase tracking-wider">
-                                Strict Focus Completed · 1.5x Coins
+                    {isSuccess && result.coins > 0 && (
+                        <View className="bg-surface rounded-2xl py-4 px-6 w-full items-center mb-2">
+                            <Text className="text-textSecondary text-[10px] font-bold uppercase tracking-wider mb-1">
+                                Reward Earned
                             </Text>
+                            <View className="flex-row items-center justify-center">
+                                <Text style={{ fontSize: 26, marginRight: 6 }}>🪙</Text>
+                                <Text className="text-accent text-4xl font-black tracking-tighter">+{result.coins}</Text>
+                            </View>
+                            {result.isStrict && (
+                                <View className="flex-row items-center mt-2">
+                                    <Ionicons name="shield-checkmark" size={12} color={colors.accent} style={{ marginRight: 4 }} />
+                                    <Text className="text-accent text-[10px] font-bold uppercase tracking-wider">
+                                        Includes 1.5x Strict Bonus
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     )}
 
                     <Pressable
                         onPress={onClose}
-                        className="w-full rounded-2xl p-4 items-center justify-center active:opacity-80 bg-accent"
+                        className="w-full rounded-2xl p-4 items-center justify-center active:opacity-80 bg-accent mt-4"
                         accessibilityRole="button"
                         accessibilityLabel={isSuccess ? "Continue" : "Dismiss"}
                     >
-                        {/* SR1: Removed tracking-wider — font-black text-base uppercase is already strong enough */}
                         <Text className="font-black text-base uppercase text-accentForeground">
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
