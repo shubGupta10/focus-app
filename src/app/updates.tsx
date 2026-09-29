@@ -3,6 +3,7 @@ import { useAppUpdate } from "@/hooks/useAppUpdater";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,10 +11,31 @@ export default function UpdatesScreen() {
     const { activeStyle, colors } = useTheme();
     const { isChecking, checkForUpdates } = useAppUpdate();
 
-    const handleFullUpdate = () => {
-        Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
-    };
+    const [isFetchingRelease, setIsFetchingRelease] = useState(false);
 
+    const handleFullUpdate = async () => {
+        try {
+            setIsFetchingRelease(true);
+            const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
+            const data = await response.json();
+
+            // Find the .apk file in the release assets
+            const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
+
+            if (apkAsset && apkAsset.browser_download_url) {
+                // Instantly start downloading the APK!
+                Linking.openURL(apkAsset.browser_download_url);
+            } else {
+                // Fallback to the releases page if no APK is found
+                Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
+            }
+        } catch (error) {
+            // Fallback to the releases page if the network request fails
+            Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
+        } finally {
+            setIsFetchingRelease(false);
+        }
+    };
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-5 border-b border-border">
@@ -72,14 +94,22 @@ export default function UpdatesScreen() {
                     >
                         <View className="flex-row items-center justify-between mb-2">
                             <View className="flex-row items-center">
-                                <Ionicons
-                                    name="logo-github"
-                                    size={20}
-                                    color="#10b981"
-                                    style={{ marginRight: 12 }}
-                                />
+                                {isFetchingRelease ? (
+                                    <ActivityIndicator
+                                        color="#10b981"
+                                        size="small"
+                                        style={{ marginRight: 12 }}
+                                    />
+                                ) : (
+                                    <Ionicons
+                                        name="logo-github"
+                                        size={20}
+                                        color="#10b981"
+                                        style={{ marginRight: 12 }}
+                                    />
+                                )}
                                 <Text className="text-text font-bold text-base">
-                                    Full App Update (.apk)
+                                    {isFetchingRelease ? "Finding update..." : "Full App Update (.apk)"}
                                 </Text>
                             </View>
                             <Ionicons name="open-outline" size={20} color="#9ca3af" />

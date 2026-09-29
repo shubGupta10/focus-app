@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { migrateDbIfNeeded } from "@/store/database";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
@@ -12,6 +13,7 @@ import "../global.css";
 SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
+  useAutoUpdateCheck();
   const [loaded, error] = useFonts({
     ...Ionicons.font,
   })
