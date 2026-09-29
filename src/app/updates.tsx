@@ -1,10 +1,11 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAppUpdate } from "@/hooks/useAppUpdater";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UpdatesScreen() {
@@ -16,21 +17,30 @@ export default function UpdatesScreen() {
     const handleFullUpdate = async () => {
         try {
             setIsFetchingRelease(true);
+            const currentVersion = Constants.expoConfig?.version!;
+
             const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
             const data = await response.json();
 
-            // Find the .apk file in the release assets
+            if (data.tag_name) {
+                const latestVersion = data.tag_name.replace("v", "");
+
+                if (latestVersion === currentVersion) {
+                    Alert.alert("Up to Date", "You already have the latest version installed!");
+                    return;
+                }
+            }
+
             const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
 
             if (apkAsset && apkAsset.browser_download_url) {
-                // Instantly start downloading the APK!
+
                 Linking.openURL(apkAsset.browser_download_url);
             } else {
-                // Fallback to the releases page if no APK is found
+
                 Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
             }
         } catch (error) {
-            // Fallback to the releases page if the network request fails
             Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
         } finally {
             setIsFetchingRelease(false);
