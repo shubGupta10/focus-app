@@ -1,9 +1,11 @@
+import { useAppUpdate } from "@/hooks/useAppUpdater";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 export function SettingsAboutCard() {
+    const { isChecking, checkForUpdates } = useAppUpdate();
     const handleContactSupport = () => {
         Linking.openURL("mailto:support@lockoutapp.com?subject=Lockout Support");
     };
@@ -29,6 +31,37 @@ export function SettingsAboutCard() {
             </Text>
 
             <View className="bg-surfaceElevated rounded-2xl overflow-hidden border border-border">
+                <Pressable
+                    onPress={checkForUpdates}
+                    disabled={isChecking}
+                    className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
+                >
+                    <View className="flex-row items-center">
+                        {isChecking ? (
+                            <ActivityIndicator
+                                color="#3b82f6"
+                                size="small"
+                                style={{ marginRight: 12 }}
+                            />
+                        ) : (
+                            <Ionicons
+                                name="cloud-download"
+                                size={20}
+                                color="#3b82f6"
+                                style={{ marginRight: 12 }}
+                            />
+                        )}
+                        <Text className="text-text font-bold text-base">
+                            {isChecking ? "Checking for updates..." : "Check for Updates (OTA)"}
+                        </Text>
+                    </View>
+                    <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color="#9ca3af"
+                    />
+                </Pressable>
+
                 <Pressable
                     onPress={handleRateApp}
                     className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"

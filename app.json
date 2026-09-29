@@ -24,6 +24,13 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
         "android.permission.POST_NOTIFICATIONS",
+        "android.permission.QUERY_ALL_PACKAGES",
+        "android.permission.PACKAGE_USAGE_STATS",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.QUERY_ALL_PACKAGES"
       ]
     },
@@ -57,6 +64,12 @@
       "eas": {
         "projectId": "93ede2bb-c65f-403d-ba1a-2b20d0348b72"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/93ede2bb-c65f-403d-ba1a-2b20d0348b72"
     }
   }
 }
