@@ -1,11 +1,10 @@
-import { useAppUpdate } from "@/hooks/useAppUpdater";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 
 export function SettingsAboutCard() {
-    const { isChecking, checkForUpdates } = useAppUpdate();
     const handleContactSupport = () => {
         Linking.openURL("mailto:support@lockoutapp.com?subject=Lockout Support");
     };
@@ -32,27 +31,18 @@ export function SettingsAboutCard() {
 
             <View className="bg-surfaceElevated rounded-2xl overflow-hidden border border-border">
                 <Pressable
-                    onPress={checkForUpdates}
-                    disabled={isChecking}
+                    onPress={() => router.push("/updates")}
                     className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        {isChecking ? (
-                            <ActivityIndicator
-                                color="#3b82f6"
-                                size="small"
-                                style={{ marginRight: 12 }}
-                            />
-                        ) : (
-                            <Ionicons
-                                name="cloud-download"
-                                size={20}
-                                color="#3b82f6"
-                                style={{ marginRight: 12 }}
-                            />
-                        )}
+                        <Ionicons
+                            name="cloud-download"
+                            size={20}
+                            color="#3b82f6"
+                            style={{ marginRight: 12 }}
+                        />
                         <Text className="text-text font-bold text-base">
-                            {isChecking ? "Checking for updates..." : "Check for Updates (OTA)"}
+                            App Updates
                         </Text>
                     </View>
                     <Ionicons
