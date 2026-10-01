@@ -81,12 +81,12 @@ export function CentralFocusOrb({
                 Animated.timing(breathAnim, {
                     toValue: 1.035,
                     duration: 3000,
-                    useNativeDriver: true,
+                    useNativeDriver: false,
                 }),
                 Animated.timing(breathAnim, {
                     toValue: 0.985,
                     duration: 3000,
-                    useNativeDriver: true,
+                    useNativeDriver: false,
                 }),
             ])
         );
@@ -257,7 +257,7 @@ export function CentralFocusOrb({
                         </Text>
 
                         <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
-                            {isInfinite ? "Elapsed" : "Remaining"}
+                            {isInfinite ? "Active" : "Remaining"}
                         </Text>
                     </Pressable>
                 </Animated.View>

@@ -81,13 +81,13 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 : "bg-surface"
                                 }`}
                             accessibilityRole="button"
-                            accessibilityLabel="Select infinite mode — counts up until you stop"
+                            accessibilityLabel="Select stopwatch mode — counts up until you stop"
                             accessibilityState={{ selected: selectedMinutes === -1 }}
                         >
                             <View className="flex-1 mr-3">
                                 <Text className={`font-black text-lg mb-0.5 ${selectedMinutes === -1 ? "text-accentForeground" : "text-text"
                                     }`}>
-                                    Infinite Mode
+                                    Stopwatch Mode
                                 </Text>
                                 <Text className={`text-sm font-medium ${selectedMinutes === -1 ? "text-accentForeground" : "text-textSecondary"
                                     }`}>
@@ -95,7 +95,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 </Text>
                             </View>
                             <Ionicons
-                                name="infinite"
+                                name="stopwatch-outline"
                                 size={30}
                                 color={selectedMinutes === -1 ? colors.accentForeground : colors.accent}
                             />
@@ -200,7 +200,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         accessibilityRole="button"
                         accessibilityLabel={
                             selectedMinutes === -1
-                                ? "Start infinite focus session"
+                                ? "Start stopwatch focus session"
                                 : `Start ${selectedMinutes} minute focus session`
                         }
                     >
@@ -214,7 +214,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         )}
                         <Text className="text-accentForeground font-black text-base uppercase">
                             {selectedMinutes === -1
-                                ? "Start Infinite Session"
+                                ? "Start stopwatch Session"
                                 : isStrict
                                     ? `Start ${selectedMinutes}m Strict Session`
                                     : `Start ${selectedMinutes}m Session`}

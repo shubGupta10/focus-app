@@ -1,56 +1,36 @@
-# Welcome to your Expo app 👋
+# Lockout
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Lockout is a premium, distraction-blocking focus application for Android. Built with React Native and Expo, Lockout helps you reclaim your time by intentionally starting focused sessions and natively blocking distracting applications.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Focus Sessions:** Set dedicated focus timers or use the open-ended "Flow State" mode to track your productivity.
+- **Native App Blocking:** Uses Android Usage Access to forcefully block distracting applications (like social media or shopping apps) while you are in a session.
+- **Strict Mode:** Lock yourself in. When enabled, you cannot exit the session until the timer completes (with limited emergency skips).
+- **Coin System & Shop:** Earn coins for every minute of focus. Spend them in the shop to unlock new cosmetic orb themes and animations.
+- **Detailed Statistics:** Track your daily focus time, session counts, and longest streaks to build healthy habits.
+- **Beautiful UI:** A dark-mode first, glassmorphic design featuring custom typography, dynamic animations, and haptic feedback.
 
+## Setup & Installation
+
+Because Lockout uses native Android permissions (Usage Access, System Alert Window, and Foreground Services) for its core blocking functionality, it **cannot** be run in the standard Expo Go app. You must compile a development build.
+
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. **Build the native Android app**
    ```bash
-   npx expo start
+   npx expo prebuild --clean
+   npm run android
    ```
+   *This command will compile the Kotlin services and launch the app on your emulator or connected device.*
 
-In the output, you'll find options to open the app in a
+## Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Framework:** React Native + Expo (SDK 57)
+- **Language:** TypeScript & Kotlin (for native Android services)
+- **Styling:** NativeWind (Tailwind CSS)
+- **Database:** SQLite (expo-sqlite)
+- **State Management:** Zustand

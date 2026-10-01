@@ -164,6 +164,8 @@ class FocusBlockerModule : Module() {
                 val appsList = mutableListOf<Map<String, String>>()
 
                 for (app in packages) {
+                    if (app.packageName == context.packageName) continue
+
                     if (pm.getLaunchIntentForPackage(app.packageName) != null) {
                         val appName = app.loadLabel(pm).toString()
                         var base64Icon = ""
@@ -308,7 +310,13 @@ class FocusBlockerModule : Module() {
                 if (duration != -1L) {
                     val isStrict = prefs.getBoolean("completed_isStrict", false)
                     val endTime = prefs.getLong("completed_endTime", -1L)
-                    promise.resolve(mapOf("durationSeconds" to duration.toDouble(), "isStrict" to isStrict, "endTime" to endTime.toDouble()))
+                    promise.resolve(
+                        mapOf(
+                            "durationSeconds" to duration.toDouble(),
+                            "isStrict" to isStrict,
+                            "endTime" to endTime.toDouble()
+                        )
+                    )
                     return@AsyncFunction
                 }
             }
@@ -319,7 +327,8 @@ class FocusBlockerModule : Module() {
             val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
             if (context != null) {
                 val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
-                prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime").apply()
+                prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime")
+                    .apply()
             }
             promise.resolve(null)
         }
@@ -332,8 +341,15 @@ class FocusBlockerModule : Module() {
                 if (duration != -1L) {
                     val isStrict = prefs.getBoolean("completed_isStrict", false)
                     val endTime = prefs.getLong("completed_endTime", -1L)
-                    prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime").apply()
-                    promise.resolve(mapOf("durationSeconds" to duration.toDouble(), "isStrict" to isStrict, "endTime" to endTime.toDouble()))
+                    prefs.edit().remove("completed_duration").remove("completed_isStrict").remove("completed_endTime")
+                        .apply()
+                    promise.resolve(
+                        mapOf(
+                            "durationSeconds" to duration.toDouble(),
+                            "isStrict" to isStrict,
+                            "endTime" to endTime.toDouble()
+                        )
+                    )
                     return@AsyncFunction
                 }
             }

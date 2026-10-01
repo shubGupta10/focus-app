@@ -56,8 +56,6 @@ class FocusService : Service() {
     @Volatile
     private var currentForegroundPackage: String? = null
 
-    private val activeForegroundApps = java.util.Collections.synchronizedSet(mutableSetOf<String>())
-
     private var cachedLauncherPackages: Set<String> = emptySet()
     private var lastLauncherCheckTime: Long = 0L
 
@@ -103,7 +101,6 @@ class FocusService : Service() {
         val isStrictParam = intent?.getBooleanExtra("isStrict", false)
         val durationMsParam = intent?.getDoubleExtra("durationMs", -1.0)
 
-        // Always prioritize passed apps, fallback to SharedPreferences for global blocklist
         if (passedApps != null && passedApps.isNotEmpty()) {
             customBlockedApps = passedApps.toList()
         } else {
@@ -112,13 +109,23 @@ class FocusService : Service() {
         }
 
         val now = System.currentTimeMillis()
-        
-        // If durationMsParam is provided and valid, this is a NEW session/routine starting
-        if (durationMsParam != null && durationMsParam > 0) {
-            endTime = now + durationMsParam.toLong()
-            isStrictActive = isStrictParam ?: false
+
+        val isSystemRestart = intent == null
+
+        if (isSystemRestart) {
+            activeStartTime = prefs.getLong("activeStartTime", now)
+            activeEndTime = prefs.getLong("activeEndTime", -1L)
+            isStrictActive = prefs.getBoolean("isStrictActive", false)
+            endTime = activeEndTime
+        } else {
+            if (durationMsParam != null && durationMsParam > 0) {
+                endTime = now + durationMsParam.toLong()
+            } else {
+                endTime = -1L
+            }
             activeStartTime = now
             activeEndTime = endTime
+            isStrictActive = isStrictParam ?: false
 
             prefs.edit()
                 .putString("customBlockedApps", customBlockedApps.joinToString(","))
@@ -126,12 +133,6 @@ class FocusService : Service() {
                 .putLong("activeEndTime", activeEndTime)
                 .putBoolean("isStrictActive", isStrictActive)
                 .apply()
-        } else {
-            // No duration provided, likely the service being recreated by the system
-            activeStartTime = prefs.getLong("activeStartTime", now)
-            activeEndTime = prefs.getLong("activeEndTime", -1L)
-            isStrictActive = prefs.getBoolean("isStrictActive", false)
-            endTime = activeEndTime
         }
 
         isServiceActive = true
@@ -190,38 +191,38 @@ class FocusService : Service() {
             val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
 
-            // Initialize active apps with recent events in last 10 seconds, or default to Lockout
+            // Initialize with the most recent app in the last 10 seconds, or default to Lockout
             val initialNow = System.currentTimeMillis()
             try {
+                var topPackage: String? = null
                 val initialEvents = usageStatsManager.queryEvents(initialNow - 10000, initialNow)
                 val event = UsageEvents.Event()
                 while (initialEvents.hasNextEvent()) {
                     initialEvents.getNextEvent(event)
                     if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                        activeForegroundApps.add(event.packageName)
-                        currentForegroundPackage = event.packageName
-                    } else if (event.eventType == UsageEvents.Event.MOVE_TO_BACKGROUND || event.eventType == 23) {
-                        activeForegroundApps.remove(event.packageName)
+                        topPackage = event.packageName
                     }
+                }
+                
+                if (topPackage != null) {
+                    currentForegroundPackage = topPackage
+                } else {
+                    currentForegroundPackage = packageName
                 }
             } catch (e: Exception) {
                 Log.e("FocusBlocker", "Error querying initial usage events", e)
-            }
-
-            if (activeForegroundApps.isEmpty()) {
-                activeForegroundApps.add(packageName)
                 currentForegroundPackage = packageName
             }
 
             while (isRunning) {
-                if (endTime > 0 && System.currentTimeMillis() >= endTime) {
+                if (endTime == -1L && System.currentTimeMillis() - activeStartTime >= 24 * 60 * 60 * 1000L) {
                     Log.d("FocusBlocker", "Time expired! Auto-stopping service")
                     sendSessionEndNotification()
 
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
-                        .putLong("completed_duration", (activeEndTime - activeStartTime) / 1000)
-                        .putLong("completed_endTime", activeEndTime)
+                        .putLong("completed_duration", 24 * 60 * 60)
+                        .putLong("completed_endTime", System.currentTimeMillis())
                         .putBoolean("completed_isStrict", isStrictActive)
                         .apply()
 
@@ -229,7 +230,6 @@ class FocusService : Service() {
                     break
                 }
 
-                // If device is not interactive (screen off) or keyguard is locked, don't show overlay
                 if (powerManager?.isInteractive == false || keyguardManager?.isKeyguardLocked == true) {
                     hideBlockOverlay()
                     Thread.sleep(300)
@@ -239,18 +239,18 @@ class FocusService : Service() {
                 val nowTime = System.currentTimeMillis()
 
                 try {
-                    // Query moving 2-second window to never miss events across ticks
+                    var topPackage: String? = null
                     val usageEvents = usageStatsManager.queryEvents(nowTime - 2000, nowTime)
                     val event = UsageEvents.Event()
 
                     while (usageEvents.hasNextEvent()) {
                         usageEvents.getNextEvent(event)
                         if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                            activeForegroundApps.add(event.packageName)
-                            currentForegroundPackage = event.packageName
-                        } else if (event.eventType == UsageEvents.Event.MOVE_TO_BACKGROUND || event.eventType == 23) {
-                            activeForegroundApps.remove(event.packageName)
+                            topPackage = event.packageName
                         }
+                    }
+                    if (topPackage != null) {
+                        currentForegroundPackage = topPackage
                     }
                 } catch (e: Exception) {
                     Log.e("FocusBlocker", "Error querying usage events in loop", e)
@@ -261,16 +261,13 @@ class FocusService : Service() {
 
                 val isGracePeriod = System.currentTimeMillis() < ignoreBlockingUntil
 
-                if (!isGracePeriod) {
-                    // Supports split-screen, full-screen, and recents transitions
-                    synchronized(activeForegroundApps) {
-                        for (app in activeForegroundApps) {
-                            if (!isPackageAllowedOrSystem(app) && customBlockedApps.contains(app)) {
-                                isDistracting = true
-                                distractingApp = app
-                                break
-                            }
-                        }
+                if (!isGracePeriod && currentForegroundPackage != null) {
+                    if (!isPackageAllowedOrSystem(currentForegroundPackage!!) && customBlockedApps.contains(
+                            currentForegroundPackage
+                        )
+                    ) {
+                        isDistracting = true
+                        distractingApp = currentForegroundPackage!!
                     }
                 }
 
@@ -409,7 +406,6 @@ class FocusService : Service() {
                 setOnClickListener {
                     ignoreBlockingUntil = System.currentTimeMillis() + 2500L
                     currentForegroundPackage = null
-                    activeForegroundApps.removeAll(customBlockedApps.toSet())
                     hideBlockOverlay()
 
                     val intent = Intent(Intent.ACTION_MAIN).apply {
@@ -457,8 +453,6 @@ class FocusService : Service() {
                 setOnClickListener {
                     ignoreBlockingUntil = System.currentTimeMillis() + 2500L
                     currentForegroundPackage = packageName
-                    activeForegroundApps.removeAll(customBlockedApps.toSet())
-                    activeForegroundApps.add(packageName)
                     hideBlockOverlay()
 
                     val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
@@ -544,17 +538,9 @@ class FocusService : Service() {
         activeStartTime = -1L
         activeEndTime = -1L
         isStrictActive = false
-        activeForegroundApps.clear()
         currentForegroundPackage = null
         hideBlockOverlay()
 
-        // Wipe active state, but DO NOT wipe the completed bookmark or global blocklist!
-        val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
-        prefs.edit()
-            .remove("activeStartTime")
-            .remove("activeEndTime")
-            .remove("isStrictActive")
-            .apply()
 
         super.onDestroy()
     }

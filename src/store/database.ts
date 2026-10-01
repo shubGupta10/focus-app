@@ -5,6 +5,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 
     await db.execAsync(
         `PRAGMA journal_mode = "wal";
+        PRAGMA synchronous = FULL;
         
         CREATE TABLE IF NOT EXISTS selected_apps (
             package_name TEXT PRIMARY KEY NOT NULL 

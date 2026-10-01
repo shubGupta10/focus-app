@@ -12,12 +12,10 @@ export function TodayFocusCard() {
 
     return (
         <View className="pb-6 mb-2">
-            {/* Date label */}
             <Text className="text-textMuted font-semibold text-base mb-3">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </Text>
 
-            {/* Focus time — page hero */}
             <View className="flex-row items-baseline mb-6 flex-wrap">
                 {todayHours > 0 ? (
                     <>
@@ -47,9 +45,9 @@ export function TodayFocusCard() {
             <View className="flex-row items-center justify-between">
                 <View className="items-center">
                     <Text className="text-warning font-black text-3xl tabular-nums leading-none">
-                        {hasActivity ? `+${todayStats.today_coins}` : "0"}
+                        {`+${stats.total_coins}`}
                     </Text>
-                    <Text className="text-textMuted font-medium text-sm mt-1">coins earned</Text>
+                    <Text className="text-textMuted font-medium text-sm mt-1"> coin balance</Text>
                 </View>
 
                 <View className="w-px h-10 bg-border opacity-40" />
