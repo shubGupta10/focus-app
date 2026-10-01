@@ -4,15 +4,48 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import { useState } from "react";
+import Updates from "expo-updates";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UpdatesScreen() {
     const { activeStyle, colors } = useTheme();
     const { isChecking, checkForUpdates } = useAppUpdate();
+    const [hasOTAUpdateAvilable, sethasOTAUpdateAvailable] = useState(false);
+    const [hasFullUpdateAvilable, sethasFullUpdateAvailable] = useState(false);
 
     const [isFetchingRelease, setIsFetchingRelease] = useState(false);
+
+    const checkOTAUpdateAvailable = async () => {
+        try {
+            const checkUpdate = await Updates.checkForUpdateAsync();
+            if (checkUpdate.isAvailable) {
+                sethasOTAUpdateAvailable(true);
+            }
+        } catch (error) {
+            sethasOTAUpdateAvailable(false);
+        }
+    }
+
+    const checkFullUpdateAvailable = async () => {
+        try {
+            const currentVersion = Constants.expoConfig?.version;
+            const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
+            const data = await response.json();
+
+            if (data.tag_name && data.tag_name !== `v${currentVersion}`) {
+                sethasFullUpdateAvailable(true);
+            }
+        } catch (error) {
+            sethasFullUpdateAvailable(false);
+        }
+    }
+
+    useEffect(() => {
+        checkOTAUpdateAvailable();
+        checkFullUpdateAvailable();
+    }, []);
 
     const handleFullUpdate = async () => {
         try {
@@ -96,6 +129,11 @@ export default function UpdatesScreen() {
                         <Text className="text-textSecondary text-sm ml-8">
                             Seamlessly update the app's interface and logic over the air. No downloading required!
                         </Text>
+                        {hasOTAUpdateAvilable && (
+                            <View className="bg-success/20 px-3 py-1.5 rounded-full mt-3 ml-8 self-start">
+                                <Text className="text-success text-xs font-bold uppercase tracking-widest">Update Available</Text>
+                            </View>
+                        )}
                     </Pressable>
 
                     <Pressable
@@ -127,6 +165,11 @@ export default function UpdatesScreen() {
                         <Text className="text-textSecondary text-sm ml-8">
                             Download the latest native app directly from GitHub. Use this for major engine overhauls.
                         </Text>
+                        {hasFullUpdateAvilable && (
+                            <View className="bg-success/20 px-3 py-1.5 rounded-full mt-3 ml-8 self-start">
+                                <Text className="text-success text-xs font-bold uppercase tracking-widest">Update Available</Text>
+                            </View>
+                        )}
                     </Pressable>
                 </View>
             </ScrollView>
