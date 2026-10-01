@@ -6,14 +6,15 @@ import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import Updates from "expo-updates";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, ToastAndroid } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UpdatesScreen() {
     const { activeStyle, colors } = useTheme();
     const { isChecking, checkForUpdates } = useAppUpdate();
-    const [hasOTAUpdateAvilable, sethasOTAUpdateAvailable] = useState(false);
-    const [hasFullUpdateAvilable, sethasFullUpdateAvailable] = useState(false);
+    const [isCheckingBackground, setIsCheckingBackground] = useState(true);
+    const [hasOTAUpdateAvailable, setHasOTAUpdateAvailable] = useState(false);
+    const [hasFullUpdateAvailable, setHasFullUpdateAvailable] = useState(false);
 
     const [isFetchingRelease, setIsFetchingRelease] = useState(false);
 
@@ -21,10 +22,14 @@ export default function UpdatesScreen() {
         try {
             const checkUpdate = await Updates.checkForUpdateAsync();
             if (checkUpdate.isAvailable) {
-                sethasOTAUpdateAvailable(true);
+                setHasOTAUpdateAvailable(true);
+                ToastAndroid.show("A new OTA update is ready! Click the button to apply it.", ToastAndroid.LONG);
+            } else {
+                setHasOTAUpdateAvailable(false);
             }
         } catch (error) {
-            sethasOTAUpdateAvailable(false);
+            console.error("Background OTA check failed:", error);
+            setHasOTAUpdateAvailable(false);
         }
     }
 
@@ -35,16 +40,27 @@ export default function UpdatesScreen() {
             const data = await response.json();
 
             if (data.tag_name && data.tag_name !== `v${currentVersion}`) {
-                sethasFullUpdateAvailable(true);
+                setHasFullUpdateAvailable(true);
+                ToastAndroid.show(`A full app update (${data.tag_name}) is available on GitHub!`, ToastAndroid.LONG);
+            } else {
+                setHasFullUpdateAvailable(false);
             }
         } catch (error) {
-            sethasFullUpdateAvailable(false);
+            console.error("Background Full update check failed:", error);
+            setHasFullUpdateAvailable(false);
         }
     }
 
     useEffect(() => {
-        checkOTAUpdateAvailable();
-        checkFullUpdateAvailable();
+        const runChecks = async () => {
+            setIsCheckingBackground(true);
+            await Promise.all([
+                checkOTAUpdateAvailable(),
+                checkFullUpdateAvailable()
+            ]);
+            setIsCheckingBackground(false);
+        };
+        runChecks();
     }, []);
 
     const handleFullUpdate = async () => {
@@ -129,11 +145,6 @@ export default function UpdatesScreen() {
                         <Text className="text-textSecondary text-sm ml-8">
                             Seamlessly update the app's interface and logic over the air. No downloading required!
                         </Text>
-                        {hasOTAUpdateAvilable && (
-                            <View className="bg-success/20 px-3 py-1.5 rounded-full mt-3 ml-8 self-start">
-                                <Text className="text-success text-xs font-bold uppercase tracking-widest">Update Available</Text>
-                            </View>
-                        )}
                     </Pressable>
 
                     <Pressable
@@ -165,11 +176,6 @@ export default function UpdatesScreen() {
                         <Text className="text-textSecondary text-sm ml-8">
                             Download the latest native app directly from GitHub. Use this for major engine overhauls.
                         </Text>
-                        {hasFullUpdateAvilable && (
-                            <View className="bg-success/20 px-3 py-1.5 rounded-full mt-3 ml-8 self-start">
-                                <Text className="text-success text-xs font-bold uppercase tracking-widest">Update Available</Text>
-                            </View>
-                        )}
                     </Pressable>
                 </View>
             </ScrollView>
