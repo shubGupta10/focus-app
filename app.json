@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lockout",
     "slug": "lockout",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -17,14 +17,8 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.shubham720.lockout",
+      "versionCode": 2,
       "permissions": [
-        "android.permission.PACKAGE_USAGE_STATS",
-        "android.permission.SYSTEM_ALERT_WINDOW",
-        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
-        "android.permission.POST_NOTIFICATIONS",
-        "android.permission.QUERY_ALL_PACKAGES",
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
