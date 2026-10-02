@@ -4,8 +4,8 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     const DATABASE_VERSION = 8;
 
     await db.execAsync(
-        `PRAGMA journal_mode = "wal";
-        PRAGMA synchronous = FULL;
+        `PRAGMA journal_mode = "TRUNCATE";
+        PRAGMA synchronous = NORMAL;
         
         CREATE TABLE IF NOT EXISTS selected_apps (
             package_name TEXT PRIMARY KEY NOT NULL 
