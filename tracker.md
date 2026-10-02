@@ -118,6 +118,10 @@
 - [x] **Routine Global Blocklist Fix**: Removed a bug in `FocusService.kt` where `com.android.systemui` background events were aggressively clearing the blocked apps state, ensuring apps remain correctly blocked during both Manual Timers and Routines.
 - [x] **Stale Routine Blocklist Fix**: Fixed a bug where routines would silently capture a one-time snapshot of the global blocklist. `RoutineReceiver.kt` now dynamically fetches the most up-to-date global blocklist directly from `SharedPreferences` in real-time when the alarm fires, completely eliminating the risk of old blocklists skipping new distractions.
 - [x] **EAS OTA Updates Integration**: Configured `expo-updates` and added a "Check for Updates" UI to Settings, allowing users to seamlessly download and apply JS/UI updates without the Play Store.
+- [x] **SQLite Corruption Fix (v1.1.1)**: Disabled SQLite `WAL` mode and switched to `TRUNCATE` in `database.ts` to permanently fix the `database disk image is malformed` crash caused by Android freezing the background process during SQLite sidecar synchronization.
+- [x] **UsageStats Telemetry (v1.1.1)**: Injected deep `Log.d` tracking into the native Android loop and JS bridge to allow explicit real-time debugging of Android OS Shadow-Revocation bugs for the `UsageStatsManager`.
+- [x] **v1.1.1 Release**: Successfully generated and published the `application-d36a149e.apk` via EAS `preview` profile to address critical native blocker and database stability issues.
+
 ## Phase 17: Advanced Analytics & Deep Insights
 - [x] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
 - [x] Build rich data visualizations on the Progress tab (weekly/monthly trend charts, daily focus breakdowns).
