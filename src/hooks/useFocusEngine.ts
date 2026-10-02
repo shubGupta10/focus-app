@@ -90,6 +90,10 @@ export function useFocusEngine(isRoot: boolean = false) {
                 });
             }
 
+            console.log(`[Lockout JS] Starting session for ${durationMinutes} mins.`);
+            console.log(`[Lockout JS] Apps to block: ${JSON.stringify(appsToBlock)}`);
+            console.log(`[Lockout JS] Strict mode: ${isStrict}`);
+
             await FocusBlocker.startService(appsToBlock, durationMs, isStrict);
 
             const now = Date.now();
@@ -167,7 +171,7 @@ export function useFocusEngine(isRoot: boolean = false) {
             }
 
             if (storeState.isSessionActive) {
-                clearSession();
+                setSessionState(false, storeState.sessionStartTime, storeState.sessionEndTime, storeState.isStrictSession);
             }
         } catch (error) {
             console.error("Error loading active session:", error);

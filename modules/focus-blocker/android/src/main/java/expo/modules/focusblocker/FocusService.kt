@@ -108,11 +108,29 @@ class FocusService : Service() {
             customBlockedApps = if (savedApps.isNotEmpty()) savedApps.split(",") else emptyList()
         }
 
+        Log.d("FocusBlocker", "[Native] onStartCommand received ${customBlockedApps.size} apps to block.")
+        Log.d("FocusBlocker", "[Native] customBlockedApps: $customBlockedApps")
+
         val now = System.currentTimeMillis()
 
         val isSystemRestart = intent == null
 
         if (isSystemRestart) {
+            // If active session prefs were cleared (session completed), don't restart
+            if (!prefs.contains("activeStartTime")) {
+                val stopNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Notification.Builder(this, CHANNEL_ID)
+                        .setSmallIcon(android.R.drawable.ic_secure)
+                        .build()
+                } else {
+                    Notification.Builder(this)
+                        .setSmallIcon(android.R.drawable.ic_secure)
+                        .build()
+                }
+                startForeground(1, stopNotification)
+                stopSelf()
+                return START_NOT_STICKY
+            }
             activeStartTime = prefs.getLong("activeStartTime", now)
             activeEndTime = prefs.getLong("activeEndTime", -1L)
             isStrictActive = prefs.getBoolean("isStrictActive", false)
@@ -203,7 +221,7 @@ class FocusService : Service() {
                         topPackage = event.packageName
                     }
                 }
-                
+
                 if (topPackage != null) {
                     currentForegroundPackage = topPackage
                 } else {
@@ -215,15 +233,38 @@ class FocusService : Service() {
             }
 
             while (isRunning) {
-                if (endTime == -1L && System.currentTimeMillis() - activeStartTime >= 24 * 60 * 60 * 1000L) {
+                val currentLoopTime = System.currentTimeMillis()
+
+                if (endTime == -1L && currentLoopTime - activeStartTime >= 24 * 60 * 60 * 1000L) {
                     Log.d("FocusBlocker", "Time expired! Auto-stopping service")
                     sendSessionEndNotification()
 
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
                         .putLong("completed_duration", 24 * 60 * 60)
-                        .putLong("completed_endTime", System.currentTimeMillis())
+                        .putLong("completed_endTime", currentLoopTime)
                         .putBoolean("completed_isStrict", isStrictActive)
+                        .remove("activeStartTime")
+                        .remove("activeEndTime")
+                        .remove("isStrictActive")
+                        .apply()
+
+                    stopSelf()
+                    break
+                } else if (endTime > 0 && currentLoopTime >= endTime) {
+                    Log.d("FocusBlocker", "Timer expired! Auto-stopping service")
+                    sendSessionEndNotification()
+
+                    val durationSeconds = (endTime - activeStartTime) / 1000L
+
+                    val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                    prefs.edit()
+                        .putLong("completed_duration", durationSeconds)
+                        .putLong("completed_endTime", endTime)
+                        .putBoolean("completed_isStrict", isStrictActive)
+                        .remove("activeStartTime")
+                        .remove("activeEndTime")
+                        .remove("isStrictActive")
                         .apply()
 
                     stopSelf()
@@ -250,6 +291,9 @@ class FocusService : Service() {
                         }
                     }
                     if (topPackage != null) {
+                        if (currentForegroundPackage != topPackage) {
+                            Log.d("FocusBlocker", "[Native] App moved to foreground: $topPackage")
+                        }
                         currentForegroundPackage = topPackage
                     }
                 } catch (e: Exception) {
@@ -262,10 +306,13 @@ class FocusService : Service() {
                 val isGracePeriod = System.currentTimeMillis() < ignoreBlockingUntil
 
                 if (!isGracePeriod && currentForegroundPackage != null) {
-                    if (!isPackageAllowedOrSystem(currentForegroundPackage!!) && customBlockedApps.contains(
-                            currentForegroundPackage
-                        )
-                    ) {
+                    val isAllowed = isPackageAllowedOrSystem(currentForegroundPackage!!)
+                    val isMarkedToBlock = customBlockedApps.contains(currentForegroundPackage)
+
+                    if (!isAllowed && isMarkedToBlock) {
+                        if (!isDistracting) {
+                            Log.d("FocusBlocker", "[Native] BLOCKING $currentForegroundPackage!")
+                        }
                         isDistracting = true
                         distractingApp = currentForegroundPackage!!
                     }

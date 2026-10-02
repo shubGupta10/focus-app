@@ -22,6 +22,14 @@ class RoutineReceiver : BroadcastReceiver() {
         val endTime = intent.getStringExtra("endTime") ?: ""
 
         val blockedApps = ArrayList(passedApps)
+        if (blockedApps.isEmpty()) {
+            val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+            val savedApps = prefs.getString("customBlockedApps", "") ?: ""
+            if (savedApps.isNotEmpty()) {
+                blockedApps.addAll(savedApps.split(","))
+            }
+        }
+
         if (isStrict) {
             val systemApps = listOf(
                 "com.android.settings",
@@ -46,7 +54,7 @@ class RoutineReceiver : BroadcastReceiver() {
             ContextCompat.startForegroundService(context, serviceIntent)
 
             if (routineId != -1 && daysOfWeek.isNotEmpty() && startTime.isNotEmpty()) {
-                rescheduleNext(context, routineId, daysOfWeek, startTime, endTime, isStrict, blockedApps)
+                rescheduleNext(context, routineId, daysOfWeek, startTime, endTime, isStrict, passedApps)
             }
         } catch (e: Exception) {
             Log.e("RoutineReceiver", "Error launching scheduled routine", e)

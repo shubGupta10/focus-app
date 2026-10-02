@@ -1,4 +1,4 @@
-import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine, getGlobalSelectedApps } from "@/features/routines/db/routineRepository";
+import { createRoutine, deleteRoutine, getRoutines, toggleRoutine, updateRoutine } from "@/features/routines/db/routineRepository";
 import { useAppStore } from "@/store/useAppStore";
 import { Routine, RoutineInput } from "@/types/routine";
 import { calculateNextTrigger, getRoutineDurationMinutes } from "@/utils/routineScheduler";
@@ -20,7 +20,7 @@ export function useRoutine() {
 
                 const apps = routine.blocked_apps && routine.blocked_apps.trim().length > 0 
                     ? routine.blocked_apps.split(",")
-                    : await getGlobalSelectedApps(db);
+                    : [];
 
                 FocusBlocker.scheduleRoutineAlarm(
                     routine.id,

@@ -116,6 +116,7 @@
 - [x] **Progressive Disclosure UX**: Embedded contextual "How Coins Work" tutorials inside the empty Progress state and post-session Success modals to organically teach the economy without annoying popups.
 - [x] **Zombie Blocker Loop Fix**: Replaced the leaking, accumulating `activeApps` Set in `FocusService.kt` with real-time foreground package resolution, instant state release on Return to Home / Open Lockout, and screen interactivity / lock-screen guards to completely prevent the blocker overlay from repeatedly reopening on Home.
 - [x] **Routine Global Blocklist Fix**: Removed a bug in `FocusService.kt` where `com.android.systemui` background events were aggressively clearing the blocked apps state, ensuring apps remain correctly blocked during both Manual Timers and Routines.
+- [x] **Stale Routine Blocklist Fix**: Fixed a bug where routines would silently capture a one-time snapshot of the global blocklist. `RoutineReceiver.kt` now dynamically fetches the most up-to-date global blocklist directly from `SharedPreferences` in real-time when the alarm fires, completely eliminating the risk of old blocklists skipping new distractions.
 - [x] **EAS OTA Updates Integration**: Configured `expo-updates` and added a "Check for Updates" UI to Settings, allowing users to seamlessly download and apply JS/UI updates without the Play Store.
 ## Phase 17: Advanced Analytics & Deep Insights
 - [x] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
