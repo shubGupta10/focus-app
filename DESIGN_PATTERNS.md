@@ -11,12 +11,12 @@
 
 ---
 
-# Design Principles
+# Design Principles (Material You MD3)
 
-Lockout is a productivity and focus application. The interface must respect the user's intent to disconnect from distractions.
-- **Calm & Focused:** Avoid visual noise, excessive animations, and cluttered dashboards.
-- **Clear Hierarchy:** The most important action (starting a session) should always be immediately obvious.
-- **Honest UI:** Do not use fake data to make the UI look populated. If there is no data, use a well-designed empty state.
+Lockout uses **Material You (MD3)** as its core design language, tailored for Android 13+.
+- **Dynamic & Expressive:** UIs adapt to dynamic colors (if enabled) or use a consistent, harmonious semantic palette.
+- **Tonal Elevation:** We do not use drop shadows. Elevation is expressed through surface color changes (e.g., `surface`, `surfaceContainerLow`, `surfaceContainerHigh`).
+- **Rounded & Friendly:** Use large corner radii (e.g., 28dp for large cards, 16dp for medium elements, fully rounded pills for buttons).
 - **Platform Respect:** Respect Android-first conventions, including 3-button navigation insets, predictable back-button behavior, and native safe areas.
 
 ---
@@ -32,9 +32,10 @@ Lockout uses a consistent, airy layout structure driven by Tailwind CSS (`Native
 - **Scrollable Content:** Use `ScrollView` with `contentContainerStyle={{ paddingBottom: 130 }}` to ensure content isn't hidden behind bottom tabs.
 
 ### Component Spacing (Vertical Rhythm)
-- **Between Cards:** Use `mb-4`.
-- **Inside Cards:** Use `p-6` for standard card padding.
+- **Between Cards:** Use `mb-4` or `mb-6` to separate sections.
+- **Inside Cards:** Use `p-5` or `p-6` for standard card padding to provide ample breathing room. Do not cramp text.
 - **Small Gaps:** Use `gap-3` or `gap-4` in flex rows for buttons and icons.
+- **Breathing Room Rule:** Never let UI elements feel cluttered. Use generous internal padding and distinct groupings (e.g., `rounded-3xl` cards) to keep cognitive load low. Always ensure there is space between a card and the horizontal divider above it (e.g., `mt-6`).
 
 ---
 
@@ -55,39 +56,49 @@ Lockout relies exclusively on the **Inter** font family to maintain a stark, cle
 
 ---
 
-# Colour
+# Colour (Material You MD3 Roles)
 
-Colors must **always** be referenced via Tailwind semantic tokens (e.g., `bg-surface`, `text-accent`) or the `useTheme()` hook. **Never hardcode hex values in components.**
+Colors must **always** be referenced via Tailwind semantic tokens (e.g., `bg-surface`, `text-primary`) or the `useTheme()` hook. **Never hardcode hex values in components.**
 
-### Semantic Palette
-- **`bg-surface`:** The absolute background of the app.
-- **`bg-surfaceElevated`:** Used for cards, buttons, modals, and any element resting on top of the surface.
-- **`text-text`:** High-contrast primary text.
-- **`text-textSecondary`:** Muted text for descriptions and metadata.
-- **`colors.accent`:** The primary brand color (a calm, desaturated red/rose). Used sparingly for active states, primary icons, and emphasis.
-- **`colors.accentMuted`:** Used for highlighting backgrounds behind accent-colored text/icons.
-- **`colors.warning`:** Used for strict-mode warnings and locks.
-- **`colors.success`:** Used for positive reinforcement (e.g., completed sessions).
+### MD3 Semantic Palette
+- **`bg-surface`:** The absolute background of the app (Surface).
+- **`bg-surfaceContainerLow` / `bg-surfaceContainer` / `bg-surfaceContainerHigh`:** Used for cards, dialogs, and elevated surfaces instead of drop shadows. (In Tailwind, mapped to `bg-surfaceElevated`).
+- **`bg-accent` / `text-accent`:** Used for primary call-to-action buttons, FABs, and emphasis (corresponds to MD3 Primary).
+- **`text-onSurface` / `text-onSurfaceVariant`:** High-contrast primary text and muted secondary text (Mapped to `text-text` and `text-textSecondary`).
+- **`colors.accentMuted`:** Used for highlighting backgrounds behind primary-colored text/icons (corresponds to MD3 PrimaryContainer).
+- **`colors.error`:** Used for strict-mode warnings, locks, and destructive actions.
 
 ---
 
-# Components
+# Components (Material You MD3)
 
-### Cards
-Cards are the primary container for data.
+### Cards & Containers
 - **Pattern:** `<View className="bg-surfaceElevated rounded-3xl p-6 mb-4">`
-- **Usage:** Grouping distinct statistics or settings.
-- **Avoid:** Nesting cards inside cards.
+- **MD3 Rules:** Cards should use large border radii (`rounded-3xl` roughly equals 24dp or 28dp). Do not use drop shadows. Rely entirely on tonal contrast between `bg-surface` and `bg-surfaceElevated`.
+- **Avoid:** Nesting cards inside cards unnecessarily.
 
-### Buttons
-- **Primary Pill Buttons:** `<Pressable className="bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center">`
-- **Icon Buttons (Nav):** `<Pressable className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center">`
-- **Interaction:** All buttons must have `active:opacity-70` for press feedback.
+### Buttons (MD3 Shapes)
+- **Primary Pill Buttons:** `<Pressable className="bg-primary rounded-full px-6 py-3.5 flex-row items-center justify-center">` (Fully rounded ends).
+- **FAB (Floating Action Buttons):** Rounded rectangles (`rounded-2xl` / 16dp) instead of perfect circles, usually placed at bottom right.
+- **Icon Buttons (Nav):** `<Pressable className="w-10 h-10 rounded-full items-center justify-center active:bg-surfaceVariant">`
+- **Interaction:** All buttons must have `active:opacity-70` for press feedback (or use Ripple effects where possible).
 
-### List Items
-- **Pattern:** `flex-row items-center justify-between mb-4`
-- **Leading Element:** Usually a 40x40 circular container `w-10 h-10 rounded-full bg-surface items-center justify-center` containing an Ionicons icon.
-- **Text Body:** `flex-1` with a `text-base` title and a `text-xs` subtitle.
+### List Items (Flat)
+- **Pattern:** `flex-row items-center justify-between py-3`
+- **MD3 Rules:** Used for simple menus or bottom sheets.
+
+### Grouped Settings Lists (MD3 / Modern)
+- **Section Headers:** Placed outside the card. Use `<Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">`.
+- **Card Container:** Wrap grouped items in a `<View className="bg-surfaceElevated rounded-3xl overflow-hidden p-5">`.
+- **List Items (Row):** Use `flex-row items-center justify-between`.
+- **Action Blocks (Stacked):** For important calls to action (like Review Permissions, Delete Data, Revisit Guide):
+  - Stack the text/description on top with `mb-5`.
+  - Align the action pill button to the bottom right using `self-end`.
+  - Example button: `<Pressable className="bg-accent py-3 px-6 rounded-full self-end shadow-sm">`
+
+### Bubbly App/List Cards
+- **Pattern:** For scrollable lists that need breathing room (like the Blocklist), use individual cards for each item instead of flat rows.
+- **Example:** `<Pressable className="bg-surfaceElevated rounded-[24px] p-4 mb-2.5">`.
 
 ---
 
@@ -149,13 +160,13 @@ Cards are the primary container for data.
 
 Future agents **MUST NOT** introduce these into the Lockout codebase:
 
-1. **Generic AI Aesthetics:** Do not use random neon colors, generic violet/indigo themes, glowing elements, or heavy gradients. Lockout's palette is flat, calm, and grounded.
-2. **Glassmorphism:** Do not use blur-backs or frosted glass layers. We rely on solid color elevation (`bg-surfaceElevated`).
-3. **Heavy Shadows:** Do not use drop shadows for elevation. Lockout is a flat design system.
+1. **Generic AI Aesthetics:** Do not use random neon colors, generic violet/indigo themes, glowing elements, or heavy gradients.
+2. **Glassmorphism:** Do not use blur-backs or frosted glass layers. We rely on solid color elevation (`bg-surfaceElevated`, `bg-surfaceContainerHigh`).
+3. **Heavy Shadows:** Do not use drop shadows for elevation. Material You relies on tonal elevation (color shifts) rather than heavy drop shadows.
 4. **God Components:** Do not put complex permission checking, native module interactions, and UI rendering into a single `.tsx` file. Extract logic into custom hooks (e.g., `useSessionController.ts`).
-5. **Hardcoded Inline Colors:** Never write `color="#F7F5F4"`. Always use `colors.background` from `useTheme()`.
+5. **Hardcoded Inline Colors:** Never write `color="#F7F5F4"`. Always use semantic colors from `useTheme()` (e.g. `colors.surface`, `colors.primary`).
 6. **Fake Dashboards:** Never generate fake statistics or charts just to make a screen look "finished." Build the correct empty state instead.
-7. **Redundant UI Variations:** If you need a card header, use the existing `text-[11px] uppercase tracking-widest` pattern. Do not invent a new header style.
+7. **Redundant UI Variations:** If you need a card header, use the existing pattern. Do not invent a new header style.
 
 ---
 
@@ -165,4 +176,4 @@ Before building a new UI component, follow this exact flowchart:
 1. Does this pattern already exist in `src/features/` or `src/components/`?
 2. If yes, **reuse it**.
 3. If it almost fits, **extend it** gracefully.
-4. If it genuinely cannot support the requirement, **create it**, but ensure it perfectly matches the `DESIGN_PATTERNS.md` rules above.
+4. If it genuinely cannot support the requirement, **create it**, but ensure it perfectly matches the `DESIGN_PATTERNS.md` rules above, specifically embracing Material You (MD3) principles.

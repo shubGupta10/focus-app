@@ -6,7 +6,8 @@ import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import Updates from "expo-updates";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View, ToastAndroid } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View, ToastAndroid } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UpdatesScreen() {
@@ -123,11 +124,9 @@ export default function UpdatesScreen() {
                         <View className="flex-row items-center justify-between mb-2">
                             <View className="flex-row items-center">
                                 {isChecking ? (
-                                    <ActivityIndicator
-                                        color="#3b82f6"
-                                        size="small"
-                                        style={{ marginRight: 12 }}
-                                    />
+                                    <View style={{ marginRight: 12 }}>
+                                        <GlobalLoader color="#3b82f6" size="small" />
+                                    </View>
                                 ) : (
                                     <Ionicons
                                         name="cloud-download"
@@ -154,11 +153,9 @@ export default function UpdatesScreen() {
                         <View className="flex-row items-center justify-between mb-2">
                             <View className="flex-row items-center">
                                 {isFetchingRelease ? (
-                                    <ActivityIndicator
-                                        color="#10b981"
-                                        size="small"
-                                        style={{ marginRight: 12 }}
-                                    />
+                                    <View style={{ marginRight: 12 }}>
+                                        <GlobalLoader color="#10b981" size="small" />
+                                    </View>
                                 ) : (
                                     <Ionicons
                                         name="logo-github"

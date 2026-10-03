@@ -82,7 +82,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
             <View className="items-center w-full pt-6">
                 <View className="flex-row items-center justify-center gap-3 mb-6">
                     {isStrict && (
-                        <View className="flex-row items-center bg-accentMuted px-4 py-2 rounded-lg">
+                        <View className="flex-row items-center bg-accentMuted px-4 py-2 rounded-full">
                             <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 6 }} />
                             <Text className="text-accent text-[13px] font-bold tracking-widest uppercase">
                                 Strict Mode
@@ -90,7 +90,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                         </View>
                     )}
 
-                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-lg shadow-sm">
+                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-full">
                         <Ionicons name="apps-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
                         <Text className="text-textSecondary text-[13px] font-bold">
                             {blockedAppsCount && blockedAppsCount > 0

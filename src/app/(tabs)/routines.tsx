@@ -3,7 +3,8 @@ import { RoutineEmptyState } from "../../features/routines/components/RoutineEmp
 import { RoutineEditorModal } from "../../features/routines/components/modals/RoutineEditorModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoutinesController } from "../../features/routines/hooks/useRoutinesController";
 
@@ -25,7 +26,7 @@ export default function RoutinesTab() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
+            <View className="flex-row items-center justify-between px-6 pt-5 pb-2">
                 <View className="flex-1">
                     <Text className="text-text font-black text-3xl tracking-tight">Routines</Text>
                     <Text className="text-textSecondary text-sm font-medium mt-0.5">
@@ -47,9 +48,9 @@ export default function RoutinesTab() {
 
             {engine.isSessionActive && (
                 <View className="px-6 mb-4 mt-2">
-                    <View className="bg-warningMuted border border-warning rounded-2xl p-4 flex-row items-center">
-                        <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 12 }} />
-                        <Text className="text-warning font-medium text-sm flex-1">
+                    <View className="bg-warningMuted border border-warning/50 rounded-[24px] p-5 flex-row items-center">
+                        <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 16 }} />
+                        <Text className="text-warning font-bold text-sm flex-1">
                             {engine.isStrictSession ? "Routines are locked during a strict session" : "End your current session to modify routines"}
                         </Text>
                     </View>
@@ -58,7 +59,7 @@ export default function RoutinesTab() {
 
             {isLoading ? (
                 <View className="flex-1 items-center justify-center">
-                    <ActivityIndicator color={colors.accent} size="small" />
+                    <GlobalLoader color={colors.accent} size="small" />
                 </View>
             ) : routines.length === 0 ? (
                 <RoutineEmptyState
@@ -70,7 +71,12 @@ export default function RoutinesTab() {
                     data={routines}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 6, paddingBottom: 130 }}
+                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 130 }}
+                    ListHeaderComponent={
+                        <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
+                            Your Schedules
+                        </Text>
+                    }
                     renderItem={({ item }) => (
                         <RoutineCard
                             routine={item}

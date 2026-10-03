@@ -20,9 +20,9 @@ export default function AppsTab() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <View className="flex-row justify-between items-center px-6 pt-5 pb-4">
+            <View className="flex-row justify-between items-center px-6 pt-5 pb-2">
                 <View className="flex-1">
-                    <Text className="text-text font-black text-3xl tracking-tight">Block List</Text>
+                    <Text className="text-text font-black text-3xl tracking-tight">Global Block list</Text>
                 </View>
             </View>
 
@@ -42,6 +42,9 @@ export default function AppsTab() {
             />
 
             <View className="flex-1 px-6">
+                <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2 mt-2">
+                    {filterMode === "all" ? "All Applications" : "Blocked Applications"}
+                </Text>
                 <AppList
                     installedAppsLength={engine.installedApps.length}
                     filteredApps={filteredApps}

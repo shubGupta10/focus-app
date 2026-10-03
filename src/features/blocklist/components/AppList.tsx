@@ -1,7 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { AppListItem } from "./AppListItem";
 
 interface AppListProps {
@@ -28,7 +29,7 @@ export function AppList({
     if (installedAppsLength === 0) {
         return (
             <View className="py-20 items-center justify-center">
-                <ActivityIndicator size="large" color={colors.accent} />
+                <GlobalLoader size="large" color={colors.accent} />
                 <Text className="text-textSecondary text-sm font-medium mt-3">
                     Loading installed apps...
                 </Text>
@@ -42,9 +43,13 @@ export function AppList({
                 <View className="w-12 h-12 rounded-2xl bg-surfaceElevated items-center justify-center mb-3">
                     <Ionicons name="apps-outline" size={22} color={colors.textSecondary} />
                 </View>
-                <Text className="text-text font-bold text-base">No apps found</Text>
-                <Text className="text-textSecondary text-xs mt-1 text-center">
-                    {searchQuery ? `No results matching "${searchQuery}"` : "No installed apps detected"}
+                <Text className="text-text font-bold text-[16px] mb-2">{searchQuery ? "No apps found" : installedAppsLength > 0 ? "Block List is Empty" : "No apps found"}</Text>
+                <Text className="text-textSecondary text-sm mt-1 text-center px-4 leading-5">
+                    {searchQuery 
+                        ? `No results matching "${searchQuery}"` 
+                        : installedAppsLength > 0 
+                            ? "You haven't blocked any apps yet. Switch to 'All' to select apps that distract you most."
+                            : "No installed apps detected"}
                 </Text>
                 {searchQuery.length > 0 && (
                     <Pressable

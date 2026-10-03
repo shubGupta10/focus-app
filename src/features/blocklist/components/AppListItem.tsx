@@ -20,8 +20,7 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
         <Pressable
             onPress={() => onToggle(app.packageName)}
             disabled={disabled}
-            className={`flex-row justify-between items-center p-3.5 mb-2.5 rounded-2xl bg-surfaceElevated ${disabled ? "opacity-50" : "active:opacity-80"
-                }`}
+            className={`flex-row justify-between items-center p-4 mb-2.5 bg-surfaceElevated rounded-[24px] ${disabled ? "opacity-50" : "active:opacity-80"} border border-border/30`}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
             accessibilityLabel={`${app.name}, ${isSelected ? "selected to block" : "not blocked"}`}

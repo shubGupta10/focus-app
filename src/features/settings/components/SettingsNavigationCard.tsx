@@ -3,21 +3,27 @@ import { Pressable, Text, View } from "react-native";
 
 export function SettingsNavigationCard() {
     return (
-        <View className="mx-6 mt-4 bg-surfaceElevated rounded-2xl p-5 flex-row items-center justify-between">
-            <View className="flex-1 pr-4">
-                <Text className="text-text font-bold text-lg mb-1">Onboarding Guide</Text>
-                <Text className="text-textSecondary text-sm leading-5">
-                    Review how Lockout works and learn about intentional focus.
-                </Text>
+        <View className="px-6 mb-6">
+            <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
+                Guides
+            </Text>
+            
+            <View className="bg-surfaceElevated rounded-3xl p-5">
+                <View className="mb-5">
+                    <Text className="text-text font-bold text-[16px] mb-1">Onboarding Guide</Text>
+                    <Text className="text-textSecondary text-sm leading-5">
+                        Review how Lockout works and learn about intentional focus.
+                    </Text>
+                </View>
+                <Pressable
+                    onPress={() => router.push("/onboarding")}
+                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
+                >
+                    <Text className="text-accentForeground font-bold text-[14px] tracking-wide">
+                        Revisit Guide
+                    </Text>
+                </Pressable>
             </View>
-            <Pressable
-                onPress={() => router.push("/onboarding")}
-                className="bg-surface px-3.5 py-2 rounded-xl active:opacity-75"
-            >
-                <Text className="text-text font-bold text-xs uppercase tracking-wider">
-                    Revisit
-                </Text>
-            </Pressable>
         </View>
     );
 }

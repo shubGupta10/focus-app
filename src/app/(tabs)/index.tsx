@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSessionController } from "../../features/session/hooks/useSessionController";
 import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 
+
 export default function Index() {
     const { getSetting } = useSettings();
     const { activeStyle, colors, isDarkMode } = useTheme();
@@ -54,9 +55,12 @@ export default function Index() {
 
     useFocusEffect(
         useCallback(() => {
-            engine.loadSelectedApps();
-            engine.checkPermissions();
-            engine.refreshSessionState();
+            const frameId = requestAnimationFrame(() => {
+                engine.loadSelectedApps();
+                engine.checkPermissions();
+                engine.refreshSessionState();
+            });
+            return () => cancelAnimationFrame(frameId);
         }, [])
     );
 
@@ -84,7 +88,7 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/shop")}
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opactiy-70 mr-3"
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-3"
                             accessibilityRole="button"
                             accessibilityLabel="Open Shop"
                         >
@@ -116,25 +120,25 @@ export default function Index() {
                                         setShowPermission(true);
                                     }
                                 }}
-                                className="flex-row items-center bg-surfaceElevated px-4 py-2.5 rounded-full mt-3 active:opacity-75 shadow-sm"
+                                className="flex-row items-center bg-surfaceElevated px-5 py-3 rounded-full mt-3 active:opacity-75"
                             >
                                 <Ionicons
                                     name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
-                                    size={16}
+                                    size={18}
                                     color={colors.accent}
                                     style={{ marginRight: 8 }}
                                 />
-                                <Text className="text-text font-medium text-sm mr-1">
+                                <Text className="text-text font-bold text-[15px] mr-2">
                                     {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
                                 </Text>
-                                <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
+                                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
                             </Pressable>
                         </View>
                     ) : (
                         <View className="items-center mt-6 mb-2">
-                            <Text className="text-text font-extrabold text-2xl tracking-tight mb-1">{greeting}</Text>
-                            <Text className="text-textSecondary text-[15px] font-semibold">
-                                <Text className="text-accent font-semibold">{todayTimeString}</Text> focused today · <Text className="text-accent font-semibold">{todayStats.today_sessions}</Text> sessions
+                            <Text className="text-text font-black text-2xl tracking-tight mb-1">{greeting}</Text>
+                            <Text className="text-textSecondary text-[15px] font-medium">
+                                <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
                             </Text>
                         </View>
                     )}

@@ -24,81 +24,82 @@ export function SettingsAboutCard() {
     };
 
     return (
-        <View className="px-6 py-5 mb-6">
-            <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase mb-3">
+        <View className="px-6 mb-10">
+            <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                 About & Support
             </Text>
 
-            <View className="bg-surfaceElevated rounded-2xl overflow-hidden border border-border">
+            <View className="bg-surfaceElevated rounded-3xl overflow-hidden py-2">
                 <Pressable
                     onPress={() => router.push("/updates")}
-                    className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
-                        <Ionicons
-                            name="cloud-download"
-                            size={20}
-                            color="#3b82f6"
-                            style={{ marginRight: 12 }}
-                        />
-                        <Text className="text-text font-bold text-base">
+                        <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">
+                            <Ionicons name="cloud-download" size={16} color="#3b82f6" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">
                             App Updates
                         </Text>
                     </View>
-                    <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="#9ca3af"
-                    />
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
 
                 <Pressable
                     onPress={handleRateApp}
-                    className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
-                        <Ionicons name="star" size={20} color="#f59e0b" style={{ marginRight: 12 }} />
-                        <Text className="text-text font-bold text-base">Rate the App</Text>
+                        <View className="w-8 h-8 rounded-full bg-[#f59e0b]/10 items-center justify-center mr-4">
+                            <Ionicons name="star" size={16} color="#f59e0b" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Rate the App</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
 
                 <Pressable
                     onPress={handleContactSupport}
-                    className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
-                        <Ionicons name="mail" size={20} color="#3b82f6" style={{ marginRight: 12 }} />
-                        <Text className="text-text font-bold text-base">Contact Support</Text>
+                        <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">
+                            <Ionicons name="mail" size={16} color="#3b82f6" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Contact Support</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
 
                 <Pressable
                     onPress={handlePrivacyPolicy}
-                    className="flex-row items-center justify-between p-5 border-b border-border active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
-                        <Ionicons name="shield-checkmark" size={20} color="#10b981" style={{ marginRight: 12 }} />
-                        <Text className="text-text font-bold text-base">Privacy Policy</Text>
+                        <View className="w-8 h-8 rounded-full bg-[#10b981]/10 items-center justify-center mr-4">
+                            <Ionicons name="shield-checkmark" size={16} color="#10b981" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Privacy Policy</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
 
                 <Pressable
                     onPress={handleTerms}
-                    className="flex-row items-center justify-between p-5 active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
-                        <Ionicons name="document-text" size={20} color="#8b5cf6" style={{ marginRight: 12 }} />
-                        <Text className="text-text font-bold text-base">Terms of Service</Text>
+                        <View className="w-8 h-8 rounded-full bg-[#8b5cf6]/10 items-center justify-center mr-4">
+                            <Ionicons name="document-text" size={16} color="#8b5cf6" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Terms of Service</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
             </View>
 
             <View className="items-center mt-6">
-                <Text className="text-textSecondary text-xs font-medium tracking-widest uppercase opacity-60">
+                <Text className="text-textSecondary text-[11px] font-medium tracking-widest uppercase opacity-60">
                     Lockout v{Constants.expoConfig?.version ?? '1.0.0'}
                 </Text>
             </View>

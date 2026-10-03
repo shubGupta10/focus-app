@@ -1,6 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { ShopItem } from "../data/shopCatalog";
 
 interface ShopItemCardProps {
@@ -63,7 +64,7 @@ export function ShopItemCard({ item, isOwned, isEquipped, isProcessing, onBuy, o
                     style={{ backgroundColor: colors.accent }}
                 >
                     {isProcessing ? (
-                        <ActivityIndicator color="#fff" size="small" />
+                        <GlobalLoader color="#fff" size="small" />
                     ) : (
                         <Text className="text-white font-bold text-sm">Unlock Theme</Text>
                     )}

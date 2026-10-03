@@ -10,24 +10,27 @@ export function SettingsDangerZoneCard({ resetAllData }: SettingsDangerZoneCardP
     const { colors } = useTheme();
 
     return (
-        <View className="mx-6 mt-6">
-            <Text className="text-destructive font-bold text-xs tracking-wider uppercase mb-3">
+        <View className="px-6 mb-6 mt-2">
+            <Text className="text-destructive font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                 Danger Zone
             </Text>
-            <Pressable
-                onPress={resetAllData}
-                className="bg-surfaceElevated rounded-2xl p-5 flex-row items-center justify-between active:opacity-70"
-            >
-                <View className="flex-1 pr-4">
-                    <Text className="text-text font-bold text-lg mb-1">Reset All Data</Text>
+            
+            <View className="bg-surfaceElevated rounded-3xl p-5 border border-destructive/20">
+                <View className="mb-5">
+                    <Text className="text-text font-bold text-[16px] mb-1">Reset All Data</Text>
                     <Text className="text-textSecondary text-sm leading-5">
-                        Delete all sessions, stats, coins, and cached data.
+                        Delete all sessions, stats, coins, and cached data. This action cannot be undone.
                     </Text>
                 </View>
-                <View className="bg-destructive/10 p-2.5 rounded-xl">
-                    <Ionicons name="trash-outline" size={20} color={colors.destructive} />
-                </View>
-            </Pressable>
+                <Pressable
+                    onPress={resetAllData}
+                    className="bg-destructive py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
+                >
+                    <Text className="text-white font-bold text-[14px] tracking-wide">
+                        Delete Data
+                    </Text>
+                </Pressable>
+            </View>
         </View>
     );
 }

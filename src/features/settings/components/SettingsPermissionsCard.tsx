@@ -19,30 +19,30 @@ export function SettingsPermissionsCard({
     setPermissionModalVisible
 }: SettingsPermissionsCardProps) {
     return (
-        <View className="px-6 pb-5">
-            <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase mb-3">
+        <View className="px-6 mb-6">
+            <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                 Device
             </Text>
 
-            <View className="bg-surfaceElevated rounded-2xl p-5">
-                <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-text font-bold text-lg">System Permissions</Text>
-                    <View className={`px-2.5 py-1 rounded-full border ${allPermissionsGranted ? 'bg-successMuted border-transparent' : 'bg-warningMuted border-warning/40'}`}>
-                        <Text className={`text-xs font-bold ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
+            <View className="bg-surfaceElevated rounded-3xl p-5">
+                <View className="flex-row items-center justify-between mb-3">
+                    <Text className="text-text font-bold text-[16px]">System Permissions</Text>
+                    <View className={`px-3 py-1.5 rounded-full ${allPermissionsGranted ? 'bg-success/10' : 'bg-warning/10'}`}>
+                        <Text className={`text-[11px] font-bold tracking-widest uppercase ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
                             {allPermissionsGranted ? "All Active" : "Setup Needed"}
                         </Text>
                     </View>
                 </View>
 
-                <Text className="text-textSecondary text-sm leading-5 mb-4">
+                <Text className="text-textSecondary text-sm leading-5 mb-5">
                     Required for foreground app detection, blocking overlays, and background tracking.
                 </Text>
 
                 <Pressable
                     onPress={() => setPermissionModalVisible(true)}
-                    className="bg-accent py-3 px-4 rounded-xl items-center justify-center active:opacity-80"
+                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
                 >
-                    <Text className="text-accentForeground font-black text-xs tracking-wider uppercase">
+                    <Text className="text-accentForeground font-bold text-[14px] tracking-wide">
                         {allPermissionsGranted ? "Review Permissions" : "Grant Permissions"}
                     </Text>
                 </Pressable>

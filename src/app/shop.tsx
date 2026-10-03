@@ -5,7 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useRef } from "react";
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShopScreen() {
@@ -76,8 +77,8 @@ export default function ShopScreen() {
                     </View>
 
                     <View className="mb-10">
-                        <View className="px-6 mb-4">
-                            <Text className="text-text font-bold text-lg tracking-tight">Colour Palette</Text>
+                        <View className="px-6 mb-3">
+                            <Text className="text-accent font-bold text-sm tracking-widest uppercase ml-2">Colour Palette</Text>
                         </View>
 
                         <FlatList
@@ -123,16 +124,16 @@ export default function ShopScreen() {
                     </View>
 
                     <View className="mb-4">
-                        <View className="px-6 mb-4 flex-row items-center justify-between">
-                            <Text className="text-text font-bold text-lg tracking-tight">Animation Style</Text>
+                        <View className="px-6 mb-3 flex-row items-center justify-between">
+                            <Text className="text-accent font-bold text-sm tracking-widest uppercase ml-2">Animation Style</Text>
                             <Pressable onPress={() => router.push("/shop-animations")} className="active:opacity-70">
-                                <Text className="text-accent font-medium">View All</Text>
+                                <Text className="text-accent font-medium text-sm">View All</Text>
                             </Pressable>
                         </View>
 
                         {!isReady ? (
                             <View className="h-[340px] items-center justify-center">
-                                <ActivityIndicator size="large" color={colors.accent} />
+                                <GlobalLoader size="large" color={colors.accent} />
                             </View>
                         ) : (
                             <FlatList
@@ -169,8 +170,11 @@ export default function ShopScreen() {
                     </View>
 
                     <View className="px-6 mt-auto pt-8">
+                        <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
+                            How it works
+                        </Text>
                         <View className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center border border-border">
-                            <View className="w-12 h-12 rounded-full bg-surface items-center justify-center mr-4 border border-border shadow-sm">
+                            <View className="w-12 h-12 rounded-full bg-surface items-center justify-center mr-4 shadow-sm border border-border/50">
                                 <Text style={{ fontSize: 24 }}>🪙</Text>
                             </View>
                             <View className="flex-1">

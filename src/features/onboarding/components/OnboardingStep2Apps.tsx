@@ -2,7 +2,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { AppListItem } from "@/features/blocklist/components/AppListItem";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 
 interface OnboardingStep2AppsProps {
     searchQuery: string;
@@ -39,34 +40,34 @@ export function OnboardingStep2Apps({
                     Select the apps that pull you away during work or study. You can change these anytime.
                 </Text>
 
-                <View className="flex-row items-center bg-surface border border-border rounded-xl px-3 py-2 mb-3">
-                    <Ionicons name="search" size={18} color={colors.textSecondary} />
+                <View className="flex-row items-center bg-surface border border-border rounded-full px-4 py-2 mb-3">
+                    <Ionicons name="search" size={20} color={colors.textSecondary} />
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder="Search apps..."
                         placeholderTextColor={colors.textSecondary}
-                        className="flex-1 text-text ml-2 text-sm py-1 font-medium"
+                        className="flex-1 text-text ml-2 text-[15px] py-1.5 font-medium"
                     />
                     {searchQuery.length > 0 && (
-                        <Pressable onPress={() => setSearchQuery("")}>
-                            <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
+                        <Pressable onPress={() => setSearchQuery("")} className="p-1">
+                            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                         </Pressable>
                     )}
                 </View>
 
-                <View className="flex-row items-center justify-between mb-3 px-1">
-                    <Text className="text-textSecondary text-xs font-bold uppercase tracking-wider">
+                <View className="flex-row items-center justify-between mb-3 px-1 mt-2">
+                    <Text className="text-textSecondary text-[11px] font-medium uppercase tracking-widest">
                         Installed Applications
                     </Text>
-                    <Text className="text-accent text-xs font-bold">
+                    <Text className="text-accent text-[11px] font-bold uppercase tracking-widest">
                         {selectedSetSize} selected
                     </Text>
                 </View>
 
                 {installedAppsLength === 0 ? (
                     <View className="flex-1 items-center justify-center">
-                        <ActivityIndicator color={colors.accent} size="small" />
+                        <GlobalLoader color={colors.accent} size="small" />
                     </View>
                 ) : (
                     <FlashList
@@ -88,17 +89,17 @@ export function OnboardingStep2Apps({
             <View className="pt-3 flex-row gap-3">
                 <Pressable
                     onPress={onSkip}
-                    className="flex-1 bg-surface border border-border py-4 rounded-2xl items-center justify-center active:opacity-80"
+                    className="flex-1 bg-surface border border-border py-4 rounded-full items-center justify-center active:opacity-80"
                 >
-                    <Text className="text-textSecondary font-bold text-sm tracking-wider uppercase">
-                        Skip Selection
+                    <Text className="text-text font-bold text-[15px] tracking-wide">
+                        Skip
                     </Text>
                 </Pressable>
                 <Pressable
                     onPress={onContinue}
-                    className="flex-1 bg-accent py-4 rounded-2xl items-center justify-center active:opacity-90"
+                    className="flex-1 bg-accent py-4 rounded-full items-center justify-center active:opacity-90"
                 >
-                    <Text className="text-accentForeground font-black text-sm tracking-wider uppercase">
+                    <Text className="text-accentForeground font-bold text-[15px] tracking-wide">
                         Continue
                     </Text>
                 </Pressable>

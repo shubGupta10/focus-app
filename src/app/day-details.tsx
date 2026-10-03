@@ -3,7 +3,8 @@ import { useDayDetails } from "@/features/stats/hooks/useDayDetails";
 import { formatExactTime, getTodayDateString, secondsToHoursAndMinutes } from "@/utils/timeUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DayDetailsScreen() {
@@ -111,7 +112,7 @@ export default function DayDetailsScreen() {
 
                 {isLoading ? (
                     <View className="py-12 items-center justify-center">
-                        <ActivityIndicator size="small" color={colors.accent} />
+                        <GlobalLoader size="small" color={colors.accent} />
                     </View>
                 ) : dayDetails && dayDetails.sessions.length > 0 ? (
                     <View>

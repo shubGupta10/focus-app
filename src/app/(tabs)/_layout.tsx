@@ -20,14 +20,16 @@ function TabIcon({
 }) {
     return (
         <View className="items-center justify-center">
-            <Ionicons
-                name={focused ? name : outlineName}
-                size={22}
-                color={focused ? colors.accent : colors.textSecondary}
-            />
+            <View className={`w-14 h-8 rounded-full items-center justify-center ${focused ? 'bg-accent/15' : 'bg-transparent'}`}>
+                <Ionicons
+                    name={focused ? name : outlineName}
+                    size={22}
+                    color={focused ? colors.accent : colors.textSecondary}
+                />
+            </View>
             {badgeCount !== undefined && badgeCount > 0 && (
                 <View
-                    className="absolute top-0 right-[-6px] w-2 h-2 rounded-full border-[1.5px]"
+                    className="absolute top-0 right-3 w-2.5 h-2.5 rounded-full border-[1.5px]"
                     style={{
                         backgroundColor: colors.warning,
                         borderColor: colors.surfaceElevated,
@@ -62,11 +64,8 @@ export default function TabLayout() {
                     height: 72,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    elevation: 8,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: isDarkMode ? 0.2 : 0.05,
-                    shadowRadius: 12,
+                    elevation: 0,
+                    shadowOpacity: 0,
                 },
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {

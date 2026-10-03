@@ -1,6 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { getOrbBackground } from "@/features/session/components/orb-themes";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { GlobalLoader } from "@/components/GlobalLoader";
 import { ShopItem } from "../data/shopCatalog";
 
 interface ShopAnimationCardProps {
@@ -29,8 +30,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
 
     return (
         <View
-            className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surface rounded-[32px] overflow-hidden`}
-            style={{ shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 }}
+            className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surfaceElevated rounded-[32px] overflow-hidden`}
         >
             <View className="w-full aspect-square bg-background items-center justify-center overflow-hidden">
                 <View style={{ transform: [{ scale: 0.85 }] }}>
@@ -66,7 +66,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
                         style={!isOwned && !isEquipped ? { backgroundColor: colors.accent } : undefined}
                     >
                         {isProcessing ? (
-                            <ActivityIndicator color={isOwned ? colors.text : "#fff"} size="small" />
+                            <GlobalLoader color={isOwned ? colors.text : "#fff"} size="small" />
                         ) : (
                             <Text className={`font-bold ${!isOwned && !isEquipped ? 'text-white' : isEquipped ? 'text-accent' : 'text-text'}`}>
                                 {isOwned ? (isEquipped ? 'Active' : 'Equip') : 'Unlock'}

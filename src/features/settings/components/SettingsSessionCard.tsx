@@ -20,38 +20,36 @@ export function SettingsSessionCard() {
     };
 
     return (
-        <View className= "px-6 py-5" >
-        <Text className="text-textSecondary font-bold text-xs tracking-wider uppercase mb-3" >
-            Session Preferences
-                </Text>
+        <View className="px-6 mb-6">
+            <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
+                Session Preferences
+            </Text>
 
-                < View className = "bg-surfaceElevated rounded-2xl p-5 flex-col justify-between" >
-                    <View className="mb-4" >
-                        <Text className="text-text font-bold text-lg mb-1" > Default Timer </Text>
-                            < Text className = "text-textSecondary text-sm leading-5" >
-                                Choose the default duration when starting a new session.
+            <View className="bg-surfaceElevated rounded-3xl p-5">
+                <View className="mb-5">
+                    <Text className="text-text font-bold text-[16px] mb-1">Default Timer</Text>
+                    <Text className="text-textSecondary text-sm leading-5">
+                        Choose the default duration when starting a new session.
                     </Text>
-                                    </View>
+                </View>
 
-                                    < View className = "flex-row items-center justify-between bg-surface rounded-xl p-1 border border-border" >
-                                    {
-                                        TIMER_OPTIONS.map((mins) => {
-                                            const isSelected = defaultTimer === mins;
-                                            return (
-                                                <Pressable
-                                key= { mins }
-                                            onPress = {() => handleTimerSelect(mins)
-                                        }
-                                className = {`flex-1 items-center justify-center py-2.5 rounded-lg ${isSelected ? 'bg-accent' : 'bg-transparent'}`}
-                                        >
-                                        <Text className={ `font-bold ${isSelected ? 'text-white' : 'text-textSecondary'}` }>
-                                            { mins } min
-                                                </Text>
-                                                </Pressable>
+                <View className="flex-row items-center justify-between bg-surface rounded-2xl p-1.5 border border-border">
+                    {TIMER_OPTIONS.map((mins) => {
+                        const isSelected = defaultTimer === mins;
+                        return (
+                            <Pressable
+                                key={mins}
+                                onPress={() => handleTimerSelect(mins)}
+                                className={`flex-1 items-center justify-center py-3 rounded-xl ${isSelected ? 'bg-accent' : 'bg-transparent'}`}
+                            >
+                                <Text className={`font-bold ${isSelected ? 'text-white' : 'text-textSecondary'}`}>
+                                    {mins} min
+                                </Text>
+                            </Pressable>
                         );
-})}
-</View>
-    </View>
-    </View>
+                    })}
+                </View>
+            </View>
+        </View>
     );
 }

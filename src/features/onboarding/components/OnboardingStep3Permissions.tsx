@@ -65,11 +65,11 @@ export function OnboardingStep3Permissions({
 
             <Pressable
                 onPress={onComplete}
-                className="bg-accent py-4 rounded-2xl items-center justify-center active:opacity-90 mt-4"
+                className="bg-accent py-4 rounded-full items-center justify-center active:opacity-90 mt-4"
                 accessibilityRole="button"
                 accessibilityLabel="Finish and Start Focusing"
             >
-                <Text className="text-accentForeground font-black text-sm tracking-wider uppercase">
+                <Text className="text-accentForeground font-bold text-[15px] tracking-wide">
                     {allPermissionsGranted ? "Start Focusing" : "Complete Setup"}
                 </Text>
             </Pressable>

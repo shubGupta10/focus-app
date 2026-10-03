@@ -68,8 +68,8 @@ export function RoutineEmptyState({
                 </Pressable>
             </View>
 
-            <View className="mb-3.5 px-1">
-                <Text className="text-textSecondary text-xs font-bold uppercase tracking-wider">
+            <View className="mt-4 mb-1">
+                <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                     Suggested Templates
                 </Text>
             </View>
@@ -79,7 +79,7 @@ export function RoutineEmptyState({
                     <Pressable
                         key={template.name}
                         onPress={() => onSelectTemplate(template)}
-                        className="bg-surfaceElevated rounded-3xl p-5 mb-3 active:opacity-80"
+                        className="bg-surfaceElevated rounded-[24px] p-5 mb-3 active:opacity-80 border border-border/30 shadow-sm"
                         accessibilityRole="button"
                         accessibilityLabel={`Use template ${template.name}`}
                     >

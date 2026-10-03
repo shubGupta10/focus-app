@@ -26,16 +26,16 @@ export default function SettingsTab() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <View className="flex-row items-center px-6 pt-5 pb-5 border-b border-border">
+            <View className="flex-row items-center px-6 pt-5 pb-2">
                 <Pressable
                     onPress={() => router.back()}
                     className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
                     accessibilityRole="button"
                     accessibilityLabel="Go back to Home"
                 >
-                    <Ionicons name="chevron-back" size={24} color={colors.text} />
+                    <Ionicons name="chevron-back" size={20} color={colors.text} />
                 </Pressable>
-                <Text className="text-text text-3xl font-black tracking-tight">Settings</Text>
+                <Text className="text-text text-3xl font-black tracking-tight leading-none">Settings</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>

@@ -1,6 +1,6 @@
 import { useToast } from "@/contexts/ToastContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Vibration } from "react-native";
 
 export function useBlocklistController() {
@@ -9,14 +9,19 @@ export function useBlocklistController() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"all" | "guarded">("all");
 
-    const filteredApps = engine.installedApps.filter((app) => {
-        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());
-        if (!matchesSearch) return false;
-        if (filterMode === "guarded") {
-            return engine.selectedApps.includes(app.packageName);
-        }
-        return true;
-    });
+    const filteredApps = useMemo(() => {
+        return engine.installedApps.filter((app) => {
+
+            const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+            if (!matchesSearch) return false;
+
+            if (filterMode === "guarded") {
+                return engine.selectedApps.includes(app.packageName);
+            }
+            return true;
+        })
+    }, [engine.installedApps, searchQuery, filterMode, engine.selectedApps]);
 
     const handleToggleApp = useCallback((packageName: string) => {
         if (engine.isSessionActive) return;

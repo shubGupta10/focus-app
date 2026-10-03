@@ -1,6 +1,6 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { useTheme } from "@/contexts/ThemeContext";
 
 interface BlocklistSearchHeaderProps {
     searchQuery: string;
@@ -24,10 +24,10 @@ export function BlocklistSearchHeader({
     return (
         <>
             <View className="px-6 mb-3">
-                <View className="flex-row items-center bg-surfaceElevated rounded-2xl px-4 py-2.5">
-                    <Ionicons name="search" size={18} color={colors.textSecondary} />
+                <View className="flex-row items-center bg-surfaceElevated border border-border rounded-full px-4 py-3">
+                    <Ionicons name="search" size={20} color={colors.textSecondary} />
                     <TextInput
-                        className="flex-1 ml-2.5 text-text text-sm font-medium"
+                        className="flex-1 ml-2.5 text-text text-[15px] font-medium"
                         placeholder="Search apps by name..."
                         placeholderTextColor={colors.textMuted}
                         value={searchQuery}
@@ -49,7 +49,7 @@ export function BlocklistSearchHeader({
                 </View>
             </View>
 
-            <View className="flex-row px-6 mb-4 gap-2">
+            <View className="flex-row px-6 mb-6 gap-2 mt-2">
                 <Pressable
                     onPress={() => setFilterMode("all")}
                     className={`px-3.5 py-1.5 rounded-full border ${filterMode === "all"
@@ -80,7 +80,7 @@ export function BlocklistSearchHeader({
                         className={`text-xs font-bold ${filterMode === "guarded" ? "text-accentForeground" : "text-textSecondary"
                             }`}
                     >
-                        Guarded ({selectedAppsCount})
+                        Blocked ({selectedAppsCount})
                     </Text>
                 </Pressable>
             </View>
