@@ -121,6 +121,8 @@
 - [x] **SQLite Corruption Fix (v1.1.1)**: Disabled SQLite `WAL` mode and switched to `TRUNCATE` in `database.ts` to permanently fix the `database disk image is malformed` crash caused by Android freezing the background process during SQLite sidecar synchronization.
 - [x] **UsageStats Telemetry (v1.1.1)**: Injected deep `Log.d` tracking into the native Android loop and JS bridge to allow explicit real-time debugging of Android OS Shadow-Revocation bugs for the `UsageStatsManager`.
 - [x] **v1.1.1 Release**: Successfully generated and published the `application-d36a149e.apk` via EAS `preview` profile to address critical native blocker and database stability issues.
+- [x] **Material 3 UI & Performance Polish**: Upgraded the app's visual identity to strictly follow MD3 guidelines (detached headers, zero-elevation pill tabs, `rounded-[24px]` bubbles). Fixed React Native JS thread lag during tab switching by deferring heavy calculations with `requestAnimationFrame` and wrapping `useBlocklistController` filters in `useMemo`.
+- [x] **Global Loader**: Created a central SVG-based classic Material Circular Progress Indicator (`GlobalLoader.tsx`) using `react-native-reanimated`, replacing all legacy `ActivityIndicator` instances across the codebase.
 
 ## Phase 17: Advanced Analytics & Deep Insights
 - [x] Expand SQLite schema to track granular session records, hourly distributions, and blocked attempt counts.
