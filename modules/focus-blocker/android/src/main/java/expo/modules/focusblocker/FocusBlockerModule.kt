@@ -86,6 +86,32 @@ class FocusBlockerModule : Module() {
             }
         }
 
+        Function("hasExactAlarmPermission") {
+            val context = appContext.reactContext ?: return@Function false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                return@Function alarmManager.canScheduleExactAlarms()
+            }
+            return@Function true
+        }
+
+        Function("requestExactAlarmPermission") {
+            val context = appContext.reactContext
+            if (context != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                if (!alarmManager.canScheduleExactAlarms()) {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    intent.data = android.net.Uri.parse("package:" + context.packageName)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        // Fallback if intent is not available
+                    }
+                }
+            }
+        }
+
         Function("goHome") {
             val context = appContext.reactContext
             if (context != null) {
@@ -254,6 +280,7 @@ class FocusBlockerModule : Module() {
                             pendingIntent
                         )
                     } catch (inner: Exception) {
+                        Log.e("FocusBlocker", "Complete failure scheduling routine alarm for id=$routineId", inner)
                     }
                 }
             }

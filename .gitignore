@@ -9,6 +9,12 @@ dist/
 web-build/
 expo-env.d.ts
 
+env
+.env
+
+REAL_DEVICE_TEST_PLAN.md
+PRODUCTION_READINESS_AUDIT.md
+
 # Native
 .kotlin/
 *.orig.*

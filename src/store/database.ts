@@ -74,49 +74,47 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     if (currentVersion < 4) {
         try {
             await db.execAsync("ALTER TABLE active_session ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
-        } catch (error) {
-
+        } catch (error: any) {
+            if (!error.message.includes("duplicate column name")) {
+                console.error("Migration v4 failed for active_session:", error);
+            }
         }
         try {
             await db.execAsync("ALTER TABLE sessions ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
-        } catch (error) {
-
+        } catch (error: any) {
+            if (!error.message.includes("duplicate column name")) {
+                console.error("Migration v4 failed for sessions:", error);
+            }
         }
-        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     }
 
     if (currentVersion < 6) {
-        try {
-            await db.execAsync(`
-                CREATE TABLE IF NOT EXISTS blocked_attempts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    package_name TEXT NOT NULL,
-                    timestamp INTEGER NOT NULL
-                );
-            `);
-        } catch (error) {
-            console.error("Failed to migrate blocked_attempts", error);
-        }
-        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+        await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS blocked_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                package_name TEXT NOT NULL,
+                timestamp INTEGER NOT NULL
+            );
+        `);
     }
 
     if (currentVersion < 7) {
-        try {
-            await db.execAsync(
-                ` CREATE TABLE IF NOT EXISTS shop_purchases (
-                    item_id TEXT PRIMARY KEY,
-                    purchased_at INTEGER NOT NULL
-                );`
-            );
-        } catch (error) {
-            console.error("Failed to migrate shop_purchases", error);
-        }
-        await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+        await db.execAsync(
+            ` CREATE TABLE IF NOT EXISTS shop_purchases (
+                item_id TEXT PRIMARY KEY,
+                purchased_at INTEGER NOT NULL
+            );`
+        );
     }
-    try {
-        await db.execAsync("ALTER TABLE routines ADD COLUMN blocked_apps TEXT NOT NULL DEFAULT '';");
-    } catch (error) {
-        // Column likely already exists
+    
+    if (currentVersion < 8) {
+        try {
+            await db.execAsync("ALTER TABLE routines ADD COLUMN blocked_apps TEXT NOT NULL DEFAULT '';");
+        } catch (error: any) {
+            if (!error.message.includes("duplicate column name")) {
+                console.error("Migration v8 failed for routines:", error);
+            }
+        }
     }
 
     await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);

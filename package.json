@@ -1,12 +1,13 @@
 {
   "name": "lockout",
   "main": "expo-router/entry",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~57.0.14",
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@sentry/react-native": "~7.11.0",
     "@shopify/flash-list": "2.0.2",
     "babel-preset-expo": "^57.0.9",
     "expo": "~57.0.18",

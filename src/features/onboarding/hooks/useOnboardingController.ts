@@ -2,7 +2,7 @@ import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { AppState } from "react-native";
+import { AppState, PermissionsAndroid, Platform } from "react-native";
 
 export function useOnboardingController() {
     const engine = useFocusEngine();
@@ -12,12 +12,30 @@ export function useOnboardingController() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSet, setSelectedSet] = useState<Set<string>>(new Set(engine.selectedApps));
 
+    const [hasNotification, setHasNotification] = useState(true);
+
+    const checkExtraPermissions = async () => {
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const status = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+            setHasNotification(status);
+        }
+    };
+
+    const requestNotification = async () => {
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+            setHasNotification(granted === PermissionsAndroid.RESULTS.GRANTED);
+        }
+    };
+
     useEffect(() => {
         if (step === 3) {
             engine.checkPermissions();
+            checkExtraPermissions();
             const subscription = AppState.addEventListener("change", (state) => {
                 if (state === "active") {
                     engine.checkPermissions();
+                    checkExtraPermissions();
                 }
             })
             return () => subscription.remove();
@@ -67,7 +85,7 @@ export function useOnboardingController() {
         router.replace("/(tabs)");
     };
 
-    const allPermissionsGranted = engine.hasUsage && engine.hasOverlay && engine.hasBattery;
+    const allPermissionsGranted = engine.hasUsage && engine.hasOverlay && engine.hasBattery && hasNotification;
 
     return {
         engine,
@@ -80,6 +98,8 @@ export function useOnboardingController() {
         toggleAppSelection,
         handleSaveAppsAndContinue,
         handleCompleteOnboarding,
-        allPermissionsGranted
+        allPermissionsGranted,
+        hasNotification,
+        requestNotification
     };
 }

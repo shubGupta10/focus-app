@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lockout",
     "slug": "lockout",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -17,7 +17,7 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.shubham720.lockout",
-      "versionCode": 3,
+      "versionCode": 4,
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",
@@ -25,7 +25,9 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.QUERY_ALL_PACKAGES"
+        "android.permission.QUERY_ALL_PACKAGES",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.SCHEDULE_EXACT_ALARM"
       ]
     },
     "web": {
@@ -48,7 +50,8 @@
         }
       ],
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,

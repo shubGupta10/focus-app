@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { Alert, AppState } from "react-native";
+import { Alert, AppState, PermissionsAndroid, Platform } from "react-native";
 import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 
 export function useSettingsController() {
@@ -11,11 +11,17 @@ export function useSettingsController() {
     const [hasUsage, setHasUsage] = useState(false);
     const [hasOverlay, setHasOverlay] = useState(false);
     const [hasBattery, setHasBattery] = useState(false);
+    const [hasNotification, setHasNotification] = useState(true);
 
-    const checkPermissions = () => {
+    const checkPermissions = async () => {
         setHasUsage(FocusBlocker.hasUsagePermission());
         setHasOverlay(FocusBlocker.hasOverlayPermission());
         setHasBattery(FocusBlocker.hasBatteryPermission());
+        
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const status = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+            setHasNotification(status);
+        }
     };
 
     useEffect(() => {
@@ -53,7 +59,14 @@ export function useSettingsController() {
         );
     };
 
-    const allPermissionsGranted = hasUsage && hasOverlay && hasBattery;
+    const requestNotification = async () => {
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+            setHasNotification(granted === PermissionsAndroid.RESULTS.GRANTED);
+        }
+    };
+
+    const allPermissionsGranted = hasUsage && hasOverlay && hasBattery && hasNotification;
 
     return {
         permissionModalVisible,
@@ -61,7 +74,9 @@ export function useSettingsController() {
         hasUsage,
         hasOverlay,
         hasBattery,
+        hasNotification,
         allPermissionsGranted,
-        resetAllData
+        resetAllData,
+        requestNotification
     };
 }

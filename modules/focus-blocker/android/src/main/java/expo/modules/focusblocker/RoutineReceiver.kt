@@ -51,13 +51,58 @@ class RoutineReceiver : BroadcastReceiver() {
                 putExtra("durationMs", durationMs)
                 putExtra("isStrict", isStrict)
             }
-            ContextCompat.startForegroundService(context, serviceIntent)
+            try {
+                ContextCompat.startForegroundService(context, serviceIntent)
+            } catch (e: Exception) {
+                val isFgsBlocked = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    e.javaClass.name == "android.app.ForegroundServiceStartNotAllowedException"
+
+                if (isFgsBlocked) {
+                    Log.e("RoutineReceiver", "FGS start not allowed by OS (background start restriction)", e)
+                } else {
+                    Log.e("RoutineReceiver", "Unexpected error starting FocusService: ${e.javaClass.simpleName}", e)
+                }
+
+                val notificationText = if (isFgsBlocked)
+                    "Lockout needs Alarms & Reminders permission to start background routines. Tap to fix."
+                else
+                    "Your routine couldn't start due to an unexpected error. Tap to open Lockout."
+
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+
+                val notificationBuilder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    android.app.Notification.Builder(context, "FocusBlockerChannel_V2")
+                        .setContentTitle("Routine Failed to Start")
+                        .setContentText(notificationText)
+                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                        .setAutoCancel(true)
+                } else {
+                    android.app.Notification.Builder(context)
+                        .setContentTitle("Routine Failed to Start")
+                        .setContentText(notificationText)
+                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                        .setAutoCancel(true)
+                }
+
+                if (launchIntent != null) {
+                    val pendingIntent = android.app.PendingIntent.getActivity(
+                        context,
+                        0,
+                        launchIntent,
+                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                    )
+                    notificationBuilder.setContentIntent(pendingIntent)
+                }
+
+                manager.notify(3, notificationBuilder.build())
+            }
 
             if (routineId != -1 && daysOfWeek.isNotEmpty() && startTime.isNotEmpty()) {
                 rescheduleNext(context, routineId, daysOfWeek, startTime, endTime, isStrict, passedApps)
             }
         } catch (e: Exception) {
-            Log.e("RoutineReceiver", "Error launching scheduled routine", e)
+            Log.e("RoutineReceiver", "Error in RoutineReceiver", e)
         }
     }
 
@@ -130,18 +175,36 @@ class RoutineReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    nextTrigger,
-                    pendingIntent
-                )
-            } else {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    nextTrigger,
-                    pendingIntent
-                )
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        nextTrigger,
+                        pendingIntent
+                    )
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        nextTrigger,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        nextTrigger,
+                        pendingIntent
+                    )
+                }
+            } catch (e: Exception) {
+                try {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        nextTrigger,
+                        pendingIntent
+                    )
+                } catch (inner: Exception) {
+                    Log.e("RoutineReceiver", "Complete failure rescheduling routine", inner)
+                }
             }
         }
     }

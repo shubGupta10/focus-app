@@ -21,7 +21,9 @@ export default function SettingsTab() {
         hasOverlay,
         hasBattery,
         allPermissionsGranted,
-        resetAllData
+        resetAllData,
+        hasNotification,
+        requestNotification,
     } = useSettingsController();
 
     return (
@@ -49,6 +51,8 @@ export default function SettingsTab() {
                     hasUsage={hasUsage}
                     hasOverlay={hasOverlay}
                     hasBattery={hasBattery}
+                    hasNotification={hasNotification}
+                    requestNotification={requestNotification}
                     permissionModalVisible={permissionModalVisible}
                     setPermissionModalVisible={setPermissionModalVisible}
                 />

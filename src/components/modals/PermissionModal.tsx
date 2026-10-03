@@ -20,6 +20,8 @@ interface PermissionModalProps {
     hasUsage: boolean;
     hasOverlay: boolean;
     hasBattery: boolean;
+    hasNotification?: boolean;
+    requestNotification?: () => void;
 }
 
 export function PermissionRow({
@@ -69,7 +71,7 @@ export function PermissionRow({
     );
 }
 
-export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBattery }: PermissionModalProps) {
+export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBattery, hasNotification, requestNotification }: PermissionModalProps) {
     const { colors, isDarkMode } = useTheme();
     return (
         <Modal visible={visible} transparent animationType="fade">
@@ -126,6 +128,16 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                             accessibilityLabel="Ignore Battery Optimization permission"
                             accessibilityHint="Opens system settings to disable battery optimization"
                         />
+                        {hasNotification !== undefined && requestNotification && (
+                            <PermissionRow
+                                label="4. Notifications"
+                                description="To alert you when a session ends"
+                                isGranted={hasNotification}
+                                onRequest={requestNotification}
+                                accessibilityLabel="Notifications permission"
+                                accessibilityHint="Prompts to allow notifications"
+                            />
+                        )}
                     </View>
 
                     <TouchableOpacity

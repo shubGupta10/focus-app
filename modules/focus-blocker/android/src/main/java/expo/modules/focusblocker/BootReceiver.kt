@@ -15,7 +15,7 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        if (action != Intent.ACTION_BOOT_COMPLETED && action != "android.intent.action.LOCKED_BOOT_COMPLETED") {
+        if (action != Intent.ACTION_BOOT_COMPLETED) {
             return
         }
 
@@ -38,6 +38,7 @@ class BootReceiver : BroadcastReceiver() {
                 }
                 appsCursor.close()
             } catch (e: Exception) {
+                Log.e("BootReceiver", "Failed to query selected_apps; proceeding without custom blocklist", e)
             }
 
             val cursor = db.rawQuery(
@@ -75,18 +76,36 @@ class BootReceiver : BroadcastReceiver() {
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerMs,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerMs,
-                            pendingIntent
-                        )
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                            alarmManager.setAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                triggerMs,
+                                pendingIntent
+                            )
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            alarmManager.setExactAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                triggerMs,
+                                pendingIntent
+                            )
+                        } else {
+                            alarmManager.setExact(
+                                AlarmManager.RTC_WAKEUP,
+                                triggerMs,
+                                pendingIntent
+                            )
+                        }
+                    } catch (e: Exception) {
+                        try {
+                            alarmManager.setAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                triggerMs,
+                                pendingIntent
+                            )
+                        } catch (inner: Exception) {
+                            Log.e("BootReceiver", "Failed to schedule routine on boot", inner)
+                        }
                     }
                 }
             }

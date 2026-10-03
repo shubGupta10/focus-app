@@ -5,6 +5,7 @@ import { Routine, RoutineInput } from "@/types/routine";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
+import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 import { StarterTemplate } from "../components/RoutineEmptyState";
 
 export function useRoutinesController() {
@@ -29,8 +30,24 @@ export function useRoutinesController() {
         }, [loadRoutines])
     );
 
+    const checkExactAlarm = (): boolean => {
+        if (!FocusBlocker.hasExactAlarmPermission()) {
+            Alert.alert(
+                "Exact Alarms Required",
+                "To start your sessions automatically at the exact time you schedule them, Lockout needs the Alarms & Reminders permission.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Open Settings", onPress: () => FocusBlocker.requestExactAlarmPermission() }
+                ]
+            );
+            return false;
+        }
+        return true;
+    };
+
     const handleOpenCreate = (template?: StarterTemplate) => {
         if (engine.isSessionActive) return;
+        if (!checkExactAlarm()) return;
         if (template) {
             setSelectedRoutine({
                 id: 0,
@@ -85,6 +102,7 @@ export function useRoutinesController() {
 
     const handleToggleRoutineState = useCallback((id: number, val: boolean) => {
         if (engine.isSessionActive) return;
+        if (val && !checkExactAlarm()) return;
         toggleRoutineState(id, val);
     }, [engine.isSessionActive, toggleRoutineState]);
 

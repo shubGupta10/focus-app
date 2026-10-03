@@ -19,7 +19,9 @@ export default function OnboardingScreen() {
         toggleAppSelection,
         handleSaveAppsAndContinue,
         handleCompleteOnboarding,
-        allPermissionsGranted
+        allPermissionsGranted,
+        hasNotification,
+        requestNotification
     } = useOnboardingController();
 
     return (
@@ -75,6 +77,8 @@ export default function OnboardingScreen() {
                     hasUsage={engine.hasUsage}
                     hasOverlay={engine.hasOverlay}
                     hasBattery={engine.hasBattery}
+                    hasNotification={hasNotification}
+                    requestNotification={requestNotification}
                     allPermissionsGranted={allPermissionsGranted}
                     onComplete={handleCompleteOnboarding}
                 />

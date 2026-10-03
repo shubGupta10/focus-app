@@ -31,6 +31,8 @@ export declare class FocusBlockerModule {
   requestOverlayPermission(): void;
   hasBatteryPermission(): boolean;
   requestBatteryPermission(): void;
+  hasExactAlarmPermission(): boolean;
+  requestExactAlarmPermission(): void;
 
   startService(customBlockedApps: string[], durationMs: number, isStrict?: boolean): Promise<string>;
   stopService(): Promise<string>;

@@ -16,7 +16,7 @@ export function SettingsAboutCard() {
     };
 
     const handlePrivacyPolicy = () => {
-        Linking.openURL("https://lockoutapp.com/privacy"); // Replace with actual URL later
+        Linking.openURL("https://github.com/shubGupta10/focus-app/blob/main/PRIVACY_POLICY.md");
     };
 
     const handleTerms = () => {

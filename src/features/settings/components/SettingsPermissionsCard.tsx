@@ -6,6 +6,8 @@ interface SettingsPermissionsCardProps {
     hasUsage: boolean;
     hasOverlay: boolean;
     hasBattery: boolean;
+    hasNotification: boolean;
+    requestNotification: () => void;
     permissionModalVisible: boolean;
     setPermissionModalVisible: (visible: boolean) => void;
 }
@@ -15,6 +17,8 @@ export function SettingsPermissionsCard({
     hasUsage,
     hasOverlay,
     hasBattery,
+    hasNotification,
+    requestNotification,
     permissionModalVisible,
     setPermissionModalVisible
 }: SettingsPermissionsCardProps) {
@@ -35,7 +39,7 @@ export function SettingsPermissionsCard({
                 </View>
 
                 <Text className="text-textSecondary text-sm leading-5 mb-5">
-                    Required for foreground app detection, blocking overlays, and background tracking.
+                    Required for foreground app detection, blocking overlays, background tracking, and notifications.
                 </Text>
 
                 <Pressable
@@ -54,6 +58,8 @@ export function SettingsPermissionsCard({
                 hasUsage={hasUsage}
                 hasOverlay={hasOverlay}
                 hasBattery={hasBattery}
+                hasNotification={hasNotification}
+                requestNotification={requestNotification}
             />
         </View>
     );

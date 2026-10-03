@@ -8,6 +8,8 @@ interface OnboardingStep3PermissionsProps {
     hasUsage: boolean;
     hasOverlay: boolean;
     hasBattery: boolean;
+    hasNotification: boolean;
+    requestNotification: () => void;
     allPermissionsGranted: boolean;
     onComplete: () => void;
 }
@@ -16,6 +18,8 @@ export function OnboardingStep3Permissions({
     hasUsage,
     hasOverlay,
     hasBattery,
+    hasNotification,
+    requestNotification,
     allPermissionsGranted,
     onComplete
 }: OnboardingStep3PermissionsProps) {
@@ -59,6 +63,14 @@ export function OnboardingStep3Permissions({
                         onRequest={() => FocusBlocker.requestBatteryPermission()}
                         accessibilityLabel="Ignore Battery Optimization permission"
                         accessibilityHint="Opens system settings to disable battery optimization"
+                    />
+                    <PermissionRow
+                        label="4. Notifications"
+                        description="To alert you when a session ends"
+                        isGranted={hasNotification}
+                        onRequest={requestNotification}
+                        accessibilityLabel="Notifications permission"
+                        accessibilityHint="Prompts to allow notifications"
                     />
                 </View>
             </View>
