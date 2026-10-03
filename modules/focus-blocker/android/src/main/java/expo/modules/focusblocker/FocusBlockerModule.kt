@@ -15,6 +15,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.os.Build
+import android.util.Log
 
 
 class FocusBlockerModule : Module() {
