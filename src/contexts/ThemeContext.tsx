@@ -9,6 +9,8 @@ export type ThemeColors = typeof Colors.light;
 interface ThemeContextType {
     isDarkMode: boolean;
     toggleDarkMode: (val: boolean) => void;
+    themeMode: "light" | "dark" | "system";
+    setThemeMode: (mode: "light" | "dark" | "system") => void;
     colorScheme: "light" | "dark";
     setColorScheme: (scheme: "light" | "dark" | "system") => void;
     colors: ThemeColors;
@@ -27,13 +29,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const { getSetting, setSetting } = useSettings();
     const { colorScheme, setColorScheme } = useColorScheme();
     const [orbTheme, setOrbTheme] = useState("theme_default");
+    const [themeMode, setThemeModeState] = useState<"light" | "dark" | "system">("system");
 
     useEffect(() => {
         getSetting("equipped_orb_theme").then((val) => {
             if (val) setOrbTheme(val);
         });
         getSetting("colorScheme").then((val) => {
-            if (val === "dark" || val === "light") {
+            if (val === "dark" || val === "light" || val === "system") {
+                setThemeModeState(val as "light" | "dark" | "system");
                 setColorScheme(val);
             }
         });
@@ -43,8 +47,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const toggleDarkMode = async (val: boolean) => {
         const nextScheme = val ? "dark" : "light";
+        setThemeModeState(nextScheme);
         setColorScheme(nextScheme);
         await setSetting("colorScheme", nextScheme);
+    };
+
+    const setThemeMode = async (mode: "light" | "dark" | "system") => {
+        setThemeModeState(mode);
+        setColorScheme(mode);
+        await setSetting("colorScheme", mode);
     };
 
     const baseTheme = isDarkMode ? Colors.dark : Colors.light;
@@ -98,6 +109,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             value={{
                 isDarkMode,
                 toggleDarkMode,
+                themeMode,
+                setThemeMode,
                 colorScheme: isDarkMode ? "dark" : "light",
                 setColorScheme,
                 colors,

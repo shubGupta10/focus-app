@@ -16,11 +16,15 @@ export function SettingsAboutCard() {
     };
 
     const handlePrivacyPolicy = () => {
-        Linking.openURL("https://github.com/shubGupta10/focus-app/blob/main/PRIVACY_POLICY.md");
+        Linking.openURL("https://lockout-website.vercel.app/privacy");
     };
 
-    const handleTerms = () => {
-        Linking.openURL("https://lockoutapp.com/terms"); // Replace with actual URL later
+    const handleTransparency = () => {
+        Linking.openURL("https://lockout-website.vercel.app/transparency");
+    };
+
+    const handleWebsite = () => {
+        Linking.openURL("https://lockout-website.vercel.app/");
     };
 
     return (
@@ -85,14 +89,27 @@ export function SettingsAboutCard() {
                 </Pressable>
 
                 <Pressable
-                    onPress={handleTerms}
+                    onPress={handleTransparency}
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                >
+                    <View className="flex-row items-center">
+                        <View className="w-8 h-8 rounded-full bg-[#f43f5e]/10 items-center justify-center mr-4">
+                            <Ionicons name="eye" size={16} color="#f43f5e" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Transparency</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+                </Pressable>
+
+                <Pressable
+                    onPress={handleWebsite}
                     className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
                 >
                     <View className="flex-row items-center">
                         <View className="w-8 h-8 rounded-full bg-[#8b5cf6]/10 items-center justify-center mr-4">
-                            <Ionicons name="document-text" size={16} color="#8b5cf6" />
+                            <Ionicons name="globe" size={16} color="#8b5cf6" />
                         </View>
-                        <Text className="text-text font-bold text-[16px]">Terms of Service</Text>
+                        <Text className="text-text font-bold text-[16px]">Website</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
