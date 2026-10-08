@@ -174,7 +174,7 @@ export default function ShopScreen() {
                             How it works
                         </Text>
                         <View className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center border border-border">
-                            <View className="w-12 h-12 rounded-full bg-surface items-center justify-center mr-4 shadow-sm border border-border/50">
+                            <View className="w-12 h-12 rounded-full bg-surface items-center justify-center mr-4 shadow-sm border border-border">
                                 <Text style={{ fontSize: 24 }}>🪙</Text>
                             </View>
                             <View className="flex-1">

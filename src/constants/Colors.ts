@@ -6,7 +6,7 @@ export const Colors = {
     text: '#1C1618',
     textSecondary: '#5C5355',
     textMuted: '#8A8082',
-    border: 'transparent',
+    border: '#aea5a0',
     icon: '#5C5355',
     accent: '#A35265',
     accentForeground: '#FFFFFF',
@@ -26,7 +26,7 @@ export const Colors = {
     text: '#F0EDEC',
     textSecondary: '#A09896',
     textMuted: '#7A7170',
-    border: 'transparent', // Nuked the harsh borders!
+    border: '#3D3840',
     icon: '#A09896',
     accent: '#C07480',
     accentForeground: '#FFFFFF',

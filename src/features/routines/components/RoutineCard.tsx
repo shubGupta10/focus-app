@@ -48,7 +48,7 @@ export function RoutineCardInner({
         <Pressable
             onPress={onPress}
             className={`bg-surfaceElevated rounded-[24px] p-5 mb-3 ${isEnabled ? "" : "opacity-55"
-                } active:opacity-80 border border-border/30`}
+                } active:opacity-80 border border-border`}
             accessibilityRole="button"
             accessibilityLabel={`Routine ${routine.name}`}
         >
@@ -58,7 +58,7 @@ export function RoutineCardInner({
                         {routine.name}
                     </Text>
                     {Boolean(routine.is_strict) && (
-                        <View className="bg-accent/15 px-2 py-0.5 rounded-md">
+                        <View className="bg-accent px-2 py-0.5 rounded-md">
                             <Text className="text-accent text-[10px] font-bold uppercase">
                                 Strict
                             </Text>

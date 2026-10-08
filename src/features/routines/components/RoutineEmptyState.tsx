@@ -79,7 +79,7 @@ export function RoutineEmptyState({
                     <Pressable
                         key={template.name}
                         onPress={() => onSelectTemplate(template)}
-                        className="bg-surfaceElevated rounded-[24px] p-5 mb-3 active:opacity-80 border border-border/30 shadow-sm"
+                        className="bg-surfaceElevated rounded-[24px] p-5 mb-3 active:opacity-80 border border-border shadow-sm"
                         accessibilityRole="button"
                         accessibilityLabel={`Use template ${template.name}`}
                     >

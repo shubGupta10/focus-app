@@ -73,7 +73,7 @@ export function TodayFocusCard() {
 
             {/* First-time hint */}
             {stats?.total_coins === 0 && (
-                <View className="mt-5 pt-5 border-t border-border/20">
+                <View className="mt-5 pt-5 border-t border-border">
                     <Text className="text-accent text-xs font-medium uppercase tracking-wider mb-1">
                         How coins work
                     </Text>

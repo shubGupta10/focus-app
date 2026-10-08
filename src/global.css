@@ -10,7 +10,7 @@
     --color-text: #1C1618;
     --color-text-secondary: #5C5355;
     --color-text-muted: #8A8082;
-    --color-border: transparent;
+    --color-border: #aea5a0;
     --color-icon: #5C5355;
     --color-accent: #A35265;
     --color-accent-foreground: #FFFFFF;
@@ -32,7 +32,7 @@
       --color-text: #F0EDEC;
       --color-text-secondary: #A09896;
       --color-text-muted: #7A7170;
-      --color-border: transparent;
+      --color-border: #3D3840;
       --color-icon: #A09896;
       --color-accent: #C07480;
       --color-accent-foreground: #FFFFFF;
