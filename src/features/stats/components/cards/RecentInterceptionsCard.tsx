@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { InfoSheet } from "@/components/InfoSheet";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
@@ -17,9 +18,15 @@ export function RecentInterceptionsCard() {
 
     return (
         <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
-            <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-6">
-                Recent Interceptions
-            </Text>
+            <View className="flex-row items-center justify-between mb-6">
+                <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest">
+                    Recent Interceptions
+                </Text>
+                <InfoSheet
+                    title="What is an Interception?"
+                    description={"An interception means you tried to open a distracting app, but we caught you and stopped it from opening.\n\nThis list keeps track of every time you got tempted and we successfully helped you stay on track!"}
+                />
+            </View>
 
             {recentBlockedAttempts && recentBlockedAttempts.length > 0 ? (
                 <View className="space-y-4">

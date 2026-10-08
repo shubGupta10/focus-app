@@ -11,7 +11,7 @@ export default function ProgressTab() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            {/* Page title — stays fixed above scroll */}
+
             <View className="px-6 pt-5 pb-0">
                 <Text className="text-text font-black text-3xl tracking-tight">Progress</Text>
             </View>

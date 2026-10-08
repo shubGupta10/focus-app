@@ -6,13 +6,7 @@ import { Pressable, Text, View } from "react-native";
 
 export function SettingsAboutCard() {
     const handleContactSupport = () => {
-        Linking.openURL("mailto:support@lockoutapp.com?subject=Lockout Support");
-    };
-
-    const handleRateApp = () => {
-        Linking.openURL("market://details?id=com.lockout.app").catch(() => {
-            Linking.openURL("https://play.google.com/store/apps/details?id=com.lockout.app");
-        });
+        Linking.openURL("https://shubhamgupta.online");
     };
 
     const handlePrivacyPolicy = () => {
@@ -45,19 +39,6 @@ export function SettingsAboutCard() {
                         <Text className="text-text font-bold text-[16px]">
                             App Updates
                         </Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
-                </Pressable>
-
-                <Pressable
-                    onPress={handleRateApp}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
-                >
-                    <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#f59e0b]/10 items-center justify-center mr-4">
-                            <Ionicons name="star" size={16} color="#f59e0b" />
-                        </View>
-                        <Text className="text-text font-bold text-[16px]">Rate the App</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>

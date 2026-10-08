@@ -1,6 +1,7 @@
 import { useUserStats } from "@/hooks/useUserStats";
 import { Text, View } from "react-native";
 import { secondsToHoursAndMinutes } from "../../../../utils/timeUtils";
+import { InfoSheet } from "@/components/InfoSheet";
 
 export function TodayFocusCard() {
     const { todayStats, stats } = useUserStats();
@@ -8,13 +9,18 @@ export function TodayFocusCard() {
         todayStats.today_focus_seconds
     );
 
-    const hasActivity = todayStats.today_sessions > 0;
-
     return (
         <View className="pb-6 mb-2">
-            <Text className="text-textMuted font-semibold text-base mb-3">
-                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-            </Text>
+            <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-textMuted font-semibold text-base mb-3">
+                    {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                </Text>
+
+                <InfoSheet
+                    title="How Coins Work"
+                    description="You earn 1 coin for every minute of deep focus. Spend your coins in the Shop to unlock new animations and features!"
+                />
+            </View>
 
             <View className="flex-row items-baseline mb-6 flex-wrap">
                 {todayHours > 0 ? (
@@ -41,7 +47,6 @@ export function TodayFocusCard() {
                 </Text>
             </View>
 
-            {/* Inline stats row — spread full width */}
             <View className="flex-row items-center justify-between">
                 <View className="items-center">
                     <Text className="text-warning font-black text-3xl tabular-nums leading-none">
@@ -71,17 +76,6 @@ export function TodayFocusCard() {
                 </View>
             </View>
 
-            {/* First-time hint */}
-            {stats?.total_coins === 0 && (
-                <View className="mt-5 pt-5 border-t border-border">
-                    <Text className="text-accent text-xs font-medium uppercase tracking-wider mb-1">
-                        How coins work
-                    </Text>
-                    <Text className="text-textSecondary text-base font-medium leading-6">
-                        Earn 1 coin per minute of focus. Spend them in the Shop.
-                    </Text>
-                </View>
-            )}
         </View>
     );
 }

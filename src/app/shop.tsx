@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from "react";
 import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { InfoSheet } from "@/components/InfoSheet";
 
 export default function ShopScreen() {
     const { activeStyle, colors, isDarkMode } = useTheme();
@@ -59,9 +60,12 @@ export default function ShopScreen() {
                 >
                     <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
                 </Pressable>
-                <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-border">
-                    <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
-                    <Text className="text-text font-bold text-base">{totalCoins}</Text>
+                <View className="flex-row items-center gap-5">
+                    <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-border">
+
+                        <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
+                        <Text className="text-text font-bold text-base">{totalCoins}</Text>
+                    </View>
                 </View>
             </View>
 
@@ -70,7 +74,13 @@ export default function ShopScreen() {
                 <View className="flex-1">
 
                     <View className="px-6 mt-2 mb-8">
-                        <Text className="text-text font-black text-4xl tracking-tighter mb-2">SHOP</Text>
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Text className="text-text font-black text-4xl tracking-tighter">SHOP</Text>
+                            <InfoSheet
+                                title="Welcome to the Shop"
+                                description={"This is where you are rewarded for staying off your phone.\n\nHow it works:\n1. You get 1 coin for every minute you stay focused.\n2. You can spend your coins here to buy new colors and styles.\n3. If you quit a session early, you do not get any coins!"}
+                            />
+                        </View>
                         <Text className="text-textSecondary text-base leading-relaxed">
                             Spend your focus coins to personalise your experience.
                         </Text>
@@ -138,53 +148,37 @@ export default function ShopScreen() {
                         ) : (
                             <FlatList
                                 horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingHorizontal: 24 }}
-                            data={animations.slice(0, 5)}
-                            keyExtractor={item => item.id}
-                            ItemSeparatorComponent={() => <View className="w-6" />}
-                            snapToInterval={324}
-                            decelerationRate="fast"
-                            onViewableItemsChanged={onViewableItemsChanged}
-                            viewabilityConfig={viewabilityConfig}
-                            renderItem={({ item, index }) => {
-                                const isOwned = purchasedItems.has(item.id);
-                                const isEquipped = equippedAnimation === item.id;
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ paddingHorizontal: 24 }}
+                                data={animations.slice(0, 5)}
+                                keyExtractor={item => item.id}
+                                ItemSeparatorComponent={() => <View className="w-6" />}
+                                snapToInterval={324}
+                                decelerationRate="fast"
+                                onViewableItemsChanged={onViewableItemsChanged}
+                                viewabilityConfig={viewabilityConfig}
+                                renderItem={({ item, index }) => {
+                                    const isOwned = purchasedItems.has(item.id);
+                                    const isEquipped = equippedAnimation === item.id;
 
-                                return (
-                                    <ShopAnimationCard
-                                        item={item}
-                                        isOwned={isOwned}
-                                        isEquipped={isEquipped}
-                                        isProcessing={isProcessing}
-                                        isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
-                                        onAction={() => {
-                                            if (!isOwned) handleBuyItem(item);
-                                            else if (!isEquipped) handleEquipItem(item.id);
-                                        }}
-                                    />
-                                );
-                            }}
-                        />
+                                    return (
+                                        <ShopAnimationCard
+                                            item={item}
+                                            isOwned={isOwned}
+                                            isEquipped={isEquipped}
+                                            isProcessing={isProcessing}
+                                            isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
+                                            onAction={() => {
+                                                if (!isOwned) handleBuyItem(item);
+                                                else if (!isEquipped) handleEquipItem(item.id);
+                                            }}
+                                        />
+                                    );
+                                }}
+                            />
                         )}
                     </View>
 
-                    <View className="px-6 mt-auto pt-8">
-                        <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
-                            How it works
-                        </Text>
-                        <View className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center border border-border">
-                            <View className="w-12 h-12 rounded-full bg-surface items-center justify-center mr-4 shadow-sm border border-border">
-                                <Text style={{ fontSize: 24 }}>🪙</Text>
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-text font-bold text-base mb-1">Earning Coins</Text>
-                                <Text className="text-textSecondary text-sm leading-tight">
-                                    Stay focused. You earn 1 coin for every minute of an active focus session.
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>

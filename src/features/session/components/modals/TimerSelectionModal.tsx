@@ -7,6 +7,7 @@ import { Modal, Pressable, ScrollView, Text, Vibration, View } from "react-nativ
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Material3Switch } from "../../../../components/Material3Switch";
 import { useTheme } from "../../../../contexts/ThemeContext";
+import { InfoSheet } from "@/components/InfoSheet";
 
 interface TimerSelectionModalProps {
     visible: boolean
@@ -55,7 +56,13 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
             >
                 <View className="bg-surfaceElevated rounded-t-3xl p-6" style={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}>
                     <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-text text-xl font-black tracking-tight">New Focus Session</Text>
+                        <View className="flex-row items-center gap-3">
+                            <Text className="text-text text-xl font-black tracking-tight">Start a Session</Text>
+                            <InfoSheet
+                                title="Focus Modes"
+                                description={"- Stopwatch\nA free-flowing timer that counts up. This is great when you want to focus, but aren't sure how long it will take. You can stop it whenever you're done.\n\n- Timed Focus\nYou pick a specific amount of time (like 25 minutes) and the timer counts down. Perfect if you want to commit to a solid block of work.\n\n- Strict Mode (Timed Only)\nIf you turn this on, your phone will be completely locked down until the time is up. You get exactly 1 Emergency Skip just in case, but if you don't use it and successfully finish, you earn 1.5x bonus coins!"}
+                            />
+                        </View>
 
                         <Pressable
                             className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70"

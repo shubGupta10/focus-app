@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Text, View } from "react-native";
+import { InfoSheet } from "@/components/InfoSheet";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useBlocklistController } from "../../features/blocklist/hooks/useBlocklistController";
 import { BlocklistSearchHeader } from "../../features/blocklist/components/BlocklistSearchHeader";
@@ -21,8 +22,12 @@ export default function AppsTab() {
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row justify-between items-center px-6 pt-5 pb-2">
-                <View className="flex-1">
+                <View className="flex-1 flex-row items-center justify-between">
                     <Text className="text-text font-black text-3xl tracking-tight">Global Block list</Text>
+                    <InfoSheet
+                        title="What is the Block List?"
+                        description={"This is where you choose which apps distract you the most.\n\nAny app you select here will be completely locked while your timer is running. If you try to open one of these apps, we will immediately close it and send you back here."}
+                    />
                 </View>
             </View>
 

@@ -1,4 +1,5 @@
 import { RoutineCard } from "../../features/routines/components/RoutineCard";
+import { InfoSheet } from "@/components/InfoSheet";
 import { RoutineEmptyState } from "../../features/routines/components/RoutineEmptyState";
 import { RoutineEditorModal } from "../../features/routines/components/modals/RoutineEditorModal";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -28,7 +29,13 @@ export default function RoutinesTab() {
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row items-center justify-between px-6 pt-5 pb-2">
                 <View className="flex-1">
-                    <Text className="text-text font-black text-3xl tracking-tight">Routines</Text>
+                    <View className="flex-row items-center gap-3">
+                        <Text className="text-text font-black text-3xl tracking-tight">Routines</Text>
+                        <InfoSheet
+                            title="How Routines Work"
+                            description={"Routines are schedules you create so you do not have to start timers yourself.\n\nFor example, you can set a routine for 'Work' from 9 AM to 5 PM. When the time comes, the app will automatically lock your distracting apps for you so you can focus."}
+                        />
+                    </View>
                     <Text className="text-textSecondary text-sm font-medium mt-0.5">
                         {routines.length === 0
                             ? "Automated schedules"
