@@ -56,6 +56,7 @@ export declare class FocusBlockerModule {
   ): void;
   cancelRoutineAlarm(routineId: number): void;
   showTimePicker(initialHour: number, initialMinute: number, is24Hour?: boolean): Promise<TimePickerResult>;
+  sendNotification(title: string, message: string): void;
 }
 
 export default requireNativeModule<FocusBlockerModule>('FocusBlocker');

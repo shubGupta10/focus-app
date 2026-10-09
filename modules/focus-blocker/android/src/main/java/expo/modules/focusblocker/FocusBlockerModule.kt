@@ -384,5 +384,40 @@ class FocusBlockerModule : Module() {
             promise.resolve(null)
         }
 
+        Function("sendNotification") { title: String, message: String ->
+            val context = appContext.reactContext ?: return@Function
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                android.app.Notification.Builder(context, "FocusBlockerChannel_V2")
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build()
+            } else {
+                android.app.Notification.Builder(context)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build()
+            }
+
+            notificationManager.notify((System.currentTimeMillis() % Int.MAX_VALUE).toInt(), notification)
+        }
+
     }
 }

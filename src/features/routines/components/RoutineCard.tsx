@@ -58,7 +58,7 @@ export function RoutineCardInner({
                         {routine.name}
                     </Text>
                     {Boolean(routine.is_strict) && (
-                        <View className="bg-accent px-2 py-0.5 rounded-md">
+                        <View className="px-2 py-0.5 rounded-md">
                             <Text className="text-accent text-[10px] font-bold uppercase">
                                 Strict
                             </Text>

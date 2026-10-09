@@ -54,7 +54,7 @@ export function BlocklistSearchHeader({
                     onPress={() => setFilterMode("all")}
                     className={`px-3.5 py-1.5 rounded-full border ${filterMode === "all"
                         ? "bg-accent border-accent"
-                        : "bg-surfaceElevated active:opacity-75"
+                        : "bg-surfaceElevated border-transparent active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show all apps"
@@ -71,7 +71,7 @@ export function BlocklistSearchHeader({
                     onPress={() => setFilterMode("guarded")}
                     className={`px-3.5 py-1.5 rounded-full border ${filterMode === "guarded"
                         ? "bg-accent border-accent"
-                        : "bg-surfaceElevated active:opacity-75"
+                        : "bg-surfaceElevated border-transparent active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show guarded apps only"

@@ -14,12 +14,16 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSessionController } from "../../features/session/hooks/useSessionController";
 import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
+import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
+import { NotificationSheet } from "@/components/NotificationSheet";
 
 
 export default function Index() {
     const { getSetting } = useSettings();
     const { activeStyle, colors, isDarkMode } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+    const { notifications, hasUnread, markAsRead } = useAutoUpdateCheck();
+    const [showNotification, setShowNotification] = useState(false);
 
     const {
         engine,
@@ -85,6 +89,20 @@ export default function Index() {
                     </View>
 
                     <View className="flex-row items-center">
+
+                        <Pressable
+                            onPress={() => {
+                                markAsRead();
+                                setShowNotification(true);
+                            }}
+                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-3"
+                        >
+                            <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
+
+                            {hasUnread && (
+                                <View className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500" />
+                            )}
+                        </Pressable>
 
                         <Pressable
                             onPress={() => router.push("/shop")}
@@ -206,6 +224,13 @@ export default function Index() {
                 isStrict={engine.isStrictSession}
                 resetCountdownText={resetCountdownText}
             />
+
+            <NotificationSheet
+                visible={showNotification}
+                onClose={() => setShowNotification(false)}
+                notifications={notifications}
+            />
+
         </SafeAreaView>
     );
 }

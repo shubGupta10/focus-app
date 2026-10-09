@@ -1,7 +1,6 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
-import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { migrateDbIfNeeded } from "@/store/database";
 import { Inter_400Regular, Inter_900Black } from "@expo-google-fonts/inter";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,7 +35,6 @@ Sentry.init({
 });
 
 function Layout() {
-  useAutoUpdateCheck();
   const [loaded, error] = useFonts({
     ...Ionicons.font,
     Inter_400Regular,
