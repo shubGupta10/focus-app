@@ -1,3 +1,4 @@
+import { useAppStore } from "@/store/useAppStore";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ShopAnimationCard } from "@/features/shop/components/ShopAnimationCard";
 import { useShopController } from "@/features/shop/hooks/useShopController";
@@ -9,6 +10,7 @@ import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { InfoSheet } from "@/components/InfoSheet";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function ShopScreen() {
     const { activeStyle, colors, isDarkMode } = useTheme();
@@ -75,7 +77,9 @@ export default function ShopScreen() {
 
                     <View className="px-6 mt-2 mb-8">
                         <View className="flex-row items-center justify-between mb-2">
-                            <Text className="text-text font-black text-4xl tracking-tighter">SHOP</Text>
+                            <Pressable onLongPress={__DEV__ ? () => useAppStore.getState().updateStatsLocally(100000, 0, 0) : undefined}>
+                                <Text className="text-text font-black text-4xl tracking-tighter">SHOP</Text>
+                            </Pressable>
                             <InfoSheet
                                 title="Welcome to the Shop"
                                 description={"This is where you are rewarded for staying off your phone.\n\nHow it works:\n1. You get 1 coin for every minute you stay focused.\n2. You can spend your coins here to buy new colors and styles.\n3. If you quit a session early, you do not get any coins!"}
@@ -98,36 +102,40 @@ export default function ShopScreen() {
                             data={themes}
                             keyExtractor={item => item.id}
                             ItemSeparatorComponent={() => <View className="w-4" />}
-                            renderItem={({ item }) => {
+                            renderItem={({ item, index }) => {
                                 const isOwned = purchasedItems.has(item.id);
                                 const isEquipped = equippedTheme === item.id;
                                 const swatchColor = item.hexColor || colors.surfaceElevated;
 
                                 return (
-                                    <Pressable
-                                        disabled={isProcessing}
-                                        onPress={() => {
-                                            if (!isOwned) handleBuyItem(item);
-                                            else if (!isEquipped) handleEquipItem(item.id);
-                                        }}
-                                        className="items-center w-24"
+                                    <Animated.View
+                                        entering={FadeInDown.delay(index * 100).duration(400)}
                                     >
-                                        <View
-                                            className={`w-20 h-20 rounded-full items-center justify-center mb-3 ${isEquipped ? 'border-[4px]' : 'border border-border'}`}
-                                            style={[{ backgroundColor: swatchColor, borderColor: isEquipped ? colors.accent : undefined }, !isOwned ? { opacity: 0.9 } : undefined]}
+                                        <Pressable
+                                            disabled={isProcessing}
+                                            onPress={() => {
+                                                if (!isOwned) handleBuyItem(item);
+                                                else if (!isEquipped) handleEquipItem(item.id);
+                                            }}
+                                            className="items-center w-24"
                                         >
-                                            {!isOwned && (
-                                                <View className="absolute -top-1 -right-2 bg-surface px-2 py-1 rounded-full border border-border flex-row items-center shadow-sm">
-                                                    <Text style={{ fontSize: 10, marginRight: 4 }}>🪙</Text>
-                                                    <Text className="text-text font-bold text-[10px]">{item.cost}</Text>
-                                                </View>
-                                            )}
-                                            {isEquipped && <Ionicons name="checkmark" size={32} color="#ffffff" style={{ opacity: 0.9 }} />}
-                                        </View>
-                                        <Text className="text-textSecondary text-sm font-medium text-center leading-tight" numberOfLines={2}>
-                                            {item.name}
-                                        </Text>
-                                    </Pressable>
+                                            <View
+                                                className={`w-20 h-20 rounded-full items-center justify-center mb-3 ${isEquipped ? 'border-[4px]' : 'border border-border'}`}
+                                                style={[{ backgroundColor: swatchColor, borderColor: isEquipped ? colors.accent : undefined }, !isOwned ? { opacity: 0.9 } : undefined]}
+                                            >
+                                                {!isOwned && (
+                                                    <View className="absolute -top-1 -right-2 bg-surface px-2 py-1 rounded-full border border-border flex-row items-center shadow-sm">
+                                                        <Text style={{ fontSize: 10, marginRight: 4 }}>🪙</Text>
+                                                        <Text className="text-text font-bold text-[10px]">{item.cost}</Text>
+                                                    </View>
+                                                )}
+                                                {isEquipped && <Ionicons name="checkmark" size={32} color="#ffffff" style={{ opacity: 0.9 }} />}
+                                            </View>
+                                            <Text className="text-textSecondary text-sm font-medium text-center leading-tight" numberOfLines={2}>
+                                                {item.name}
+                                            </Text>
+                                        </Pressable>
+                                    </Animated.View>
                                 )
                             }}
                         />
@@ -162,17 +170,21 @@ export default function ShopScreen() {
                                     const isEquipped = equippedAnimation === item.id;
 
                                     return (
-                                        <ShopAnimationCard
-                                            item={item}
-                                            isOwned={isOwned}
-                                            isEquipped={isEquipped}
-                                            isProcessing={isProcessing}
-                                            isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
-                                            onAction={() => {
-                                                if (!isOwned) handleBuyItem(item);
-                                                else if (!isEquipped) handleEquipItem(item.id);
-                                            }}
-                                        />
+                                        <Animated.View
+                                            entering={FadeInDown.delay(index * 100).duration(400)}
+                                        >
+                                            <ShopAnimationCard
+                                                item={item}
+                                                isOwned={isOwned}
+                                                isEquipped={isEquipped}
+                                                isProcessing={isProcessing}
+                                                isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
+                                                onAction={() => {
+                                                    if (!isOwned) handleBuyItem(item);
+                                                    else if (!isEquipped) handleEquipItem(item.id);
+                                                }}
+                                            />
+                                        </Animated.View>
                                     );
                                 }}
                             />

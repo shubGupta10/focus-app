@@ -68,7 +68,7 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
                             onPress={closeSheet}
                             className="mt-4 bg-accent py-4 rounded-full items-center active:opacity-80 border border-border"
                         >
-                            <Text className="text-text font-bold text-base">Got it</Text>
+                            <Text className="text-accentForeground  font-bold text-base">Got it</Text>
                         </Pressable>
                     </Animated.View>
                 </View>

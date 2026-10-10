@@ -4,8 +4,9 @@ import { useShopController } from "@/features/shop/hooks/useShopController";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { FlashList } from "@shopify/flash-list";
 
 export default function ShopAnimationsScreen() {
     const { activeStyle, colors, isDarkMode } = useTheme();
@@ -48,7 +49,7 @@ export default function ShopAnimationsScreen() {
                 </Text>
             </View>
 
-            <FlatList
+            <FlashList
                 data={allAnimations}
                 keyExtractor={item => item.id}
                 numColumns={1}
@@ -60,12 +61,14 @@ export default function ShopAnimationsScreen() {
                     const isEquipped = equippedAnimation === item.id;
 
                     return (
+
                         <ShopAnimationCard
                             item={item}
                             isOwned={isOwned}
                             isEquipped={isEquipped}
                             isProcessing={isProcessing}
                             fullWidth={true}
+                            isActive={true}
                             onAction={() => {
                                 if (!isOwned) handleBuyItem(item);
                                 else if (!isEquipped) handleEquipItem(item.id);

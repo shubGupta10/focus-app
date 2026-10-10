@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { ShopItem } from "../data/shopCatalog";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 
 interface ShopItemCardProps {
     item: ShopItem;
@@ -49,26 +50,28 @@ export function ShopItemCard({ item, isOwned, isEquipped, isProcessing, onBuy, o
                     <Text className="text-accent font-bold text-sm">Equipped</Text>
                 </View>
             ) : isOwned ? (
-                <Pressable
+                <AnimatedPressable
                     onPress={onEquip}
+                    hapticMode="light"
                     disabled={isProcessing}
-                    className="bg-surface py-3 rounded-xl items-center active:opacity-70 border border-border"
+                    className="bg-surface py-3 rounded-xl items-center border border-border"
                 >
                     <Text className="text-text font-bold text-sm">Equip</Text>
-                </Pressable>
+                </AnimatedPressable>
             ) : (
-                <Pressable
+                <AnimatedPressable
                     onPress={onBuy}
+                    hapticMode="light"
                     disabled={isProcessing}
-                    className="py-3 rounded-xl items-center active:opacity-80 flex-row justify-center"
+                    className="py-3 rounded-xl items-center flex-row justify-center"
                     style={{ backgroundColor: colors.accent }}
                 >
                     {isProcessing ? (
                         <GlobalLoader color="#fff" size="small" />
                     ) : (
-                        <Text className="text-white font-bold text-sm">Unlock Theme</Text>
+                        <Text className="text-accentForeground font-bold text-sm">Unlock Theme</Text>
                     )}
-                </Pressable>
+                </AnimatedPressable>
             )}
         </View>
     );

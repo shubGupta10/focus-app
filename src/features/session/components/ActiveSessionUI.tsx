@@ -2,8 +2,10 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { formatTimerDisplay } from "../../../utils/timeUtils";
 import { CentralFocusOrb } from "./CentralFocusOrb";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
+import { formatTimerDisplay } from "@/utils/timeUtils";
 
 interface ActiveSessionUIProps {
     onStopPress: () => void;
@@ -21,6 +23,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     const [minuteProgress, setMinuteProgress] = useState(1);
     const [earnedCoins, setEarnedCoins] = useState(0);
     const { colors } = useTheme();
+    const reducedMotion = useDynamicReducedMotion();
 
     useEffect(() => {
         if (!startTime) return;
@@ -79,7 +82,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
 
     return (
         <View className="flex-1 items-center justify-between px-6 py-10 w-full max-w-md mx-auto">
-            <View className="items-center w-full pt-6">
+            <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(150)} className="items-center w-full pt-6">
                 <View className="flex-row items-center justify-center gap-3 mb-6">
                     {isStrict && (
                         <View className="flex-row items-center bg-accentMuted px-4 py-2 rounded-full">
@@ -106,7 +109,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 <Text className="text-textSecondary text-sm font-bold tracking-widest uppercase text-center">
                     {isInfinite ? "Stay in the zone" : "Stay on track"}
                 </Text>
-            </View>
+            </Animated.View>
 
             <View className="items-center justify-center flex-1 w-full pb-8">
                 <CentralFocusOrb
@@ -121,7 +124,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     onStopPress={onStopPress}
                 />
 
-                <View className="items-center justify-center mt-12 w-full gap-4">
+                <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(250)} className="items-center justify-center mt-12 w-full gap-4">
                     <View className="flex-row items-center justify-center">
                         <Text className="text-2xl mr-2">🪙</Text>
                         <Text className="text-text font-black text-xl">
@@ -153,7 +156,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                             </>
                         )}
                     </View>
-                </View>
+                </Animated.View>
             </View>
         </View>
     );

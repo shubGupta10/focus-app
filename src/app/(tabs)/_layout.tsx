@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { ThemeColors, useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,6 +52,17 @@ export default function TabLayout() {
             screenOptions={{
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
+                tabBarButton: (props) => (
+                    <AnimatedPressable
+                        {...props}
+                        hapticMode="light"
+                        scaleTo={0.85}
+                        style={[
+                            { flex: 1 },
+                            props.style
+                        ]}
+                    />
+                ),
                 tabBarStyle: {
                     position: "absolute",
                     bottom: insets.bottom + 16,

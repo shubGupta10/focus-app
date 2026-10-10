@@ -45,9 +45,9 @@ export function AppList({
                 </View>
                 <Text className="text-text font-bold text-[16px] mb-2">{searchQuery ? "No apps found" : installedAppsLength > 0 ? "Block List is Empty" : "No apps found"}</Text>
                 <Text className="text-textSecondary text-sm mt-1 text-center px-4 leading-5">
-                    {searchQuery 
-                        ? `No results matching "${searchQuery}"` 
-                        : installedAppsLength > 0 
+                    {searchQuery
+                        ? `No results matching "${searchQuery}"`
+                        : installedAppsLength > 0
                             ? "You haven't blocked any apps yet. Switch to 'All' to select apps that distract you most."
                             : "No installed apps detected"}
                 </Text>

@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -32,7 +33,7 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
 
             <View className="flex-1 justify-center items-center px-6">
                 <View className="w-full max-w-sm bg-surfaceElevated rounded-[32px] p-8 shadow-xl items-center">
-                    
+
                     <View className="w-20 h-20 rounded-[24px] items-center justify-center mb-6 bg-surface">
                         <Text className="text-5xl">{isSuccess ? "🎉" : "🔔"}</Text>
                     </View>
@@ -67,16 +68,17 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                         </View>
                     )}
 
-                    <Pressable
+                    <AnimatedPressable
                         onPress={onClose}
-                        className="w-full rounded-2xl p-4 items-center justify-center active:opacity-80 bg-accent mt-4"
+                        hapticMode="light"
+                        className="w-full rounded-2xl p-4 items-center justify-center bg-accent mt-4"
                         accessibilityRole="button"
                         accessibilityLabel={isSuccess ? "Continue" : "Dismiss"}
                     >
                         <Text className="font-black text-base uppercase text-accentForeground">
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
-                    </Pressable>
+                    </AnimatedPressable>
                 </View>
             </View>
         </Modal>

@@ -3,10 +3,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
+import * as Haptics from "expo-haptics";
 import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 
 const engineListeners = new Set<() => void>();
+let isStartingSession = false;
 
 export function notifyEngineListeners() {
     engineListeners.forEach((listener) => {
@@ -60,6 +62,8 @@ export function useFocusEngine(isRoot: boolean = false) {
     };
 
     const startSession = async (durationMinutes: number, isStrict: boolean) => {
+        if (isStartingSession) return;
+        isStartingSession = true;
         try {
             if (Platform.OS === "android" && Platform.Version >= 33) {
                 const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
@@ -96,6 +100,24 @@ export function useFocusEngine(isRoot: boolean = false) {
 
             await FocusBlocker.startService(appsToBlock, durationMs, isStrict);
 
+
+            try {
+                const setting = await db.getFirstAsync<{ value: string }>("SELECT value FROM settings WHERE key = 'haptics_enabled'");
+                if (setting?.value !== "false") {
+                    if (Platform.OS === 'android' && typeof Haptics.performAndroidHapticsAsync === 'function') {
+                        Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
+                    } else {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    }
+                }
+            } catch (e) {
+                if (Platform.OS === 'android' && typeof Haptics.performAndroidHapticsAsync === 'function') {
+                    Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
+                } else {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                }
+            }
+
             const now = Date.now();
             const endTime = durationMs > 0 ? now + durationMs : -1;
 
@@ -108,6 +130,8 @@ export function useFocusEngine(isRoot: boolean = false) {
             setSessionState(true, now, endTime, isStrict);
         } catch (error: any) {
             alert("Error Starting:" + error.message);
+        } finally {
+            isStartingSession = false;
         }
     };
 

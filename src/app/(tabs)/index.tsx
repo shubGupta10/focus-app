@@ -11,10 +11,12 @@ import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSessionController } from "../../features/session/hooks/useSessionController";
 import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
+import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { NotificationSheet } from "@/components/NotificationSheet";
 
 
@@ -24,6 +26,7 @@ export default function Index() {
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
     const { notifications, hasUnread, markAsRead } = useAutoUpdateCheck();
     const [showNotification, setShowNotification] = useState(false);
+    const reducedMotion = useDynamicReducedMotion();
 
     const {
         engine,
@@ -83,7 +86,7 @@ export default function Index() {
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
             {!engine.isSessionActive && (
-                <View className="flex-row justify-between items-center px-6 pt-5 pb-2 w-full">
+                <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(300)} exiting={reducedMotion ? undefined : FadeOut.duration(200)} className="flex-row justify-between items-center px-6 pt-5 pb-2 w-full z-10">
                     <View>
                         <Text className="text-text font-black text-3xl tracking-tight leading-none">Lockout</Text>
                     </View>
@@ -122,77 +125,91 @@ export default function Index() {
                             <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
                         </Pressable>
                     </View>
-                </View>
+                </Animated.View>
             )}
 
-            {!engine.isSessionActive ? (
-                <View className="flex-1 items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
+            <View className="flex-1 w-full max-w-md mx-auto relative">
+                {!engine.isSessionActive ? (
+                    <Animated.View 
+                        key="idle-ui"
+                        entering={reducedMotion ? undefined : FadeIn.duration(300)} 
+                        exiting={reducedMotion ? undefined : FadeOut.duration(200)}
+                        className="absolute inset-0 flex-1 items-center justify-between px-6 py-4 w-full"
+                    >
 
-                    {(!hasSelectedApps || !hasAllPermissions) ? (
-                        <View className="items-center mt-2">
-                            <Pressable
-                                onPress={() => {
-                                    if (!hasSelectedApps) {
-                                        router.push("/(tabs)/apps");
-                                    } else if (!hasAllPermissions) {
-                                        setShowPermission(true);
-                                    }
-                                }}
-                                className="flex-row items-center bg-surfaceElevated px-5 py-3 rounded-full mt-3 active:opacity-75"
-                            >
-                                <Ionicons
-                                    name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
-                                    size={18}
-                                    color={colors.accent}
-                                    style={{ marginRight: 8 }}
-                                />
-                                <Text className="text-text font-bold text-[15px] mr-2">
-                                    {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
+                        {(!hasSelectedApps || !hasAllPermissions) ? (
+                            <View className="items-center mt-2">
+                                <Pressable
+                                    onPress={() => {
+                                        if (!hasSelectedApps) {
+                                            router.push("/(tabs)/apps");
+                                        } else if (!hasAllPermissions) {
+                                            setShowPermission(true);
+                                        }
+                                    }}
+                                    className="flex-row items-center bg-surfaceElevated px-5 py-3 rounded-full mt-3 active:opacity-75"
+                                >
+                                    <Ionicons
+                                        name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
+                                        size={18}
+                                        color={colors.accent}
+                                        style={{ marginRight: 8 }}
+                                    />
+                                    <Text className="text-text font-bold text-[15px] mr-2">
+                                        {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
+                                    </Text>
+                                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                                </Pressable>
+                            </View>
+                        ) : (
+                            <View className="items-center mt-6 mb-2">
+                                <Text className="text-text font-black text-2xl tracking-tight mb-1">{greeting}</Text>
+                                <Text className="text-textSecondary text-[15px] font-medium">
+                                    <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
                                 </Text>
-                                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                            </View>
+                        )}
+
+                        <View className="items-center justify-center my-auto">
+                            <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
+                            {(!hasSelectedApps || !hasAllPermissions) && (
+                                <Text className="text-textSecondary text-xs font-medium text-center mt-6">
+                                    {!hasSelectedApps ? "Tap to choose apps" : "Tap to grant permissions"}
+                                </Text>
+                            )}
+                        </View>
+
+                        <View className="w-full mb-[120px] mt-auto">
+                            <Pressable
+                                onPress={() => router.push("/(tabs)/apps")}
+                                className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"
+                            >
+                                <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
+                                <Text className="text-text font-medium text-sm">
+                                    {engine.selectedApps.length} Apps blocked
+                                </Text>
+                                <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
                             </Pressable>
                         </View>
-                    ) : (
-                        <View className="items-center mt-6 mb-2">
-                            <Text className="text-text font-black text-2xl tracking-tight mb-1">{greeting}</Text>
-                            <Text className="text-textSecondary text-[15px] font-medium">
-                                <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
-                            </Text>
-                        </View>
-                    )}
-
-                    <View className="items-center justify-center my-auto">
-                        <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
-                        {(!hasSelectedApps || !hasAllPermissions) && (
-                            <Text className="text-textSecondary text-xs font-medium text-center mt-6">
-                                {!hasSelectedApps ? "Tap to choose apps" : "Tap to grant permissions"}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View className="w-full mb-[120px] mt-auto">
-                        <Pressable
-                            onPress={() => router.push("/(tabs)/apps")}
-                            className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"
-                        >
-                            <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
-                            <Text className="text-text font-medium text-sm">
-                                {engine.selectedApps.length} Apps blocked
-                            </Text>
-                            <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
-                        </Pressable>
-                    </View>
-                </View>
-            ) : (
-                <ActiveSessionUI
-                    onStopPress={handleFocusPress}
-                    startTime={engine.sessionStartTime}
-                    endTime={engine.sessionEndTime}
-                    blockedAppsCount={engine.selectedApps.length}
-                    isStrict={engine.isStrictSession}
-                    skipsRemaining={skipsRemaining}
-                />
-            )}
+                    </Animated.View>
+                ) : (
+                    <Animated.View 
+                        key="active-ui"
+                        entering={reducedMotion ? undefined : FadeIn.duration(400).delay(50)} 
+                        exiting={reducedMotion ? undefined : FadeOut.duration(200)}
+                        className="absolute inset-0"
+                    >
+                        <ActiveSessionUI
+                            onStopPress={handleFocusPress}
+                            startTime={engine.sessionStartTime}
+                            endTime={engine.sessionEndTime}
+                            blockedAppsCount={engine.selectedApps.length}
+                            isStrict={engine.isStrictSession}
+                            skipsRemaining={skipsRemaining}
+                        />
+                    </Animated.View>
+                )}
+            </View>
 
             <TimerSelectionModal
                 visible={isTimerModalVisible}

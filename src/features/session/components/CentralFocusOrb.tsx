@@ -223,10 +223,17 @@ export function CentralFocusOrb({
                         }}
                         onPressIn={handlePressIn}
                         onPressOut={handlePressOut}
-                        className={`w-48 h-48 rounded-full items-center justify-center shadow-2xl ${isHolding
+                        className={`w-48 h-48 rounded-full items-center justify-center ${isHolding
                             ? "bg-destructiveMuted"
                             : "bg-surfaceElevated"
                             }`}
+                        style={{
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 10 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 20,
+                            // Removed elevation to prevent Android octagon artifact
+                        }}
                         accessibilityRole="button"
                         accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
                     >
@@ -274,7 +281,7 @@ export function CentralFocusOrb({
                         shadowOffset: { width: 0, height: 8 },
                         shadowOpacity: 0.4,
                         shadowRadius: 16,
-                        elevation: 12,
+                        // elevation: 12 removed to prevent Android octagon artifact
                     }}
                     accessibilityRole="button"
                     accessibilityLabel="Start focus session"

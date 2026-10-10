@@ -3,6 +3,7 @@ import { getOrbBackground } from "@/features/session/components/orb-themes";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { ShopItem } from "../data/shopCatalog";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 
 interface ShopAnimationCardProps {
     item: ShopItem;
@@ -59,8 +60,9 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
                         <Text className="text-textSecondary font-medium tracking-tight">Available</Text>
                     )}
 
-                    <Pressable
+                    <AnimatedPressable
                         onPress={onAction}
+                        hapticMode="light"
                         disabled={isProcessing || isEquipped}
                         className={`px-6 py-3 rounded-full items-center justify-center flex-row ${isEquipped ? 'bg-accent/10 opacity-50' : isOwned ? 'bg-surfaceElevated border border-border' : ''}`}
                         style={!isOwned && !isEquipped ? { backgroundColor: colors.accent } : undefined}
@@ -68,11 +70,11 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
                         {isProcessing ? (
                             <GlobalLoader color={isOwned ? colors.text : "#fff"} size="small" />
                         ) : (
-                            <Text className={`font-bold ${!isOwned && !isEquipped ? 'text-white' : isEquipped ? 'text-accent' : 'text-text'}`}>
+                            <Text className={`font-bold ${!isOwned && !isEquipped ? 'text-accentForeground' : isEquipped ? 'text-accent' : 'text-text'}`}>
                                 {isOwned ? (isEquipped ? 'Active' : 'Equip') : 'Unlock'}
                             </Text>
                         )}
-                    </Pressable>
+                    </AnimatedPressable>
                 </View>
             </View>
         </View>

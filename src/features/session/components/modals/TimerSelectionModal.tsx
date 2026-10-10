@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Material3Switch } from "../../../../components/Material3Switch";
 import { useTheme } from "../../../../contexts/ThemeContext";
 import { InfoSheet } from "@/components/InfoSheet";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 
 interface TimerSelectionModalProps {
     visible: boolean
@@ -198,12 +199,13 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         )}
                     </View>
 
-                    <Pressable
+                    <AnimatedPressable
                         onPress={() => {
                             try { Vibration.vibrate(12); } catch { }
                             onStartSession(selectedMinutes, selectedMinutes === -1 ? false : isStrict);
                         }}
-                        className="w-full bg-accent rounded-2xl p-4 items-center justify-center active:opacity-80 flex-row"
+                        hapticMode="light"
+                        className="w-full bg-accent rounded-2xl p-4 items-center justify-center flex-row"
                         accessibilityRole="button"
                         accessibilityLabel={
                             selectedMinutes === -1
@@ -226,7 +228,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                     ? `Start ${selectedMinutes}m Strict Session`
                                     : `Start ${selectedMinutes}m Session`}
                         </Text>
-                    </Pressable>
+                    </AnimatedPressable>
                 </View>
             </BlurView>
         </Modal>

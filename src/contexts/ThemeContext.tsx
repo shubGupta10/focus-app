@@ -4,6 +4,26 @@ import { useSettings } from "@/hooks/useSettings";
 import { useColorScheme, vars } from "nativewind";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+function getWCAGRelativeLuminance(hex: string) {
+    const c = hex.startsWith('#') ? hex.substring(1) : hex;
+    const rgb = parseInt(c, 16);
+    let r = ((rgb >> 16) & 0xff) / 255.0;
+    let g = ((rgb >> 8) & 0xff) / 255.0;
+    let b = ((rgb >> 0) & 0xff) / 255.0;
+
+    r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+    g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+    b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function getContrastRatio(l1: number, l2: number) {
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
 export type ThemeColors = typeof Colors.light;
 
 interface ThemeContextType {
@@ -69,9 +89,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             customAccent = shopTheme.hexColor;
         }
 
+        const accentLuminance = getWCAGRelativeLuminance(customAccent);
+        const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
+        const darkLuminance = getWCAGRelativeLuminance('#1C1618');
+
+        const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
+        const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
+
+        const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#1C1618';
+
         colors = {
             ...colors,
             accent: customAccent,
+            accentForeground: bestForeground,
             accentMuted: customAccent + "33",
         };
     }

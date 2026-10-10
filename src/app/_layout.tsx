@@ -60,38 +60,32 @@ function Layout() {
           <ToastProvider>
             <Stack screenOptions={{
               headerShown: false,
-              animation: 'none'
+              animation: 'default'
             }}
             >
               <Stack.Screen name="(tabs)" />
 
               <Stack.Screen
                 name="onboarding"
-                options={{
-                  animation: "fade"
-                }}
               />
 
               <Stack.Screen
                 name="shop"
                 options={{
-                  animation: "default"
+                  presentation: "modal"
                 }}
               />
 
               <Stack.Screen
                 name="settings"
                 options={{
-                  animation: "default"
+                  presentation: "modal"
                 }}
               />
 
-              <Stack.Screen
-                name="day-details"
-                options={{
-                  animation: "default"
-                }}
-              />
+              <Stack.Screen name="day-details" />
+
+              <Stack.Screen name="shop-animations" />
             </Stack>
           </ToastProvider>
         </ThemeProvider>

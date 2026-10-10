@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -67,23 +68,25 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                     </Text>
                     <View className="gap-3">
                         {/* Primary Action: Keep Focusing */}
-                        <Pressable
+                        <AnimatedPressable
                             onPress={onClose}
-                            className="bg-accent py-3.5 rounded-xl items-center justify-center active:opacity-80"
+                            hapticMode="light"
+                            className="bg-accent py-3.5 rounded-xl items-center justify-center"
                             accessibilityRole="button"
                             accessibilityLabel="Keep focusing"
                         >
                             <Text className="text-accentForeground font-black text-sm tracking-wider uppercase">
                                 Keep focusing
                             </Text>
-                        </Pressable>
+                        </AnimatedPressable>
 
-                        <Pressable
+                        <AnimatedPressable
                             onPress={isButtonDisabled ? undefined : onConfirmEnd}
                             disabled={isButtonDisabled}
+                            hapticMode="heavy"
                             className={`py-3.5 rounded-xl items-center justify-center ${isButtonDisabled
                                 ? "bg-surface opacity-50"
-                                : "bg-destructive active:opacity-80"
+                                : "bg-destructive"
                                 }`}
                             accessibilityRole="button"
                             accessibilityLabel={isStrict ? "Use Emergency Skip" : "End session"}
@@ -98,7 +101,7 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                                         : "Use Emergency Skip"
                                     : "End session"}
                             </Text>
-                        </Pressable>
+                        </AnimatedPressable>
                     </View>
                 </View>
             </View>
