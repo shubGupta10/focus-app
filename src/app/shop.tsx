@@ -6,7 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useRef } from "react";
-import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Pressable, ScrollView, Text, ToastAndroid, View } from "react-native";
+import { useSQLiteContext } from "expo-sqlite";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { InfoSheet } from "@/components/InfoSheet";
@@ -38,8 +39,19 @@ export default function ShopScreen() {
         handleEquipItem
     } = useShopController();
 
+    const db = useSQLiteContext();
     const themes = catalog.filter(item => item.type === "theme");
     const animations = catalog.filter(item => item.type === "animation");
+
+    const handleSecretBoost = async () => {
+        try {
+            await db.runAsync("UPDATE user_stats SET total_coins = total_coins + 100000 WHERE id = 1");
+            useAppStore.getState().updateStatsLocally(100000, 0, 0);
+            ToastAndroid.show("100,000 Coins Added!", ToastAndroid.SHORT);
+        } catch (e) {
+            console.error("Failed to add coins:", e);
+        }
+    };
 
     useEffect(() => {
         const handle = requestIdleCallback(() => {
@@ -77,7 +89,7 @@ export default function ShopScreen() {
 
                     <View className="px-6 mt-2 mb-8">
                         <View className="flex-row items-center justify-between mb-2">
-                            <Pressable onLongPress={__DEV__ ? () => useAppStore.getState().updateStatsLocally(100000, 0, 0) : undefined}>
+                            <Pressable onLongPress={handleSecretBoost}>
                                 <Text className="text-text font-black text-4xl tracking-tighter">SHOP</Text>
                             </Pressable>
                             <InfoSheet
