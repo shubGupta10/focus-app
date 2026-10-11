@@ -40,6 +40,8 @@ function Layout() {
   const { isUpdatePending } = Updates.useUpdates();
 
   useEffect(() => {
+    if (__DEV__) return;
+
     if (isUpdatePending) {
       Alert.alert(
         "Update Ready",

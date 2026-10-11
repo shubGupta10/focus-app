@@ -33,7 +33,7 @@ export function SettingsSessionCard() {
                     </Text>
                 </View>
 
-                <View className="flex-row items-center justify-between bg-surface rounded-2xl p-1.5 border border-border">
+                <View className="flex-row items-center justify-between bg-surface rounded-2xl p-1.5">
                     {TIMER_OPTIONS.map((mins) => {
                         const isSelected = defaultTimer === mins;
                         return (

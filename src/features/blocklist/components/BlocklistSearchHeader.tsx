@@ -24,7 +24,7 @@ export function BlocklistSearchHeader({
     return (
         <>
             <View className="px-6 mb-3">
-                <View className="flex-row items-center bg-surfaceElevated border border-border rounded-full px-4 py-3">
+                <View className="flex-row items-center bg-surfaceElevated rounded-full px-4 py-3">
                     <Ionicons name="search" size={20} color={colors.textSecondary} />
                     <TextInput
                         className="flex-1 ml-2.5 text-text text-[15px] font-medium"

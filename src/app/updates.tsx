@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import Updates from "expo-updates";
+import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View, ToastAndroid } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
@@ -20,6 +20,7 @@ export default function UpdatesScreen() {
     const [isFetchingRelease, setIsFetchingRelease] = useState(false);
 
     const checkOTAUpdateAvailable = async () => {
+        if (__DEV__) return;
         try {
             const checkUpdate = await Updates.checkForUpdateAsync();
             if (checkUpdate.isAvailable) {
