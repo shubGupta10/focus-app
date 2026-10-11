@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const DATABASE_VERSION = 8;
+    const DATABASE_VERSION = 9;
 
     await db.execAsync(
         `PRAGMA journal_mode = "TRUNCATE";
@@ -61,6 +61,17 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
          timestamp INTEGER NOT NULL
         );
 
+        CREATE TABLE IF NOT EXISTS notifications (
+          id TEXT PRIMARY KEY,
+          type TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          timestamp INTEGER NOT NULL,
+          is_read INTEGER NOT NULL DEFAULT 0,
+          action_label TEXT,
+          action_url TEXT
+        );
+
         -- Insert the default stats row if it doesn't exist
         INSERT OR IGNORE INTO user_stats (id, total_coins, current_streak, longest_streak)
         VALUES (1, 0, 0, 0);`
@@ -106,10 +117,31 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
             );`
         );
     }
-    
+
     if (currentVersion < 8) {
         try {
             await db.execAsync("ALTER TABLE routines ADD COLUMN blocked_apps TEXT NOT NULL DEFAULT '';");
+        } catch (error: any) {
+            if (!error.message.includes("duplicate column name")) {
+                console.error("Migration v8 failed for routines:", error);
+            }
+        }
+    }
+
+    if (currentVersion < 9) {
+        try {
+            await db.execAsync(`
+                CREATE TABLE IF NOT EXISTS notifications (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                is_read INTEGER NOT NULL DEFAULT 0,
+                action_label TEXT,
+                action_url TEXT
+                );
+                 `);
         } catch (error: any) {
             if (!error.message.includes("duplicate column name")) {
                 console.error("Migration v8 failed for routines:", error);

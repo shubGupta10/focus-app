@@ -18,14 +18,14 @@ import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { NotificationSheet } from "@/components/NotificationSheet";
+import { useNotification } from "@/hooks/useNotifications";
 
 
 export default function Index() {
     const { getSetting } = useSettings();
     const { activeStyle, colors, isDarkMode } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-    const { notifications, hasUnread, markAsRead } = useAutoUpdateCheck();
-    const [showNotification, setShowNotification] = useState(false);
+    const { hasUnread } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
 
     const {
@@ -94,10 +94,7 @@ export default function Index() {
                     <View className="flex-row items-center">
 
                         <Pressable
-                            onPress={() => {
-                                markAsRead();
-                                setShowNotification(true);
-                            }}
+                            onPress={() => router.push("/notifications")}
                             className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-3"
                         >
                             <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
@@ -130,9 +127,9 @@ export default function Index() {
 
             <View className="flex-1 w-full max-w-md mx-auto relative">
                 {!engine.isSessionActive ? (
-                    <Animated.View 
+                    <Animated.View
                         key="idle-ui"
-                        entering={reducedMotion ? undefined : FadeIn.duration(300)} 
+                        entering={reducedMotion ? undefined : FadeIn.duration(300)}
                         exiting={reducedMotion ? undefined : FadeOut.duration(200)}
                         className="absolute inset-0 flex-1 items-center justify-between px-6 py-4 w-full"
                     >
@@ -193,9 +190,9 @@ export default function Index() {
                         </View>
                     </Animated.View>
                 ) : (
-                    <Animated.View 
+                    <Animated.View
                         key="active-ui"
-                        entering={reducedMotion ? undefined : FadeIn.duration(400).delay(50)} 
+                        entering={reducedMotion ? undefined : FadeIn.duration(400).delay(50)}
                         exiting={reducedMotion ? undefined : FadeOut.duration(200)}
                         className="absolute inset-0"
                     >
@@ -241,13 +238,6 @@ export default function Index() {
                 isStrict={engine.isStrictSession}
                 resetCountdownText={resetCountdownText}
             />
-
-            <NotificationSheet
-                visible={showNotification}
-                onClose={() => setShowNotification(false)}
-                notifications={notifications}
-            />
-
         </SafeAreaView>
     );
 }
