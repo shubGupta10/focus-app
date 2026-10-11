@@ -21,7 +21,7 @@ function TabIcon({
 }) {
     return (
         <View className="items-center justify-center">
-            <View className={`w-14 h-8 rounded-full items-center justify-center ${focused ? 'bg-accent/15' : 'bg-transparent'}`}>
+            <View className={`w-14 h-8 rounded-full items-center justify-center ${focused ? 'bg-accent/10' : 'bg-transparent'}`}>
                 <Ionicons
                     name={focused ? name : outlineName}
                     size={22}
@@ -43,15 +43,19 @@ function TabIcon({
 
 export default function TabLayout() {
     const engine = useFocusEngine(true);
-    const { colors, isDarkMode } = useTheme();
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
 
     return (
         <Tabs
             initialRouteName="index"
+            detachInactiveScreens={false}
             screenOptions={{
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
+                sceneStyle: {
+                    backgroundColor: colors.background,
+                },
                 tabBarButton: (props) => (
                     <AnimatedPressable
                         {...props}

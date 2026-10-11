@@ -9,8 +9,10 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
-import { Text, TextInput } from "react-native";
+import { Text, TextInput, Alert } from "react-native";
 import "../global.css";
+import * as Updates from "expo-updates"
+
 
 interface TextWithDefaultProps extends Function {
   defaultProps?: { allowFontScaling?: boolean; style?: any };
@@ -35,6 +37,37 @@ Sentry.init({
 });
 
 function Layout() {
+  const { isUpdatePending } = Updates.useUpdates();
+
+  useEffect(() => {
+    if (isUpdatePending) {
+      Alert.alert(
+        "Update Ready",
+        "A new update has been downloaded. Restart the app to apply changes",
+        [
+          { text: "Later", style: "cancel" },
+          { text: "Restart Now", onPress: () => Updates.reloadAsync() }
+        ]
+      )
+    }
+  }, [isUpdatePending])
+
+  useEffect(() => {
+    if (__DEV__) return;
+
+    async function checkSilently() {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+        }
+      } catch (error) {
+        //silently fails
+      }
+    }
+    checkSilently();
+  }, [])
+
   const [loaded, error] = useFonts({
     ...Ionicons.font,
     Inter_400Regular,
@@ -60,7 +93,10 @@ function Layout() {
           <ToastProvider>
             <Stack screenOptions={{
               headerShown: false,
-              animation: 'default'
+              animation: 'default',
+              contentStyle: {
+                backgroundColor: "#161517"
+              }
             }}
             >
               <Stack.Screen name="(tabs)" />
