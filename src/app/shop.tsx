@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useRef } from "react";
 import { FlatList, Pressable, ScrollView, Text, ToastAndroid, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,9 +46,16 @@ export default function ShopScreen() {
 
     const handleSecretBoost = async () => {
         try {
-            await db.runAsync("UPDATE user_stats SET total_coins = total_coins + 100000 WHERE id = 1");
-            useAppStore.getState().updateStatsLocally(100000, 0, 0);
-            ToastAndroid.show("100,000 Coins Added!", ToastAndroid.SHORT);
+            const hasClaimed = await AsyncStorage.getItem("userSecret");
+            if (hasClaimed) {
+                ToastAndroid.show("Secret bonus already claimed!", ToastAndroid.SHORT);
+                return;
+            }
+
+            await db.runAsync("UPDATE user_stats SET total_coins = total_coins + 10000 WHERE id = 1");
+            useAppStore.getState().updateStatsLocally(10000, 0, 0);
+            await AsyncStorage.setItem("userSecret", "true");
+            ToastAndroid.show("10,000 Coins Added!", ToastAndroid.SHORT);
         } catch (e) {
             console.error("Failed to add coins:", e);
         }
