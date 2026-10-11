@@ -2,6 +2,16 @@
 
 Lockout is a premium, distraction-blocking focus application for Android. Built with React Native and Expo, Lockout helps you reclaim your time by intentionally starting focused sessions and natively blocking distracting applications.
 
+## Screenshots
+
+| Home / Focus Orb | Active Session | Distraction Blocker |
+| :---: | :---: | :---: |
+| <img src="./assets/screenshots/Screenshot_initial_black.png" width="240" alt="Home" /> | <img src="./assets/screenshots/Screenshot_timer_running_black.png" width="240" alt="Active Session" /> | <img src="./assets/screenshots/ScreenShot_blocker.jpg" width="240" alt="Distraction Blocker" /> |
+
+| Global Blocklist | Statistics & Streaks | Customization Shop |
+| :---: | :---: | :---: |
+| <img src="./assets/screenshots/Screenshot_apps_black.png" width="240" alt="Global Blocklist" /> | <img src="./assets/screenshots/Screenshot_progress_black.png" width="240" alt="Statistics" /> | <img src="./assets/screenshots/Screenshot_shop_black.png" width="240" alt="Shop" /> |
+
 ## Features
 
 - **Focus Sessions:** Set dedicated focus timers or use the open-ended "Flow State" mode to track your productivity.
