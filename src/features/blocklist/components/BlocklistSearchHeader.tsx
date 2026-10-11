@@ -22,39 +22,38 @@ export function BlocklistSearchHeader({
     const { colors } = useTheme();
 
     return (
-        <>
-            <View className="px-6 mb-3">
-                <View className="flex-row items-center bg-surfaceElevated rounded-full px-4 py-3">
-                    <Ionicons name="search" size={20} color={colors.textSecondary} />
-                    <TextInput
-                        className="flex-1 ml-2.5 text-text text-[15px] font-medium"
-                        placeholder="Search apps by name..."
-                        placeholderTextColor={colors.textMuted}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        autoCorrect={false}
-                        autoCapitalize="none"
-                    />
-                    {searchQuery.length > 0 && (
-                        <Pressable
-                            onPress={() => setSearchQuery("")}
-                            className="p-1"
-                            hitSlop={8}
-                            accessibilityRole="button"
-                            accessibilityLabel="Clear search text"
-                        >
-                            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-                        </Pressable>
-                    )}
-                </View>
+        <View className="px-6 mb-4">
+            <View className="flex-row items-center bg-surfaceElevated rounded-2xl px-4 py-3">
+                <Ionicons name="search" size={20} color={colors.textSecondary} />
+                <TextInput
+                    className="flex-1 ml-2.5 text-text text-[15px] font-medium py-0"
+                    placeholder="Search apps..."
+                    placeholderTextColor={colors.textMuted}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                />
+
+                {searchQuery.length > 0 && (
+                    <Pressable
+                        onPress={() => setSearchQuery("")}
+                        className="p-1"
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel="Clear search text"
+                    >
+                        <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                    </Pressable>
+                )}
             </View>
 
-            <View className="flex-row px-6 mb-6 gap-2 mt-2">
+            <View className="flex-row gap-2.5 mt-3.5">
                 <Pressable
                     onPress={() => setFilterMode("all")}
-                    className={`px-3.5 py-1.5 rounded-full border ${filterMode === "all"
-                        ? "bg-accent border-accent"
-                        : "bg-surfaceElevated border-transparent active:opacity-75"
+                    className={`px-4 py-2 rounded-full ${filterMode === "all"
+                        ? "bg-accent"
+                        : "bg-surfaceElevated active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show all apps"
@@ -69,9 +68,9 @@ export function BlocklistSearchHeader({
 
                 <Pressable
                     onPress={() => setFilterMode("guarded")}
-                    className={`px-3.5 py-1.5 rounded-full border ${filterMode === "guarded"
-                        ? "bg-accent border-accent"
-                        : "bg-surfaceElevated border-transparent active:opacity-75"
+                    className={`px-4 py-2 rounded-full ${filterMode === "guarded"
+                        ? "bg-accent"
+                        : "bg-surfaceElevated active:opacity-75"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show guarded apps only"
@@ -84,6 +83,6 @@ export function BlocklistSearchHeader({
                     </Text>
                 </Pressable>
             </View>
-        </>
+        </View>
     );
 }
