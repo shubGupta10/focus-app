@@ -57,5 +57,6 @@
     "lint": "expo lint",
     "postinstall": "patch-package"
   },
-  "private": true
+  "private": true,
+  "license": "GPL-3.0-only"
 }
