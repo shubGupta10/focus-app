@@ -22,8 +22,10 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RemoteViews
+import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
 import expo.modules.focusblocker.R
@@ -35,6 +37,7 @@ class FocusService : Service() {
         var activeStartTime: Long = -1L
         var activeEndTime: Long = -1L
         var isStrictActive: Boolean = false
+        private val dbExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
     }
 
     private val CHANNEL_ID = "FocusBlockerChannel_V2"
@@ -45,6 +48,7 @@ class FocusService : Service() {
     private var isOverlayShowing = false
 
     private var endTime: Long = -1L
+    @Volatile
     private var customBlockedApps: List<String> = emptyList()
 
     private val appLabelCache = mutableMapOf<String, String>()
@@ -209,11 +213,11 @@ class FocusService : Service() {
             val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
 
-            // Initialize with the most recent app in the last 10 seconds, or default to Lockout
+            // Initialize with the most recent app in the last 24 hours, or default to Lockout
             val initialNow = System.currentTimeMillis()
             try {
                 var topPackage: String? = null
-                val initialEvents = usageStatsManager.queryEvents(initialNow - 10000, initialNow)
+                val initialEvents = usageStatsManager.queryEvents(initialNow - 24 * 60 * 60 * 1000L, initialNow)
                 val event = UsageEvents.Event()
                 while (initialEvents.hasNextEvent()) {
                     initialEvents.getNextEvent(event)
@@ -383,12 +387,25 @@ class FocusService : Service() {
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT
-            )
+            ).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                }
+                windowAnimations = android.R.style.Animation_Toast
+            }
+
+            val density = resources.displayMetrics.density
+            fun dp(v: Int): Int = (v * density).toInt()
+            fun dpF(v: Float): Float = v * density
 
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setBackgroundColor(Color.parseColor("#161517"))
                 gravity = Gravity.CENTER
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
             }
 
             val topSpacer = Space(this).apply {
@@ -400,7 +417,7 @@ class FocusService : Service() {
                 text = "🔒"
                 textSize = 72f
                 gravity = Gravity.CENTER
-                setPadding(0, 0, 0, 32)
+                setPadding(0, 0, 0, dp(16))
             }
             container.addView(icon)
 
@@ -420,7 +437,7 @@ class FocusService : Service() {
                 textSize = 15f
                 setTypeface(null, Typeface.NORMAL)
                 gravity = Gravity.CENTER
-                setPadding(80, 20, 80, 0)
+                setPadding(dp(32), dp(8), dp(32), 0)
             }
             subtitleView = subtitle
             container.addView(subtitle)
@@ -440,13 +457,13 @@ class FocusService : Service() {
 
                 val shape = android.graphics.drawable.GradientDrawable().apply {
                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                    cornerRadius = 48f
+                    cornerRadius = dpF(24f)
                     setColor(Color.parseColor("#C07480"))
                 }
                 background = shape
 
-                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 150).apply {
-                    setMargins(80, 0, 80, 16)
+                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(52)).apply {
+                    setMargins(dp(32), 0, dp(32), dp(12))
                 }
                 layoutParams = btnParams
 
@@ -486,14 +503,14 @@ class FocusService : Service() {
 
                 val shape = android.graphics.drawable.GradientDrawable().apply {
                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                    cornerRadius = 48f
+                    cornerRadius = dpF(24f)
                     setColor(Color.parseColor("#201E20"))
-                    setStroke(2, Color.parseColor("#3D3840"))
+                    setStroke((1.5f * density).toInt().coerceAtLeast(1), Color.parseColor("#3D3840"))
                 }
                 background = shape
 
-                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 130).apply {
-                    setMargins(80, 0, 80, 80)
+                val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(48)).apply {
+                    setMargins(dp(32), 0, dp(32), dp(32))
                 }
                 layoutParams = btnParams
 
@@ -523,9 +540,16 @@ class FocusService : Service() {
             }
             container.addView(openAppButton)
 
+            val scrollView = ScrollView(this).apply {
+                isFillViewport = true
+                overScrollMode = View.OVER_SCROLL_NEVER
+                setBackgroundColor(Color.parseColor("#161517"))
+            }
+            scrollView.addView(container)
+
             try {
-                windowManager?.addView(container, windowLayoutParams)
-                overlayView = container
+                windowManager?.addView(scrollView, windowLayoutParams)
+                overlayView = scrollView
                 isOverlayShowing = true
                 logBlockedAttempt(blockedPackage)
             } catch (e: Exception) {
@@ -538,7 +562,7 @@ class FocusService : Service() {
     private var subtitleView: TextView? = null
 
     private fun logBlockedAttempt(packageName: String) {
-        Thread {
+        dbExecutor.execute {
             try {
                 val dbFile = java.io.File(java.io.File(filesDir, "SQLite"), "focus.db")
                 if (dbFile.exists()) {
@@ -558,7 +582,7 @@ class FocusService : Service() {
             } catch (e: Exception) {
                 Log.e("FocusBlocker", "Failed to log blocked attempt", e)
             }
-        }.start()
+        }
     }
 
     private fun hideBlockOverlay() {
