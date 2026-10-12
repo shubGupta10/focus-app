@@ -66,39 +66,46 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                             ? `This will consume your ONLY emergency skip this week (${resetCountdownText}). Any future strict sessions this week cannot be ended early.`
                             : "Your focus session will end early and you won't earn the completion reward for this session."}
                     </Text>
-                    <View className="gap-3">
+                    <View className="flex-row items-center gap-3">
                         {/* Primary Action: Keep Focusing */}
                         <AnimatedPressable
                             onPress={onClose}
                             hapticMode="light"
-                            className="bg-accent py-3.5 rounded-xl items-center justify-center"
+                            className="flex-1 bg-accent py-3.5 rounded-xl items-center justify-center"
                             accessibilityRole="button"
                             accessibilityLabel="Keep focusing"
                         >
-                            <Text className="text-accentForeground font-black text-sm tracking-wider uppercase">
+                            <Text
+                                className="text-accentForeground font-bold text-sm tracking-wide uppercase text-center"
+                                numberOfLines={1}
+                            >
                                 Keep focusing
                             </Text>
                         </AnimatedPressable>
 
+                        {/* Destructive Action: End Session */}
                         <AnimatedPressable
                             onPress={isButtonDisabled ? undefined : onConfirmEnd}
                             disabled={isButtonDisabled}
                             hapticMode="heavy"
-                            className={`py-3.5 rounded-xl items-center justify-center ${isButtonDisabled
-                                ? "bg-surface opacity-50"
-                                : "bg-destructive"
-                                }`}
+                            className={`flex-1 py-3.5 rounded-xl items-center justify-center ${
+                                isButtonDisabled
+                                    ? "bg-surface opacity-50"
+                                    : "bg-destructive"
+                            }`}
                             accessibilityRole="button"
                             accessibilityLabel={isStrict ? "Use Emergency Skip" : "End session"}
                         >
                             <Text
-                                className={`font-black text-sm tracking-wider uppercase ${isButtonDisabled ? "text-textMuted" : "text-white"
-                                    }`}
+                                className={`font-bold text-sm tracking-wide uppercase text-center ${
+                                    isButtonDisabled ? "text-textMuted" : "text-white"
+                                }`}
+                                numberOfLines={1}
                             >
                                 {isStrict
                                     ? isButtonDisabled
-                                        ? `Use Emergency Skip (${countdown}s)`
-                                        : "Use Emergency Skip"
+                                        ? `Skip (${countdown}s)`
+                                        : "Emergency Skip"
                                     : "End session"}
                             </Text>
                         </AnimatedPressable>

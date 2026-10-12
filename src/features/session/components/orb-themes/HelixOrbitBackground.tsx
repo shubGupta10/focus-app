@@ -9,7 +9,17 @@ const AMPLITUDE = 28;
 const CENTER = 170;
 const WAVE_CYCLES = 3;
 
-function generateStrand(phaseOffset: number) {
+interface HelixDot {
+    x: number;
+    y: number;
+    size: number;
+    opacity: number;
+    normalizedSin: number;
+    hasGlow: boolean;
+    isCrest: boolean;
+}
+
+function generateStrand(phaseOffset: number): HelixDot[] {
     return Array.from({ length: DOT_COUNT }, (_, i) => {
         const angle = (i / DOT_COUNT) * 360;
         const waveAngle = (angle * WAVE_CYCLES + phaseOffset) * (Math.PI / 180);
@@ -19,23 +29,28 @@ function generateStrand(phaseOffset: number) {
         const normalizedSin = (sinVal + 1) / 2;
 
         return {
-            x: CENTER + radius * Math.cos(angleRad),
-            y: CENTER + radius * Math.sin(angleRad),
-            size: 1.5 + 3 * normalizedSin,
-            opacity: 0.15 + 0.6 * normalizedSin,
-            hasGlow: normalizedSin > 0.7,
+            x: Math.round((CENTER + radius * Math.cos(angleRad)) * 10) / 10,
+            y: Math.round((CENTER + radius * Math.sin(angleRad)) * 10) / 10,
+            size: Math.round((2.2 + 2.8 * normalizedSin) * 10) / 10,
+            opacity: Math.round((0.35 + 0.60 * normalizedSin) * 100) / 100,
+            normalizedSin,
+            hasGlow: normalizedSin > 0.65,
+            isCrest: normalizedSin > 0.78,
         };
     });
 }
 
-function generateRungs(strandA: ReturnType<typeof generateStrand>, strandB: ReturnType<typeof generateStrand>) {
-    return strandA.map((dotA, i) => ({
-        x1: dotA.x,
-        y1: dotA.y,
-        x2: strandB[i].x,
-        y2: strandB[i].y,
-        opacity: 0.06 + 0.08 * Math.abs(dotA.opacity - strandB[i].opacity),
-    }));
+function generateRungs(strandA: HelixDot[], strandB: HelixDot[]) {
+    return strandA.map((dotA, i) => {
+        const avgNorm = (dotA.normalizedSin + strandB[i].normalizedSin) / 2;
+        return {
+            x1: dotA.x,
+            y1: dotA.y,
+            x2: strandB[i].x,
+            y2: strandB[i].y,
+            opacity: Math.round((0.20 + 0.25 * avgNorm) * 100) / 100,
+        };
+    });
 }
 
 export function HelixOrbitBackground({
@@ -71,6 +86,7 @@ export function HelixOrbitBackground({
 
     return (
         <View style={{ width: 340, height: 340 }}>
+            {/* Guide Tracks (Crisp dashed perimeter guides) */}
             <View style={{ position: "absolute", width: 340, height: 340 }}>
                 <Svg width="340" height="340" viewBox="0 0 340 340">
                     <Circle
@@ -78,22 +94,25 @@ export function HelixOrbitBackground({
                         cy={CENTER}
                         r={BASE_RADIUS + AMPLITUDE}
                         stroke={colorAccent}
-                        strokeWidth="0.5"
+                        strokeWidth="1"
+                        strokeDasharray="2, 6"
                         fill="none"
-                        opacity={0.06}
+                        opacity={0.12}
                     />
                     <Circle
                         cx={CENTER}
                         cy={CENTER}
                         r={BASE_RADIUS - AMPLITUDE}
                         stroke={colorAccent}
-                        strokeWidth="0.5"
+                        strokeWidth="1"
+                        strokeDasharray="2, 6"
                         fill="none"
-                        opacity={0.06}
+                        opacity={0.12}
                     />
                 </Svg>
             </View>
 
+            {/* Rotating Double Helix Structure */}
             <Animated.View
                 style={{
                     position: "absolute",
@@ -103,6 +122,7 @@ export function HelixOrbitBackground({
                 }}
             >
                 <Svg width="340" height="340" viewBox="0 0 340 340">
+                    {/* Helix Ladder Rungs */}
                     {rungs.map((rung, i) => (
                         <Line
                             key={`r-${i}`}
@@ -111,20 +131,22 @@ export function HelixOrbitBackground({
                             x2={rung.x2}
                             y2={rung.y2}
                             stroke={colorAccent}
-                            strokeWidth="0.8"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
                             opacity={rung.opacity}
                         />
                     ))}
 
+                    {/* Strand A Nodes */}
                     {strandA.map((dot, i) => (
                         <React.Fragment key={`a-${i}`}>
                             {dot.hasGlow && (
                                 <Circle
                                     cx={dot.x}
                                     cy={dot.y}
-                                    r={dot.size + 4}
+                                    r={dot.size + 3.5}
                                     fill={colorAccent}
-                                    opacity={0.08}
+                                    opacity={0.22}
                                 />
                             )}
                             <Circle
@@ -134,18 +156,28 @@ export function HelixOrbitBackground({
                                 fill={colorAccent}
                                 opacity={dot.opacity}
                             />
+                            {dot.isCrest && (
+                                <Circle
+                                    cx={dot.x}
+                                    cy={dot.y}
+                                    r={dot.size * 0.42}
+                                    fill="#ffffff"
+                                    opacity={0.92}
+                                />
+                            )}
                         </React.Fragment>
                     ))}
 
+                    {/* Strand B Nodes */}
                     {strandB.map((dot, i) => (
                         <React.Fragment key={`b-${i}`}>
                             {dot.hasGlow && (
                                 <Circle
                                     cx={dot.x}
                                     cy={dot.y}
-                                    r={dot.size + 4}
+                                    r={dot.size + 3.5}
                                     fill={colorAccent}
-                                    opacity={0.08}
+                                    opacity={0.22}
                                 />
                             )}
                             <Circle
@@ -155,6 +187,15 @@ export function HelixOrbitBackground({
                                 fill={colorAccent}
                                 opacity={dot.opacity}
                             />
+                            {dot.isCrest && (
+                                <Circle
+                                    cx={dot.x}
+                                    cy={dot.y}
+                                    r={dot.size * 0.42}
+                                    fill="#ffffff"
+                                    opacity={0.92}
+                                />
+                            )}
                         </React.Fragment>
                     ))}
                 </Svg>

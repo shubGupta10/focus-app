@@ -18,35 +18,24 @@ function getLineCoords(angleDeg: number) {
     };
 }
 
-function SweepBeam({ colorAccent, trailSpacing = 10 }: { colorAccent: string; trailSpacing?: number }) {
+function SweepBeam({
+    colorAccent,
+    trailSpacing = 10,
+    reverseTrail = false,
+}: {
+    colorAccent: string;
+    trailSpacing?: number;
+    reverseTrail?: boolean;
+}) {
     const leadCoords = getLineCoords(0);
 
     return (
         <Svg width="340" height="340" viewBox="0 0 340 340">
-            <Circle
-                cx={CENTER}
-                cy={CENTER}
-                r={OUTER_RADIUS}
-                stroke={colorAccent}
-                strokeWidth="1"
-                fill="none"
-                opacity={0.08}
-            />
-            <Circle
-                cx={CENTER}
-                cy={CENTER}
-                r={INNER_RADIUS}
-                stroke={colorAccent}
-                strokeWidth="1"
-                fill="none"
-                opacity={0.08}
-            />
-
             {Array.from({ length: TRAIL_COUNT }, (_, i) => {
-                const angle = -(i * trailSpacing);
+                const angle = reverseTrail ? i * trailSpacing : -(i * trailSpacing);
                 const coords = getLineCoords(angle);
-                const opacity = 0.5 - (i / TRAIL_COUNT) * 0.45;
-                const width = 2 - (i / TRAIL_COUNT) * 1.2;
+                const opacity = Math.round((0.92 - (i / TRAIL_COUNT) * 0.72) * 100) / 100;
+                const width = Math.round((3.2 - (i / TRAIL_COUNT) * 1.8) * 10) / 10;
 
                 return (
                     <Line
@@ -63,19 +52,36 @@ function SweepBeam({ colorAccent, trailSpacing = 10 }: { colorAccent: string; tr
                 );
             })}
 
+            {/* Inner Lead Anchor Bead */}
+            <Circle
+                cx={leadCoords.x1}
+                cy={leadCoords.y1}
+                r={2.8}
+                fill={colorAccent}
+                opacity={0.85}
+            />
+
+            {/* Lead Wavefront Head (Multi-layer high-contrast beacon) */}
             <Circle
                 cx={leadCoords.x2}
                 cy={leadCoords.y2}
-                r={6}
+                r={8}
                 fill={colorAccent}
-                opacity={0.15}
+                opacity={0.25}
             />
             <Circle
                 cx={leadCoords.x2}
                 cy={leadCoords.y2}
-                r={3.5}
+                r={4.5}
                 fill={colorAccent}
-                opacity={0.7}
+                opacity={0.9}
+            />
+            <Circle
+                cx={leadCoords.x2}
+                cy={leadCoords.y2}
+                r={2}
+                fill="#ffffff"
+                opacity={0.95}
             />
         </Svg>
     );
@@ -89,7 +95,11 @@ export function WaveformPulseBackground({
     const secondarySpin = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        if (!isActive) return;
+        if (!isActive) {
+            primarySpin.setValue(0);
+            secondarySpin.setValue(0);
+            return;
+        }
 
         const primaryLoop = Animated.loop(
             Animated.timing(primarySpin, {
@@ -118,18 +128,43 @@ export function WaveformPulseBackground({
         };
     }, [primarySpin, secondarySpin, isActive]);
 
+    // Primary: In idle (0), rests at LEFT (270°); When active, rotates clockwise to 630°
     const primaryRotate = primarySpin.interpolate({
         inputRange: [0, 1],
-        outputRange: ["0deg", "360deg"],
+        outputRange: ["270deg", "630deg"],
     });
 
+    // Secondary: In idle (0), rests at RIGHT (90°); When active, rotates counter-clockwise to -270°
     const secondaryRotate = secondarySpin.interpolate({
         inputRange: [0, 1],
-        outputRange: ["360deg", "0deg"],
+        outputRange: ["90deg", "-270deg"],
     });
 
     return (
         <View style={{ width: 340, height: 340 }}>
+            {/* Guide Tracks (Rendered once, high visibility) */}
+            <Svg width="340" height="340" viewBox="0 0 340 340" style={{ position: "absolute" }}>
+                <Circle
+                    cx={CENTER}
+                    cy={CENTER}
+                    r={OUTER_RADIUS}
+                    stroke={colorAccent}
+                    strokeWidth="1.2"
+                    fill="none"
+                    opacity={0.16}
+                />
+                <Circle
+                    cx={CENTER}
+                    cy={CENTER}
+                    r={INNER_RADIUS}
+                    stroke={colorAccent}
+                    strokeWidth="1.2"
+                    fill="none"
+                    opacity={0.16}
+                />
+            </Svg>
+
+            {/* Left Wave (Primary, Clockwise) */}
             <Animated.View
                 style={{
                     position: "absolute",
@@ -141,6 +176,7 @@ export function WaveformPulseBackground({
                 <SweepBeam colorAccent={colorAccent} trailSpacing={10} />
             </Animated.View>
 
+            {/* Right Wave (Secondary, Counter-Clockwise) */}
             <Animated.View
                 style={{
                     position: "absolute",
@@ -149,7 +185,7 @@ export function WaveformPulseBackground({
                     transform: [{ rotate: secondaryRotate }],
                 }}
             >
-                <SweepBeam colorAccent={colorAccent} trailSpacing={8} />
+                <SweepBeam colorAccent={colorAccent} trailSpacing={8} reverseTrail />
             </Animated.View>
         </View>
     );

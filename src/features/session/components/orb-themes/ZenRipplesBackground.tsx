@@ -8,13 +8,18 @@ export function ZenRipplesBackground({ isActive, colorAccent }: OrbBackgroundPro
     const timeouts = useRef<NodeJS.Timeout[]>([]);
 
     useEffect(() => {
+        timeouts.current.forEach(clearTimeout);
+        timeouts.current = [];
+
         if (!isActive) {
-            anims.forEach(a => a.setValue(0));
-            timeouts.current.forEach(clearTimeout);
+            anims.forEach(a => {
+                a.stopAnimation();
+                a.setValue(0);
+            });
             return;
         }
 
-        const duration = 15000; // Slower, longer ripples
+        const duration = 9000; // Calm, peaceful zen pace (1.8s release)
         const stagger = duration / anims.length;
 
         anims.forEach((anim, index) => {
@@ -37,6 +42,7 @@ export function ZenRipplesBackground({ isActive, colorAccent }: OrbBackgroundPro
         return () => {
             anims.forEach(a => a.stopAnimation());
             timeouts.current.forEach(clearTimeout);
+            timeouts.current = [];
         };
     }, [isActive, anims]);
 
@@ -52,18 +58,30 @@ export function ZenRipplesBackground({ isActive, colorAccent }: OrbBackgroundPro
 
     return (
         <View style={{ width: 340, height: 340 }}>
-            {isActive && anims.map((anim, index) => (
-                <Animated.View key={`ripple-${index}`} style={{
-                    position: 'absolute',
-                    width: 340, height: 340,
-                    transform: [{ scale: getScale(anim) }],
-                    opacity: getOpacity(anim)
-                }}>
+            {!isActive ? (
+                /* Idle: 3 resting ripples */
+                <View style={{ position: 'absolute', width: 340, height: 340 }}>
                     <Svg width="340" height="340" viewBox="0 0 340 340">
-                        <Circle cx="170" cy="170" r="110" fill="none" stroke={colorAccent} strokeWidth="2" />
+                        <Circle cx="170" cy="170" r="110" fill="none" stroke={colorAccent} strokeWidth="1.8" opacity={0.35} />
+                        <Circle cx="170" cy="170" r="128" fill="none" stroke={colorAccent} strokeWidth="1.5" opacity={0.24} />
+                        <Circle cx="170" cy="170" r="146" fill="none" stroke={colorAccent} strokeWidth="1.2" opacity={0.15} />
                     </Svg>
-                </Animated.View>
-            ))}
+                </View>
+            ) : (
+                /* Running: active expanding ripples only */
+                anims.map((anim, index) => (
+                    <Animated.View key={`ripple-${index}`} style={{
+                        position: 'absolute',
+                        width: 340, height: 340,
+                        transform: [{ scale: getScale(anim) }],
+                        opacity: getOpacity(anim)
+                    }}>
+                        <Svg width="340" height="340" viewBox="0 0 340 340">
+                            <Circle cx="170" cy="170" r="110" fill="none" stroke={colorAccent} strokeWidth="2" />
+                        </Svg>
+                    </Animated.View>
+                ))
+            )}
         </View>
     );
 }

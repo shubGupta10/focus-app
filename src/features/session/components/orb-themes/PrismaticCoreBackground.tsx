@@ -63,50 +63,46 @@ export function PrismaticCoreBackground({ isActive, colorAccent }: OrbBackground
 
     return (
         <View style={{ width: 340, height: 340 }}>
-            {isActive && (
-                <>
-                    {/* Inner Hexagon */}
-                    <Animated.View style={{
-                        position: 'absolute',
-                        width: 340, height: 340,
-                        transform: [
-                            { rotate: anim1.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
-                        ]
-                    }}>
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            <Polygon points={hexagonPoints} fill="none" stroke={colorAccent} strokeWidth="1.5" opacity={0.4} />
-                            <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="1" opacity={0.2} />
-                        </Svg>
-                    </Animated.View>
+            {/* Inner Hexagon */}
+            <Animated.View style={{
+                position: 'absolute',
+                width: 340, height: 340,
+                transform: [
+                    { rotate: anim1.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
+                ]
+            }}>
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    <Polygon points={hexagonPoints} fill="none" stroke={colorAccent} strokeWidth="1.5" opacity={0.4} />
+                    <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="1" opacity={0.2} />
+                </Svg>
+            </Animated.View>
 
-                    {/* Middle Square */}
-                    <Animated.View style={{
-                        position: 'absolute',
-                        width: 340, height: 340,
-                        transform: [
-                            { rotate: anim2.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
-                        ]
-                    }}>
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="1" opacity={0.6} />
-                        </Svg>
-                    </Animated.View>
+            {/* Middle Square */}
+            <Animated.View style={{
+                position: 'absolute',
+                width: 340, height: 340,
+                transform: [
+                    { rotate: anim2.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
+                ]
+            }}>
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="1" opacity={0.6} />
+                </Svg>
+            </Animated.View>
 
-                    {/* Outer Square scaled up */}
-                    <Animated.View style={{
-                        position: 'absolute',
-                        width: 340, height: 340,
-                        transform: [
-                            { rotate: anim3.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
-                            { scale: 1.15 },
-                        ]
-                    }}>
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="0.5" opacity={0.3} />
-                        </Svg>
-                    </Animated.View>
-                </>
-            )}
+            {/* Outer Square scaled up */}
+            <Animated.View style={{
+                position: 'absolute',
+                width: 340, height: 340,
+                transform: [
+                    { rotate: anim3.interpolate({ inputRange: [-1, 1], outputRange: ['-360deg', '360deg'] }) },
+                    { scale: 1.15 },
+                ]
+            }}>
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    <Polygon points={squarePoints} fill="none" stroke={colorAccent} strokeWidth="0.5" opacity={0.3} />
+                </Svg>
+            </Animated.View>
         </View>
     );
 }

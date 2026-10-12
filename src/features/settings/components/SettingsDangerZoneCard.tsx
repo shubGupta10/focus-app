@@ -7,15 +7,14 @@ interface SettingsDangerZoneCardProps {
 }
 
 export function SettingsDangerZoneCard({ resetAllData }: SettingsDangerZoneCardProps) {
-    const { colors } = useTheme();
 
     return (
         <View className="px-6 mb-6 mt-2">
             <Text className="text-destructive font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                 Danger Zone
             </Text>
-            
-            <View className="bg-surfaceElevated rounded-3xl p-5 border border-destructive/20">
+
+            <View className="bg-surfaceElevated rounded-3xl p-5">
                 <View className="mb-5">
                     <Text className="text-text font-bold text-[16px] mb-1">Reset All Data</Text>
                     <Text className="text-textSecondary text-sm leading-5">

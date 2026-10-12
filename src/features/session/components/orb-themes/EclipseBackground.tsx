@@ -42,55 +42,51 @@ export function EclipseBackground({ isActive, colorAccent }: OrbBackgroundProps)
 
     return (
         <View style={{ width: 340, height: 340 }}>
-            {isActive && (
-                <>
-                    {/* Layer 1: The Breathing Aura (Soft, massive background glow) */}
-                    <Animated.View style={{
-                        position: 'absolute',
-                        width: 340, height: 340,
-                        transform: [{ scale: auraScale }],
-                        opacity: auraOpacity
-                    }}>
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            <Defs>
-                                <RadialGradient id="auraGrad" cx="50%" cy="50%" rx="50%" ry="50%">
-                                    <Stop offset="40%" stopColor={colorAccent} stopOpacity="0.8" />
-                                    <Stop offset="70%" stopColor={colorAccent} stopOpacity="0.3" />
-                                    <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
-                                </RadialGradient>
-                            </Defs>
-                            <Circle cx="170" cy="170" r="160" fill="url(#auraGrad)" />
-                        </Svg>
-                    </Animated.View>
+            {/* Layer 1: The Breathing Aura (Soft, massive background glow) */}
+            <Animated.View style={{
+                position: 'absolute',
+                width: 340, height: 340,
+                transform: [{ scale: auraScale }],
+                opacity: auraOpacity
+            }}>
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    <Defs>
+                        <RadialGradient id="auraGrad" cx="50%" cy="50%" rx="50%" ry="50%">
+                            <Stop offset="40%" stopColor={colorAccent} stopOpacity="0.8" />
+                            <Stop offset="70%" stopColor={colorAccent} stopOpacity="0.3" />
+                            <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
+                        </RadialGradient>
+                    </Defs>
+                    <Circle cx="170" cy="170" r="160" fill="url(#auraGrad)" />
+                </Svg>
+            </Animated.View>
 
-                    {/* Layer 2: The Sweeping Crescent & The Void */}
-                    <Animated.View style={{
-                        position: 'absolute',
-                        width: 340, height: 340,
-                        transform: [{ rotate: sweepRotation }]
-                    }}>
-                        <Svg width="340" height="340" viewBox="0 0 340 340">
-                            <Defs>
-                                <RadialGradient id="crescentGrad" cx="50%" cy="50%" rx="50%" ry="50%">
-                                    <Stop offset="70%" stopColor="#ffffff" stopOpacity="1" />
-                                    <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
-                                </RadialGradient>
-                            </Defs>
-                            
-                            {/* The Sun: Offset slightly by 6 pixels on the X-axis. 
-                                As the container rotates, this offset circles the center, 
-                                creating a beautiful sweeping crescent of light behind the moon. */}
-                            <Circle cx="176" cy="170" r="128" fill="url(#crescentGrad)" />
-                            
-                            {/* The Moon: Perfectly centered. Pitch black void. */}
-                            <Circle cx="170" cy="170" r="126" fill="#000000" />
-                            
-                            {/* A razor-thin crisp inner rim to perfectly define the void */}
-                            <Circle cx="170" cy="170" r="126" fill="none" stroke="#000000" strokeWidth="2" />
-                        </Svg>
-                    </Animated.View>
-                </>
-            )}
+            {/* Layer 2: The Sweeping Crescent & The Void */}
+            <Animated.View style={{
+                position: 'absolute',
+                width: 340, height: 340,
+                transform: [{ rotate: sweepRotation }]
+            }}>
+                <Svg width="340" height="340" viewBox="0 0 340 340">
+                    <Defs>
+                        <RadialGradient id="crescentGrad" cx="50%" cy="50%" rx="50%" ry="50%">
+                            <Stop offset="70%" stopColor="#ffffff" stopOpacity="1" />
+                            <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
+                        </RadialGradient>
+                    </Defs>
+                    
+                    {/* The Sun: Offset slightly by 6 pixels on the X-axis. 
+                        As the container rotates, this offset circles the center, 
+                        creating a beautiful sweeping crescent of light behind the moon. */}
+                    <Circle cx="176" cy="170" r="128" fill="url(#crescentGrad)" />
+                    
+                    {/* The Moon: Perfectly centered. Pitch black void. */}
+                    <Circle cx="170" cy="170" r="126" fill="#000000" />
+                    
+                    {/* A razor-thin crisp inner rim to perfectly define the void */}
+                    <Circle cx="170" cy="170" r="126" fill="none" stroke="#000000" strokeWidth="2" />
+                </Svg>
+            </Animated.View>
         </View>
     );
 }

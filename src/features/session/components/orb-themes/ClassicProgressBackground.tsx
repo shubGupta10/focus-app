@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Svg, { Circle } from "react-native-svg";
 import { OrbBackgroundProps } from "./OrbBackgroundProps";
 
@@ -11,12 +12,32 @@ export function ClassicProgressBackground({
     sessionProgress,
     minuteProgress,
 }: OrbBackgroundProps) {
+    const isPreview = minuteProgress === null || minuteProgress === undefined;
+    const [previewMinute, setPreviewMinute] = useState(0);
+
+    useEffect(() => {
+        if (!isActive || !isPreview) return;
+
+        const update = () => {
+            const now = Date.now();
+            setPreviewMinute((now % 60000) / 60000);
+        };
+
+        update();
+        const interval = setInterval(update, 200);
+
+        return () => clearInterval(interval);
+    }, [isActive, isPreview]);
+
+    const activeMinute = isPreview ? previewMinute : minuteProgress;
+    const activeSession = isPreview ? 0.75 : sessionProgress;
+
     const outerCircumference = 2 * Math.PI * outerRadius;
-    const clampedSession = sessionProgress !== null && sessionProgress !== undefined ? Math.max(0, Math.min(1, sessionProgress)) : 1;
+    const clampedSession = activeSession !== null && activeSession !== undefined ? Math.max(0, Math.min(1, activeSession)) : 1;
     const outerOffset = outerCircumference * (1 - clampedSession);
 
     const innerCircumference = 2 * Math.PI * innerRadius;
-    const clampedMinute = minuteProgress !== null && minuteProgress !== undefined ? Math.max(0, Math.min(1, minuteProgress)) : 1;
+    const clampedMinute = activeMinute !== null && activeMinute !== undefined ? Math.max(0, Math.min(1, activeMinute)) : 1;
     const innerOffset = innerCircumference * (1 - clampedMinute);
 
     const minuteAngle = -Math.PI / 2 + clampedMinute * 2 * Math.PI;
