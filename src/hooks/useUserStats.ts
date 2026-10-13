@@ -3,6 +3,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback } from "react";
+import { addNotification } from "./useNotifications";
 
 export function useUserStats() {
     const db = useSQLiteContext();
@@ -23,9 +24,26 @@ export function useUserStats() {
 
     const savedCompletedSession = async (durationSeconds: number, isStrict: boolean = false, endTimeMs?: number) => {
         try {
+            const previousStreak = stats.current_streak;
             const { earnedCoins, newStreak } = await recordSession(db, durationSeconds, isStrict, endTimeMs);
+
             updateStatsLocally(earnedCoins, durationSeconds, newStreak);
             refreshStats(db);
+
+            if (newStreak > previousStreak) {
+                const todayStr = new Date().toISOString().split("T")[0];
+
+                await addNotification(db, {
+                    id: `milestone_streak_${newStreak}_${todayStr}`,
+                    type: "milestone",
+                    title: `${newStreak}-Day Streak Achieved! 🔥`,
+                    description: `Consistency unlocked! You've maintained your focus habit for ${newStreak} consecutive days.`,
+                    timestamp: Date.now(),
+                    action_label: null,
+                    action_url: null,
+                });
+            }
+
             return { earnedCoins, newStreak };
         } catch (error) {
             console.error("Error recording session:", error);

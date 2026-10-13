@@ -8,8 +8,11 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, AppState } from "react-native";
 import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 import { getDurationSeconds } from "../../../utils/timeUtils";
+import { useSQLiteContext } from "expo-sqlite";
+import { addNotification } from "@/hooks/useNotifications";
 
 export function useSessionController() {
+    const db = useSQLiteContext();
     const engine = useFocusEngine();
     const { savedCompletedSession, todayStats, refreshStats } = useUserStats();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
@@ -80,6 +83,42 @@ export function useSessionController() {
                 }
 
                 const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict, endTimeMs);
+
+                const minutes = Math.max(1, Math.floor(durationSeconds / 60));
+
+                await addNotification(db, {
+                    id: `session_${endTimeMs || Date.now()}`,
+                    type: "session",
+                    title: wasStrict ? "Strict Session Completed! 🛡️" : "Focus Session Completed! 🎯",
+                    description: `You focused for ${minutes} min${minutes > 1 ? "s" : ""} and earned +${earnedCoins} coins.`,
+                    timestamp: endTimeMs || Date.now(),
+                    action_label: null,
+                    action_url: null,
+                })
+
+                try {
+                    const sessionStartTime = endTimeMs ? endTimeMs - durationSeconds * 1000 : Date.now() - durationSeconds * 1000;
+
+                    const blockedRows = await db.getAllAsync<{ count: number }>(
+                        ` SELECT COUNT(*) as count FROM blocked_attempts WHERE timestamp >= ? AND timestamp <= ?`,
+                        [sessionStartTime, endTimeMs || Date.now()]
+                    );
+                    const blockCount = blockedRows[0]?.count ?? 0;
+
+                    if (blockCount > 0) {
+                        await addNotification(db, {
+                            id: `defense_${endTimeMs || Date.now()}`,
+                            type: "defense",
+                            title: "Shield Defended Your Focus 🛡️",
+                            description: `Blocked ${blockCount} distraction attempt${blockCount > 1 ? "s" : ""} during this session.`,
+                            timestamp: (endTimeMs || Date.now()) + 1,
+                            action_label: null,
+                            action_url: null,
+                        })
+                    }
+                } catch (error) {
+                    console.error("Failed to check blocked attempts:", error);
+                }
 
                 try {
                     await FocusBlocker.clearCompletedSession();

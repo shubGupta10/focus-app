@@ -17,7 +17,6 @@ import { useSessionController } from "../../features/session/hooks/useSessionCon
 import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
-import { NotificationSheet } from "@/components/NotificationSheet";
 import { useNotification } from "@/hooks/useNotifications";
 
 
@@ -27,6 +26,8 @@ export default function Index() {
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
     const { hasUnread } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
+
+    useAutoUpdateCheck();
 
     const {
         engine,

@@ -1,6 +1,8 @@
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { useSQLiteContext } from "expo-sqlite";
+import { addNotification } from "./useNotifications";
 
 export type AppNotification = {
     id: string;
@@ -11,6 +13,7 @@ export type AppNotification = {
 };
 
 export function useAutoUpdateCheck() {
+    const db = useSQLiteContext();
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [hasUnread, setHasUnread] = useState(false);
 
@@ -23,11 +26,16 @@ export function useAutoUpdateCheck() {
             try {
                 const lastSeenVersion = await AsyncStorage.getItem("lastSeenVersion");
                 if (lastSeenVersion && lastSeenVersion !== currentVersion) {
-                    newNotifications.push({
-                        id: 'ota_celebrate',
-                        title: 'Update Successful! 🎉',
-                        description: `Lockout silently updated to v${currentVersion} in the background.`,
-                    });
+                    await addNotification(db, {
+                        id: `ota_celebrate_${currentVersion}`,
+                        type: "update",
+                        title: "Update Successfull!",
+                        description: `Lockout was successfully updated to v${currentVersion}.`,
+                        timestamp: Date.now(),
+                        action_label: null,
+                        action_url: null,
+                    })
+
                     await AsyncStorage.setItem("lastSeenVersion", currentVersion);
                 } else if (!lastSeenVersion) {
                     await AsyncStorage.setItem("lastSeenVersion", currentVersion);
@@ -42,13 +50,18 @@ export function useAutoUpdateCheck() {
                         const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
                         const downloadUrl = apkAsset?.browser_download_url || "https://github.com/shubGupta10/focus-app/releases/latest";
 
-                        newNotifications.push({
+                        await addNotification(db, {
                             id: `update_${latest}`,
+                            type: "update",
                             title: `Version ${latest} is ready!`,
-                            description: 'A major update is available with new features and improvements.',
-                            actionLabel: 'Download Update',
-                            downloadUrl: downloadUrl
-                        });
+                            description:
+                                data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
+                                "A new update is available with improvements and fixes.",
+                            timestamp: Date.now(),
+                            action_label: "Download Update",
+                            action_url: downloadUrl,
+                        })
+
                     }
                 }
 
