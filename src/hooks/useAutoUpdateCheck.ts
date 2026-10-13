@@ -30,7 +30,7 @@ export function useAutoUpdateCheck() {
                         id: `ota_celebrate_${currentVersion}`,
                         type: "update",
                         title: `Updated to v${currentVersion}`,
-                        description: "Lockout is up to date.",
+                        description: `You're all set on version ${currentVersion} with the latest improvements.`,
                         timestamp: Date.now(),
                         action_label: null,
                         action_url: null,
@@ -56,7 +56,7 @@ export function useAutoUpdateCheck() {
                             title: `Update available (v${latest})`,
                             description:
                                 data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
-                                "A new update is available with improvements and fixes.",
+                                "A new update is ready for you with fixes and improvements.",
                             timestamp: Date.now(),
                             action_label: "Download update",
                             action_url: downloadUrl,

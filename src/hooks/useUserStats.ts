@@ -37,7 +37,7 @@ export function useUserStats() {
                     id: `milestone_streak_${newStreak}_${todayStr}`,
                     type: "milestone",
                     title: `${newStreak}-day streak`,
-                    description: `Completed focus sessions ${newStreak} days in a row.`,
+                    description: `You've kept your focus habit going for ${newStreak} days in a row.`,
                     timestamp: Date.now(),
                     action_label: null,
                     action_url: null,
