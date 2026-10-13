@@ -1,6 +1,5 @@
-import { useFocusEffect } from "expo-router";
 import { SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type NotificationType = "update" | "milestone" | "session" | "defense";
 
@@ -18,6 +17,18 @@ export interface GroupedNotifications {
     today: NotificationItem[];
     yesterday: NotificationItem[];
     earlier: NotificationItem[];
+}
+
+const notificationListeners = new Set<() => void>();
+
+export function notifyNotificationChange() {
+    notificationListeners.forEach((listener) => {
+        try {
+            listener();
+        } catch (e) {
+            console.error(e);
+        }
+    });
 }
 
 export async function addNotification(
@@ -38,6 +49,8 @@ export async function addNotification(
                 notification.action_url ?? null,
             ]
         );
+
+        notifyNotificationChange();
     } catch (error) {
         console.error("Failed to add notification:", error);
     }
@@ -62,17 +75,23 @@ export function useNotification() {
     }, [db]);
 
 
-    useFocusEffect(
-        useCallback(() => {
+    useEffect(() => {
+        loadNotification();
+        const listener = () => {
             loadNotification();
-        }, [loadNotification])
-    );
+        };
+        notificationListeners.add(listener);
+        return () => {
+            notificationListeners.delete(listener);
+        };
+    }, [loadNotification]);
 
     const markAllAsRead = async () => {
         try {
             await db.runAsync(
                 `UPDATE notifications SET is_read = 1 WHERE is_read = 0`);
             setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })));
+            notifyNotificationChange();
         } catch (error) {
             console.error("Failed to mark all as read:", error);
         }
@@ -82,6 +101,7 @@ export function useNotification() {
         try {
             await db.runAsync(`DELETE FROM notifications`);
             setNotifications([]);
+            notifyNotificationChange();
         } catch (error) {
             console.error("Failed to clear notifications:", error);
         }
@@ -105,12 +125,14 @@ export function useNotification() {
             grouped.earlier.push(item);
         }
     }
+    const unreadCount = notifications.filter((n) => n.is_read === 0).length;
     const hasUnread = notifications.some((n) => n.is_read === 0);
 
     return {
         notifications,
         grouped,
         hasUnread,
+        unreadCount,
         isLoading,
         markAllAsRead,
         clearAll,

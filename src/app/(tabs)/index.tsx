@@ -25,7 +25,7 @@ export default function Index() {
     const { getSetting } = useSettings();
     const { activeStyle, colors, isDarkMode } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-    const { hasUnread } = useNotification();
+    const { hasUnread, unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
 
     useAutoUpdateCheck();
@@ -105,8 +105,12 @@ export default function Index() {
                         >
                             <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
 
-                            {hasUnread && (
-                                <View className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500" />
+                            {unreadCount > 0 && (
+                                <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 items-center justify-center px-1 border-2 border-surface">
+                                    <Text className="text-white text-[10px] font-black leading-none">
+                                        {unreadCount > 9 ? "9+" : unreadCount}
+                                    </Text>
+                                </View>
                             )}
                         </Pressable>
 

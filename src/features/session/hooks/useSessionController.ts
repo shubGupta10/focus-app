@@ -89,8 +89,8 @@ export function useSessionController() {
                 await addNotification(db, {
                     id: `session_${endTimeMs || Date.now()}`,
                     type: "session",
-                    title: wasStrict ? "Strict Session Completed! 🛡️" : "Focus Session Completed! 🎯",
-                    description: `You focused for ${minutes} min${minutes > 1 ? "s" : ""} and earned +${earnedCoins} coins.`,
+                    title: wasStrict ? "Strict session completed" : "Session completed",
+                    description: `${minutes} min${minutes > 1 ? "s" : ""} · +${earnedCoins} coins`,
                     timestamp: endTimeMs || Date.now(),
                     action_label: null,
                     action_url: null,
@@ -109,8 +109,8 @@ export function useSessionController() {
                         await addNotification(db, {
                             id: `defense_${endTimeMs || Date.now()}`,
                             type: "defense",
-                            title: "Shield Defended Your Focus 🛡️",
-                            description: `Blocked ${blockCount} distraction attempt${blockCount > 1 ? "s" : ""} during this session.`,
+                            title: `${blockCount} app open${blockCount > 1 ? "s" : ""} blocked`,
+                            description: `Intercepted during your last session.`,
                             timestamp: (endTimeMs || Date.now()) + 1,
                             action_label: null,
                             action_url: null,

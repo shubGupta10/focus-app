@@ -29,8 +29,8 @@ export function useAutoUpdateCheck() {
                     await addNotification(db, {
                         id: `ota_celebrate_${currentVersion}`,
                         type: "update",
-                        title: "Update Successfull!",
-                        description: `Lockout was successfully updated to v${currentVersion}.`,
+                        title: `Updated to v${currentVersion}`,
+                        description: "Lockout is up to date.",
                         timestamp: Date.now(),
                         action_label: null,
                         action_url: null,
@@ -53,12 +53,12 @@ export function useAutoUpdateCheck() {
                         await addNotification(db, {
                             id: `update_${latest}`,
                             type: "update",
-                            title: `Version ${latest} is ready!`,
+                            title: `Update available (v${latest})`,
                             description:
                                 data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
                                 "A new update is available with improvements and fixes.",
                             timestamp: Date.now(),
-                            action_label: "Download Update",
+                            action_label: "Download update",
                             action_url: downloadUrl,
                         })
 

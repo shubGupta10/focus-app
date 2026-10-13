@@ -36,8 +36,8 @@ export function useUserStats() {
                 await addNotification(db, {
                     id: `milestone_streak_${newStreak}_${todayStr}`,
                     type: "milestone",
-                    title: `${newStreak}-Day Streak Achieved! 🔥`,
-                    description: `Consistency unlocked! You've maintained your focus habit for ${newStreak} consecutive days.`,
+                    title: `${newStreak}-day streak`,
+                    description: `Completed focus sessions ${newStreak} days in a row.`,
                     timestamp: Date.now(),
                     action_label: null,
                     action_url: null,
