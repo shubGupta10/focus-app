@@ -1,5 +1,6 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { useSettings } from "@/hooks/useSettings";
+import { useAppStore } from "@/store/useAppStore";
 import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -10,15 +11,18 @@ export function SettingNotificationCard() {
 
     useEffect(() => {
         getSetting("haptics_enabled").then(val => {
-            if (val !== null) setHapticsEnabled(val === "true");
+            const enabled = val !== "false";
+            setHapticsEnabled(enabled);
+            useAppStore.getState().setHapticsEnabled(enabled);
         });
     }, [getSetting]);
 
     const handleHapticsToggle = (val: boolean) => {
         setHapticsEnabled(val);
         setSetting("haptics_enabled", val.toString());
+        useAppStore.getState().setHapticsEnabled(val);
         if (val) {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => { });
         }
     };
 

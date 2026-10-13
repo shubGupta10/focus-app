@@ -17,6 +17,8 @@ interface AppState {
     sessionStartTime: number | null;
     sessionEndTime: number | null;
     isStrictSession: boolean;
+    hapticsEnabled: boolean;
+    setHapticsEnabled: (enabled: boolean) => void;
 
     setSessionState: (isActive: boolean, startTime: number | null, endTime: number | null, isStrict: boolean) => void;
     clearSession: () => void;
@@ -59,6 +61,8 @@ export const useAppStore = create<AppState>((set) => ({
     sessionStartTime: null,
     sessionEndTime: null,
     isStrictSession: false,
+    hapticsEnabled: true,
+    setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
     setSessionState: (isActive, startTime, endTime, isStrict) => set({
         isSessionActive: isActive,
         sessionStartTime: startTime,

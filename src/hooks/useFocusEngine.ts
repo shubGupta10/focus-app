@@ -107,7 +107,7 @@ export function useFocusEngine(isRoot: boolean = false) {
                     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 }
             } catch (e) {
-                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
+                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => { });
             }
 
             const now = Date.now();

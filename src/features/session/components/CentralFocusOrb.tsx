@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, Vibration, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { getOrbBackground } from "./orb-themes";
+import { useAppStore } from "@/store/useAppStore";
 
 interface CentralFocusOrbProps {
     isActive?: boolean;
@@ -112,15 +113,19 @@ export function CentralFocusOrb({
         if (!isActive) return;
 
         if (isStrict && skipsRemaining <= 0) {
-            try {
-                Vibration.vibrate([0, 30, 40, 30]);
-            } catch (error) { }
+            if (useAppStore.getState().hapticsEnabled) {
+                try {
+                    Vibration.vibrate([0, 30, 40, 30]);
+                } catch (error) { }
+            }
             setShowHoldHint(true);
             setTimeout(() => setShowHoldHint(false), 2500);
             return;
         }
 
-        try { Vibration.vibrate(12); } catch { }
+        if (useAppStore.getState().hapticsEnabled) {
+            try { Vibration.vibrate(12); } catch { }
+        }
         setIsHolding(true);
 
         Animated.timing(holdProgress, {
@@ -130,7 +135,9 @@ export function CentralFocusOrb({
         }).start();
 
         holdIntervalRef.current = setInterval(() => {
-            try { Vibration.vibrate(8); } catch { }
+            if (useAppStore.getState().hapticsEnabled) {
+                try { Vibration.vibrate(8); } catch { }
+            }
         }, 800);
 
         holdTimeRef.current = setTimeout(() => {
@@ -138,7 +145,9 @@ export function CentralFocusOrb({
                 clearInterval(holdIntervalRef.current);
                 holdIntervalRef.current = null;
             }
-            try { Vibration.vibrate([0, 40, 60, 40]); } catch { }
+            if (useAppStore.getState().hapticsEnabled) {
+                try { Vibration.vibrate([0, 40, 60, 40]); } catch { }
+            }
             setIsHolding(false);
             latestOnStopPress.current?.();
         }, 3500);
@@ -271,7 +280,9 @@ export function CentralFocusOrb({
             ) : (
                 <Pressable
                     onPress={() => {
-                        try { Vibration.vibrate(12); } catch { }
+                        if (useAppStore.getState().hapticsEnabled) {
+                            try { Vibration.vibrate(12); } catch { }
+                        }
                         onStartPress?.();
                     }}
                     className="w-44 h-44 rounded-full items-center justify-center active:opacity-85"

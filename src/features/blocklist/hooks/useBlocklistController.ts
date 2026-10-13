@@ -1,5 +1,6 @@
 import { useToast } from "@/contexts/ToastContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { useAppStore } from "@/store/useAppStore";
 import { useCallback, useMemo, useState } from "react";
 import { Vibration } from "react-native";
 
@@ -27,10 +28,11 @@ export function useBlocklistController() {
         if (engine.isSessionActive) return;
         const isCurrentlySelected = engine.selectedApps.includes(packageName);
 
-        try {
-            Vibration.vibrate(8);
-        } catch { }
-
+        if (useAppStore.getState().hapticsEnabled) {
+            try {
+                Vibration.vibrate(8);
+            } catch { }
+        }
         engine.toggleApp(packageName);
 
         if (isCurrentlySelected) {

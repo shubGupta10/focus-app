@@ -1,3 +1,4 @@
+import { useAppStore } from "@/store/useAppStore";
 import * as Haptics from "expo-haptics"
 import { ReactNode } from "react";
 import { Pressable, PressableProps, ViewStyle, StyleProp } from "react-native"
@@ -35,6 +36,8 @@ export function AnimatedPressable({
     });
 
     const triggerHaptic = () => {
+        if (!useAppStore.getState().hapticsEnabled) return;
+
         switch (hapticMode) {
             case 'light': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 break;

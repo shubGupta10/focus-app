@@ -9,6 +9,7 @@ import { Material3Switch } from "../../../../components/Material3Switch";
 import { useTheme } from "../../../../contexts/ThemeContext";
 import { InfoSheet } from "@/components/InfoSheet";
 import { AnimatedPressable } from "@/components/AnimatedPressable";
+import { useAppStore } from "@/store/useAppStore";
 
 interface TimerSelectionModalProps {
     visible: boolean
@@ -81,7 +82,9 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         <Text className="text-textSecondary font-bold mb-2.5 tracking-wider text-xs uppercase">No Timer</Text>
                         <Pressable
                             onPress={() => {
-                                try { Vibration.vibrate(8); } catch { }
+                                if (useAppStore.getState().hapticsEnabled) {
+                                    try { Vibration.vibrate(8); } catch { }
+                                }
                                 setSelectedMinutes(-1);
                             }}
                             className={`rounded-2xl p-4 active:opacity-80 flex-row items-center justify-between ${selectedMinutes === -1
@@ -123,7 +126,9 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 <Pressable
                                     key={mins}
                                     onPress={() => {
-                                        try { Vibration.vibrate(8); } catch { }
+                                        if (useAppStore.getState().hapticsEnabled) {
+                                            try { Vibration.vibrate(8); } catch { }
+                                        }
                                         setSelectedMinutes(mins);
                                     }}
                                     className={`mr-3 rounded-2xl px-5 py-3.5 ${isSelected
@@ -173,9 +178,11 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 value={selectedMinutes === -1 ? false : isStrict}
                                 onValueChange={(val) => {
                                     if (selectedMinutes === -1) return;
-                                    try {
-                                        Vibration.vibrate(8);
-                                    } catch (error) { }
+                                    if (useAppStore.getState().hapticsEnabled) {
+                                        try {
+                                            Vibration.vibrate(8);
+                                        } catch (error) { }
+                                    }
                                     setIsStrict(val);
                                 }}
                                 disabled={selectedMinutes === -1}
@@ -201,7 +208,9 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
 
                     <AnimatedPressable
                         onPress={() => {
-                            try { Vibration.vibrate(12); } catch { }
+                            if (useAppStore.getState().hapticsEnabled) {
+                                try { Vibration.vibrate(12); } catch { }
+                            }
                             onStartSession(selectedMinutes, selectedMinutes === -1 ? false : isStrict);
                         }}
                         hapticMode="light"

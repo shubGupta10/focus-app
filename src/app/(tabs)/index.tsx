@@ -18,6 +18,7 @@ import { secondsToHoursAndMinutes } from "../../utils/timeUtils";
 import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { useNotification } from "@/hooks/useNotifications";
+import { useAppStore } from "@/store/useAppStore";
 
 
 export default function Index() {
@@ -50,6 +51,10 @@ export default function Index() {
     } = useSessionController();
 
     useEffect(() => {
+        getSetting("haptics_enabled").then((val) => {
+            if (val !== null) useAppStore.getState().setHapticsEnabled(val === "true");
+        });
+
         const checkFirstRun = async () => {
             const completed = await getSetting("has_completed_onboarding");
             if (completed !== "true") {
