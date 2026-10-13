@@ -76,14 +76,14 @@ export default function ShopScreen() {
             <View className="flex-row items-center justify-between px-6 py-4">
                 <Pressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70 border border-border"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
-                    <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
+                    <Ionicons name="arrow-back" size={20} color={colors.text} />
                 </Pressable>
                 <View className="flex-row items-center gap-5">
-                    <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-border">
+                    <View className="flex-row items-center bg-surfaceElevated px-3 py-1.5 rounded-full">
 
                         <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
                         <Text className="text-text font-bold text-base">{totalCoins}</Text>

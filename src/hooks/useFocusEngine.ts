@@ -104,18 +104,10 @@ export function useFocusEngine(isRoot: boolean = false) {
             try {
                 const setting = await db.getFirstAsync<{ value: string }>("SELECT value FROM settings WHERE key = 'haptics_enabled'");
                 if (setting?.value !== "false") {
-                    if (Platform.OS === 'android' && typeof Haptics.performAndroidHapticsAsync === 'function') {
-                        Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
-                    } else {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                    }
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 }
             } catch (e) {
-                if (Platform.OS === 'android' && typeof Haptics.performAndroidHapticsAsync === 'function') {
-                    Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
-                } else {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                }
+                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
             }
 
             const now = Date.now();

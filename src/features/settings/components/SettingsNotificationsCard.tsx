@@ -1,7 +1,8 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { useSettings } from "@/hooks/useSettings";
+import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export function SettingNotificationCard() {
     const { getSetting, setSetting } = useSettings();
@@ -10,12 +11,15 @@ export function SettingNotificationCard() {
     useEffect(() => {
         getSetting("haptics_enabled").then(val => {
             if (val !== null) setHapticsEnabled(val === "true");
-        })
-    }, [getSetting])
+        });
+    }, [getSetting]);
 
     const handleHapticsToggle = (val: boolean) => {
         setHapticsEnabled(val);
         setSetting("haptics_enabled", val.toString());
+        if (val) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        }
     };
 
     return (
@@ -25,7 +29,13 @@ export function SettingNotificationCard() {
             </Text>
 
             <View className="bg-surfaceElevated rounded-3xl overflow-hidden">
-                <View className="flex-row items-center justify-between p-5">
+                <Pressable
+                    onPress={() => handleHapticsToggle(!hapticsEnabled)}
+                    className="flex-row items-center justify-between p-5 active:opacity-80"
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: hapticsEnabled }}
+                    accessibilityLabel="Toggle Haptic Feedback"
+                >
                     <View className="flex-1 pr-4">
                         <Text className="text-text font-bold text-[16px] mb-1">
                             Haptic Feedback
@@ -40,7 +50,7 @@ export function SettingNotificationCard() {
                             onValueChange={handleHapticsToggle}
                         />
                     </View>
-                </View>
+                </Pressable>
             </View>
         </View>
     );
