@@ -51,7 +51,6 @@
       ],
       "expo-sqlite",
       "expo-font",
-      "@sentry/react-native",
       [
         "expo-build-properties",
         {

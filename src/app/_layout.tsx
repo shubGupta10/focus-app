@@ -29,12 +29,7 @@ TextInputOverride.defaultProps.style = { includeFontPadding: false };
 
 SplashScreen.preventAutoHideAsync();
 
-import * as Sentry from "@sentry/react-native";
 
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  enabled: !__DEV__,
-});
 
 function Layout() {
   const { isUpdatePending } = Updates.useUpdates();
@@ -134,4 +129,4 @@ function Layout() {
   );
 }
 
-export default Sentry.wrap(Layout);
+export default Layout;
