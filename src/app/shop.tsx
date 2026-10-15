@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ShopAnimationCard } from "@/features/shop/components/ShopAnimationCard";
 import { useShopController } from "@/features/shop/hooks/useShopController";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useRef } from "react";

@@ -1,7 +1,7 @@
 import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Routine, RoutineInput } from "@/types/routine";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import {
     Modal,

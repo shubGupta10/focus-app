@@ -3,7 +3,7 @@ import { InfoSheet } from "@/components/InfoSheet";
 import { RoutineEmptyState } from "../../features/routines/components/RoutineEmptyState";
 import { RoutineEditorModal } from "../../features/routines/components/modals/RoutineEditorModal";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";

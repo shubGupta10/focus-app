@@ -2,7 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsAboutCard } from "@/features/settings/components/SettingsAboutCard";
 import { SettingNotificationCard } from "@/features/settings/components/SettingsNotificationsCard";
 import { SettingsSessionCard } from "@/features/settings/components/SettingsSessionCard";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

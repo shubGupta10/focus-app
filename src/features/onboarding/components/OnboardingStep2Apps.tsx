@@ -1,6 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { AppListItem } from "@/features/blocklist/components/AppListItem";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { FlashList } from "@shopify/flash-list";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";

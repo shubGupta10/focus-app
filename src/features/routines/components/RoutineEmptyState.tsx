@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { RoutineInput } from "@/types/routine";
 import { formatRoutineDays, formatTime12Hour } from "@/utils/routineScheduler";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 export type StarterTemplate = RoutineInput & {

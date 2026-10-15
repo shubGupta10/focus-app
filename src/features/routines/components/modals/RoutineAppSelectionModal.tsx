@@ -1,6 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { AppList } from "@/features/blocklist/components/AppList";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

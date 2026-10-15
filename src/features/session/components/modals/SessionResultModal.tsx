@@ -1,6 +1,6 @@
 import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { Modal, Pressable, Text, View } from "react-native";
 

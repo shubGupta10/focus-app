@@ -1,7 +1,7 @@
 import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { ThemeColors, useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

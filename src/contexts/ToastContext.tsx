@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
 

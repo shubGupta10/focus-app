@@ -1,6 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAppUpdate } from "@/hooks/useAppUpdater";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";

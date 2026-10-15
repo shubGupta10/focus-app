@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { FlashList } from "@shopify/flash-list";
 import { Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";

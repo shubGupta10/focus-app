@@ -7,7 +7,7 @@ import {
     formatTime12Hour,
     getRoutineDurationMinutes
 } from "@/utils/routineScheduler";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { memo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 

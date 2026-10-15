@@ -6,7 +6,7 @@ import { EndSessionModal } from "@/features/session/components/modals/EndSession
 import { SessionResultModal } from "@/features/session/components/modals/SessionResultModal";
 import TimerSelectionModal from "@/features/session/components/modals/TimerSelectionModal";
 import { useSettings } from "@/hooks/useSettings";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";

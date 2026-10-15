@@ -1,5 +1,5 @@
 import { PermissionRow } from "@/components/modals/PermissionModal";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, Text, View } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";

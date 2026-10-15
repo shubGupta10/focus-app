@@ -2,7 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { InfoSheet } from "@/components/InfoSheet";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View } from "react-native";
 import { formatTimeAgo } from "../../../../utils/timeUtils";
 

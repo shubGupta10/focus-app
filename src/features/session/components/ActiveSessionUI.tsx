@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { CentralFocusOrb } from "./CentralFocusOrb";

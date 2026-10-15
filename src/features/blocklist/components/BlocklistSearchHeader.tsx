@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 interface BlocklistSearchHeaderProps {

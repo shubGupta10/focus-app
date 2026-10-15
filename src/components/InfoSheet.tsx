@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { ReactNode, useState, useEffect, useRef } from "react";
 import { Modal, Pressable, Text, View, Animated } from "react-native";
 
@@ -36,7 +36,7 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
                 onPress={() => setIsVisible(true)}
                 className="w-8 h-8 rounded-full bg-surfaceElevated items-center justify-center border border-border active:opacity-70"
             >
-                <Feather name="info" size={16} color="#8A8082" />
+                <Ionicons name="information-circle-outline" size={18} color="#8A8082" />
             </Pressable>
 
 

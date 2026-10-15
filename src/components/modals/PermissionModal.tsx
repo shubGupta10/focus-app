@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { cssInterop } from "nativewind";
 import { Modal, Text, TouchableOpacity, View } from "react-native";

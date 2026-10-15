@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { ShopItem } from "../data/shopCatalog";

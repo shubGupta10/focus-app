@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useDayDetails } from "@/features/stats/hooks/useDayDetails";
 import { formatExactTime, getTodayDateString, secondsToHoursAndMinutes } from "@/utils/timeUtils";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";

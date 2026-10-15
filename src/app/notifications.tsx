@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { NotificationItem, useNotification } from "@/hooks/useNotifications";
 import { formatTimeAgo } from "@/utils/timeUtils";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";

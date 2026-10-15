@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lockout",
     "slug": "lockout",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -17,7 +17,7 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.shubham720.lockout",
-      "versionCode": 8,
+      "versionCode": 9,
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",
@@ -57,7 +57,10 @@
         {
           "android": {
             "buildArchs": ["arm64-v8a"],
-            "useLegacyPackaging": true
+            "useLegacyPackaging": true,
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keep class expo.modules.focusblocker.** { *; }\n-keepclassmembers class expo.modules.focusblocker.** { *; }\n-keepclassmembernames class expo.modules.focusblocker.** { *; }\n-keep class expo.modules.** { *; }\n-keep interface expo.modules.** { *; }\n-keep class com.facebook.react.** { *; }\n-keep class com.facebook.hermes.** { *; }\n-keep class com.swmansion.reanimated.** { *; }\n-keep class com.swmansion.gesturehandler.** { *; }\n-keep class com.swmansion.worklets.** { *; }\n-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod\n-dontwarn **"
           }
         }
       ]
