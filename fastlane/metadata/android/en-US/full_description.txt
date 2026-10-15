@@ -1,9 +1,10 @@
 Lockout is a clean, open-source focus tool designed to help you regain control over your screen time by actively blocking distracting apps.
 
 Features:
-• App Blocker: Choose which apps distract you and prevent them from opening during focus sessions.
-• Flexible Sessions: Choose timed countdowns or open-ended flow sessions.
-• Strict Mode: Prevent canceling sessions early unless you use limited emergency skips.
-• Scheduled Routines: Automate your focus periods for work, study, or bedtime.
-• Habit Tracking: Maintain daily focus streaks as you build discipline over time.
-• Private & Open Source: No accounts required, zero trackers, zero telemetry, and all data stays strictly on your device.
+
+* App Blocker: Choose which apps distract you and prevent them from opening during focus sessions.
+* Flexible Sessions: Choose timed countdowns or open-ended flow sessions.
+* Strict Mode: Prevent canceling sessions early unless you use limited emergency skips.
+* Scheduled Routines: Automate your focus periods for work, study, or bedtime.
+* Habit Tracking: Maintain daily focus streaks as you build discipline over time.
+* Private & Open Source: No accounts required, zero trackers, zero telemetry, and all data stays strictly on your device.
