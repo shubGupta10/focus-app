@@ -9,6 +9,10 @@ export function SettingsAboutCard() {
         Linking.openURL("https://shubhamgupta.online");
     };
 
+    const handleFeedback = () => {
+        Linking.openURL("https://lockout-website.vercel.app/feedback");
+    };
+
     const handlePrivacyPolicy = () => {
         Linking.openURL("https://lockout-website.vercel.app/privacy");
     };
@@ -39,6 +43,19 @@ export function SettingsAboutCard() {
                         <Text className="text-text font-bold text-[16px]">
                             App Updates
                         </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+                </Pressable>
+
+                <Pressable
+                    onPress={handleFeedback}
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                >
+                    <View className="flex-row items-center">
+                        <View className="w-8 h-8 rounded-full bg-[#f43f5e]/10 items-center justify-center mr-4">
+                            <Ionicons name="chatbubble-ellipses" size={16} color="#f43f5e" />
+                        </View>
+                        <Text className="text-text font-bold text-[16px]">Send Feedback</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
