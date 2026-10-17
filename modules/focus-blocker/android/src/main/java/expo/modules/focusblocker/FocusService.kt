@@ -48,6 +48,7 @@ class FocusService : Service() {
     private var isOverlayShowing = false
 
     private var endTime: Long = -1L
+
     @Volatile
     private var customBlockedApps: List<String> = emptyList()
 
@@ -105,18 +106,7 @@ class FocusService : Service() {
         val isStrictParam = intent?.getBooleanExtra("isStrict", false)
         val durationMsParam = intent?.getDoubleExtra("durationMs", -1.0)
 
-        if (passedApps != null && passedApps.isNotEmpty()) {
-            customBlockedApps = passedApps.toList()
-        } else {
-            val savedApps = prefs.getString("customBlockedApps", "") ?: ""
-            customBlockedApps = if (savedApps.isNotEmpty()) savedApps.split(",") else emptyList()
-        }
-
-        Log.d("FocusBlocker", "[Native] onStartCommand received ${customBlockedApps.size} apps to block.")
-        Log.d("FocusBlocker", "[Native] customBlockedApps: $customBlockedApps")
-
         val now = System.currentTimeMillis()
-
         val isSystemRestart = intent == null
 
         if (isSystemRestart) {
@@ -139,7 +129,45 @@ class FocusService : Service() {
             activeEndTime = prefs.getLong("activeEndTime", -1L)
             isStrictActive = prefs.getBoolean("isStrictActive", false)
             endTime = activeEndTime
+
+            val savedApps = prefs.getString("customBlockedApps", "") ?: ""
+            customBlockedApps = if (savedApps.isNotEmpty()) savedApps.split(",") else emptyList()
+        } else if (isServiceActive) {
+
+            val incomingEndTime = if (durationMsParam != null && durationMsParam > 0) {
+                now + durationMsParam.toLong()
+            } else {
+                -1L
+            }
+
+            if (endTime != -1L) {
+                if (incomingEndTime == -1L || incomingEndTime > endTime) {
+                    endTime = incomingEndTime
+                    activeEndTime = incomingEndTime
+                }
+            }
+
+            if (passedApps != null && passedApps.isNotEmpty()) {
+                customBlockedApps = (customBlockedApps + passedApps).distinct()
+            }
+
+            if (isStrictParam == true) {
+                isStrictActive = true
+            }
+
+            prefs.edit()
+                .putString("customBlockedApps", customBlockedApps.joinToString(","))
+                .putLong("activeEndTime", activeEndTime)
+                .putBoolean("isStrictActive", isStrictActive)
+                .apply()
         } else {
+            if (passedApps != null && passedApps.isNotEmpty()) {
+                customBlockedApps = passedApps.toList()
+            } else {
+                val savedApps = prefs.getString("customBlockedApps", "") ?: ""
+                customBlockedApps = if (savedApps.isNotEmpty()) savedApps.split(",") else emptyList()
+            }
+
             if (durationMsParam != null && durationMsParam > 0) {
                 endTime = now + durationMsParam.toLong()
             } else {
@@ -156,6 +184,11 @@ class FocusService : Service() {
                 .putBoolean("isStrictActive", isStrictActive)
                 .apply()
         }
+
+        Log.d(
+            "FocusBlocker",
+            "[Native] onStartCommand active session apps: ${customBlockedApps.size}, endTime: $endTime, isStrict: $isStrictActive"
+        )
 
         isServiceActive = true
 
