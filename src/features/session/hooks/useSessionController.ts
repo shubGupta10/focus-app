@@ -10,6 +10,8 @@ import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModu
 import { getDurationSeconds } from "../../../utils/timeUtils";
 import { useSQLiteContext } from "expo-sqlite";
 import { addNotification } from "@/hooks/useNotifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAppStore } from "@/store/useAppStore";
 
 export function useSessionController() {
     const db = useSQLiteContext();
@@ -134,7 +136,15 @@ export function useSessionController() {
                 });
                 playCompletionFeedback(true);
 
-                await engine.stopSession();
+                const currentNative = FocusBlocker.getActiveSession();
+
+                if (!currentNative || !currentNative.isActive) {
+                    await engine.stopSession();
+                } else {
+                    await AsyncStorage.removeItem("active_session");
+                    useAppStore.getState().clearSession();
+                }
+
             }
         } catch (error) {
             console.error("Failed to complete session", error);
