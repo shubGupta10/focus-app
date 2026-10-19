@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import { CentralFocusOrb } from "./CentralFocusOrb";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
@@ -17,6 +17,8 @@ interface ActiveSessionUIProps {
 }
 
 export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCount, isStrict, skipsRemaining }: ActiveSessionUIProps) {
+    const { width, height } = useWindowDimensions();
+    const isSmallDevice = width < 380 || height < 740;
     const [timeLeft, setTimeLeft] = useState("00:00");
     const [isInfinite, setIsInfinite] = useState(false);
     const [sessionProgress, setSessionProgress] = useState(1);
@@ -81,21 +83,21 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     }, [startTime, endTime, onStopPress]);
 
     return (
-        <View className="flex-1 items-center justify-between px-6 py-10 w-full max-w-md mx-auto">
-            <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(150)} className="items-center w-full pt-6">
-                <View className="flex-row items-center justify-center gap-3 mb-6">
+        <View className={`flex-1 items-center justify-between px-6 ${isSmallDevice ? "py-4" : "py-10"} w-full max-w-md mx-auto`}>
+            <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(150)} className={`items-center w-full ${isSmallDevice ? "pt-2" : "pt-6"}`}>
+                <View className={`flex-row items-center justify-center gap-3 ${isSmallDevice ? "mb-3" : "mb-6"}`}>
                     {isStrict && (
-                        <View className="flex-row items-center bg-accentMuted px-4 py-2 rounded-full">
-                            <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 6 }} />
-                            <Text className="text-accent text-[13px] font-bold tracking-widest uppercase">
+                        <View className={`flex-row items-center bg-accentMuted ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
+                            <Ionicons name="shield-checkmark" size={isSmallDevice ? 14 : 16} color={colors.accent} style={{ marginRight: 6 }} />
+                            <Text className={`text-accent ${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold tracking-widest uppercase`}>
                                 Strict Mode
                             </Text>
                         </View>
                     )}
 
-                    <View className="flex-row items-center bg-surfaceElevated px-4 py-2 rounded-full">
-                        <Ionicons name="apps-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
-                        <Text className="text-textSecondary text-[13px] font-bold">
+                    <View className={`flex-row items-center bg-surfaceElevated ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
+                        <Ionicons name="apps-outline" size={isSmallDevice ? 14 : 16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                        <Text className={`text-textSecondary ${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold`}>
                             {blockedAppsCount && blockedAppsCount > 0
                                 ? `${blockedAppsCount} ${blockedAppsCount === 1 ? "App" : "Apps"} Blocked`
                                 : "No Apps Blocked"}
@@ -103,15 +105,15 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     </View>
                 </View>
 
-                <Text className="text-text text-4xl font-black tracking-tight text-center mb-1">
+                <Text className={`text-text ${isSmallDevice ? "text-2xl" : "text-4xl"} font-black tracking-tight text-center mb-1`}>
                     {isStrict ? "Locked In" : isInfinite ? "Flow State" : "Focus Session"}
                 </Text>
-                <Text className="text-textSecondary text-sm font-bold tracking-widest uppercase text-center">
+                <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-bold tracking-widest uppercase text-center`}>
                     {isInfinite ? "Stay in the zone" : "Stay on track"}
                 </Text>
             </Animated.View>
 
-            <View className="items-center justify-center flex-1 w-full pb-8">
+            <View className={`items-center justify-center flex-1 w-full ${isSmallDevice ? "pb-2" : "pb-8"}`}>
                 <CentralFocusOrb
                     isActive={true}
                     timeLeft={timeLeft}
@@ -124,10 +126,10 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     onStopPress={onStopPress}
                 />
 
-                <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(250)} className="items-center justify-center mt-12 w-full gap-4">
+                <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(250)} className={`items-center justify-center ${isSmallDevice ? "mt-4 gap-2" : "mt-12 gap-4"} w-full`}>
                     <View className="flex-row items-center justify-center">
-                        <Text className="text-2xl mr-2">🪙</Text>
-                        <Text className="text-text font-black text-xl">
+                        <Text className={`${isSmallDevice ? "text-xl" : "text-2xl"} mr-2`}>🪙</Text>
+                        <Text className={`text-text font-black ${isSmallDevice ? "text-base" : "text-xl"}`}>
                             +{earnedCoins} coins earned
                         </Text>
                     </View>
@@ -135,22 +137,22 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     <View className="flex-row items-center justify-center">
                         {isStrict && (skipsRemaining ?? 1) <= 0 ? (
                             <>
-                                <Ionicons name="lock-closed" size={16} color={colors.warning} style={{ marginRight: 6 }} />
-                                <Text className="text-textSecondary text-sm font-medium">
+                                <Ionicons name="lock-closed" size={isSmallDevice ? 14 : 16} color={colors.warning} style={{ marginRight: 6 }} />
+                                <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-medium text-center`}>
                                     Session locked · Unlocks at 00:00
                                 </Text>
                             </>
                         ) : isStrict && (skipsRemaining ?? 1) > 0 ? (
                             <>
-                                <Ionicons name="alert-circle-outline" size={16} color={colors.warning} style={{ marginRight: 6 }} />
-                                <Text className="text-textSecondary text-sm font-medium">
+                                <Ionicons name="alert-circle-outline" size={isSmallDevice ? 14 : 16} color={colors.warning} style={{ marginRight: 6 }} />
+                                <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-medium text-center`}>
                                     {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold orb to skip
                                 </Text>
                             </>
                         ) : (
                             <>
-                                <Ionicons name="finger-print-outline" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
-                                <Text className="text-textSecondary text-sm font-medium">
+                                <Ionicons name="finger-print-outline" size={isSmallDevice ? 14 : 16} color={colors.textSecondary} style={{ marginRight: 6 }} />
+                                <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-medium text-center`}>
                                     Press and hold orb to end session
                                 </Text>
                             </>

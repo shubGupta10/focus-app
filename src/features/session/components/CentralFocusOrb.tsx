@@ -2,7 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useSettings } from "@/hooks/useSettings";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Pressable, Text, Vibration, View } from "react-native";
+import { Animated, Pressable, Text, Vibration, View, useWindowDimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { getOrbBackground } from "./orb-themes";
 import { useAppStore } from "@/store/useAppStore";
@@ -174,10 +174,15 @@ export function CentralFocusOrb({
     };
 
     const coreRadius = 96;
+    const { width, height } = useWindowDimensions();
+    const isSmallDevice = width < 380 || height < 740;
+    const scale = isSmallDevice ? Math.min(0.82, Math.max(0.72, (width - 48) / 340)) : 1;
+    const containerSize = Math.round(340 * scale);
 
     return (
-        <View className="items-center justify-center w-[340px] h-[340px]">
-            <View className="absolute inset-0 items-center justify-center pointer-events-none">
+        <View style={{ width: containerSize, height: containerSize }} className="items-center justify-center">
+            <View style={{ width: 340, height: 340, transform: [{ scale }] }} className="items-center justify-center">
+                <View className="absolute inset-0 items-center justify-center pointer-events-none">
                 {orbAnimation && (() => {
                     const OrbBg = getOrbBackground(
                         orbAnimation.replace("animation_", "")
@@ -303,6 +308,7 @@ export function CentralFocusOrb({
                     </Text>
                 </Pressable>
             )}
+            </View>
         </View>
     );
 }

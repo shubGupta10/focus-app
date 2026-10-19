@@ -10,7 +10,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSessionController } from "../../features/session/hooks/useSessionController";
@@ -22,6 +22,8 @@ import { useAppStore } from "@/store/useAppStore";
 
 
 export default function Index() {
+    const { width, height } = useWindowDimensions();
+    const isSmallDevice = width < 380 || height < 740;
     const { getSetting } = useSettings();
     const { activeStyle, colors, isDarkMode } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
@@ -92,18 +94,22 @@ export default function Index() {
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
             {!engine.isSessionActive && (
-                <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(300)} exiting={reducedMotion ? undefined : FadeOut.duration(200)} className="flex-row justify-between items-center px-6 pt-5 pb-2 w-full z-10">
+                <Animated.View
+                    entering={reducedMotion ? undefined : FadeIn.duration(300)}
+                    exiting={reducedMotion ? undefined : FadeOut.duration(200)}
+                    className={`flex-row justify-between items-center px-6 ${isSmallDevice ? "pt-2 pb-1" : "pt-5 pb-2"} w-full z-10`}
+                >
                     <View>
-                        <Text className="text-text font-black text-3xl tracking-tight leading-none">Lockout</Text>
+                        <Text className={`text-text font-black ${isSmallDevice ? "text-2xl" : "text-3xl"} tracking-tight leading-none`}>Lockout</Text>
                     </View>
 
                     <View className="flex-row items-center">
 
                         <Pressable
                             onPress={() => router.push("/notifications")}
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-3"
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
                         >
-                            <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
+                            <Ionicons name="notifications-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
 
                             {unreadCount > 0 && (
                                 <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 items-center justify-center px-1 border-2 border-surface">
@@ -116,20 +122,20 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/shop")}
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-3"
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
                             accessibilityRole="button"
                             accessibilityLabel="Open Shop"
                         >
-                            <Ionicons name="cart-outline" size={20} color={colors.textSecondary} />
+                            <Ionicons name="cart-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
                         </Pressable>
 
                         <Pressable
                             onPress={() => router.push("/settings")}
-                            className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
                             accessibilityRole="button"
                             accessibilityLabel="Open Settings"
                         >
-                            <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+                            <Ionicons name="settings-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
                         </Pressable>
                     </View>
                 </Animated.View>
@@ -141,11 +147,11 @@ export default function Index() {
                         key="idle-ui"
                         entering={reducedMotion ? undefined : FadeIn.duration(300)}
                         exiting={reducedMotion ? undefined : FadeOut.duration(200)}
-                        className="absolute inset-0 flex-1 items-center justify-between px-6 py-4 w-full"
+                        className={`absolute inset-0 flex-1 items-center justify-between px-6 ${isSmallDevice ? "py-2" : "py-4"} w-full`}
                     >
 
                         {(!hasSelectedApps || !hasAllPermissions) ? (
-                            <View className="items-center mt-2">
+                            <View className={`items-center ${isSmallDevice ? "mt-1" : "mt-2"}`}>
                                 <Pressable
                                     onPress={() => {
                                         if (!hasSelectedApps) {
@@ -154,7 +160,7 @@ export default function Index() {
                                             setShowPermission(true);
                                         }
                                     }}
-                                    className="flex-row items-center bg-surfaceElevated px-5 py-3 rounded-full mt-3 active:opacity-75"
+                                    className={`flex-row items-center bg-surfaceElevated px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75`}
                                 >
                                     <Ionicons
                                         name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
@@ -169,9 +175,9 @@ export default function Index() {
                                 </Pressable>
                             </View>
                         ) : (
-                            <View className="items-center mt-6 mb-2">
-                                <Text className="text-text font-black text-2xl tracking-tight mb-1">{greeting}</Text>
-                                <Text className="text-textSecondary text-[15px] font-medium">
+                            <View className={`items-center ${isSmallDevice ? "mt-2 mb-1" : "mt-6 mb-2"}`}>
+                                <Text className={`text-text font-black ${isSmallDevice ? "text-xl" : "text-2xl"} tracking-tight mb-1`}>{greeting}</Text>
+                                <Text className={`text-textSecondary ${isSmallDevice ? "text-[13px]" : "text-[15px]"} font-medium`}>
                                     <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
                                 </Text>
                             </View>
@@ -180,16 +186,16 @@ export default function Index() {
                         <View className="items-center justify-center my-auto">
                             <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
                             {(!hasSelectedApps || !hasAllPermissions) && (
-                                <Text className="text-textSecondary text-xs font-medium text-center mt-6">
+                                <Text className={`text-textSecondary text-xs font-medium text-center ${isSmallDevice ? "mt-3" : "mt-6"}`}>
                                     {!hasSelectedApps ? "Tap to choose apps" : "Tap to grant permissions"}
                                 </Text>
                             )}
                         </View>
 
-                        <View className="w-full mb-[120px] mt-auto">
+                        <View className="w-full mt-auto" style={{ marginBottom: isSmallDevice ? 94 : 116 }}>
                             <Pressable
                                 onPress={() => router.push("/(tabs)/apps")}
-                                className="self-center bg-surfaceElevated rounded-full px-5 py-3 flex-row items-center justify-center active:opacity-70"
+                                className={`self-center bg-surfaceElevated rounded-full px-5 ${isSmallDevice ? "py-2.5" : "py-3"} flex-row items-center justify-center active:opacity-70`}
                             >
                                 <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
                                 <Text className="text-text font-medium text-sm">
