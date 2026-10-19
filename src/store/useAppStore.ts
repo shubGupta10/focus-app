@@ -17,10 +17,17 @@ interface AppState {
     sessionStartTime: number | null;
     sessionEndTime: number | null;
     isStrictSession: boolean;
+    isBreakActive: boolean;
+    breakEndTime: number | null;
+    breakStartTime: number | null;
+    breakDurationMs: number | null;
+    breaksRemaining: number;
+    totalBreakMs: number;
     hapticsEnabled: boolean;
     setHapticsEnabled: (enabled: boolean) => void;
 
     setSessionState: (isActive: boolean, startTime: number | null, endTime: number | null, isStrict: boolean) => void;
+    setBreakState: (isBreakActive: boolean, breakEndTime: number | null, breaksRemaining: number, totalBreakMs?: number) => void;
     clearSession: () => void;
 
     stats: UserStats;
@@ -61,19 +68,69 @@ export const useAppStore = create<AppState>((set) => ({
     sessionStartTime: null,
     sessionEndTime: null,
     isStrictSession: false,
+    isBreakActive: false,
+    breakEndTime: null,
+    breakStartTime: null,
+    breakDurationMs: null,
+    breaksRemaining: 1,
+    totalBreakMs: 0,
     hapticsEnabled: true,
     setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
-    setSessionState: (isActive, startTime, endTime, isStrict) => set({
+    setSessionState: (isActive, startTime, endTime, isStrict) => set((state) => ({
         isSessionActive: isActive,
         sessionStartTime: startTime,
         sessionEndTime: endTime,
-        isStrictSession: isStrict
+        isStrictSession: isStrict,
+        ...(isActive && !state.isSessionActive ? {
+            isBreakActive: false,
+            breakEndTime: null,
+            breakStartTime: null,
+            breakDurationMs: null,
+            breaksRemaining: 1,
+            totalBreakMs: 0
+        } : {})
+    })),
+    setBreakState: (isBreakActive, breakEndTime, breaksRemaining, totalBreakMs) => set((state) => {
+        const now = Date.now();
+        let newBreakStartTime = state.breakStartTime;
+        let newBreakDurationMs = state.breakDurationMs;
+        let newTotalBreakMs = (totalBreakMs !== undefined && totalBreakMs > state.totalBreakMs)
+            ? totalBreakMs
+            : state.totalBreakMs;
+
+        if (!state.isBreakActive && isBreakActive) {
+            newBreakStartTime = now;
+            newBreakDurationMs = breakEndTime ? Math.max(0, breakEndTime - now) : null;
+        } else if (state.isBreakActive && !isBreakActive) {
+            if (state.breakStartTime) {
+                const effectiveBreakEnd = state.breakEndTime ? Math.min(now, state.breakEndTime) : now;
+                const elapsed = Math.max(0, effectiveBreakEnd - state.breakStartTime);
+                newTotalBreakMs = Math.max(newTotalBreakMs, state.totalBreakMs + elapsed);
+            }
+            newBreakStartTime = null;
+            newBreakDurationMs = null;
+        }
+
+        return {
+            isBreakActive,
+            breakEndTime,
+            breakStartTime: newBreakStartTime,
+            breakDurationMs: newBreakDurationMs,
+            breaksRemaining,
+            totalBreakMs: newTotalBreakMs,
+        };
     }),
     clearSession: () => set({
         isSessionActive: false,
         sessionStartTime: null,
         sessionEndTime: null,
-        isStrictSession: false
+        isStrictSession: false,
+        isBreakActive: false,
+        breakEndTime: null,
+        breakStartTime: null,
+        breakDurationMs: null,
+        breaksRemaining: 1,
+        totalBreakMs: 0
     }),
     stats: defaultStats,
     todayStats: defaultTodayStats,

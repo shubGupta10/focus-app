@@ -20,6 +20,12 @@ export function notifyEngineListeners() {
     });
 }
 
+export function endFocusBreak() {
+    FocusBlocker.endBreak();
+    useAppStore.getState().setBreakState(false, null, useAppStore.getState().breaksRemaining);
+    notifyEngineListeners();
+}
+
 export function useFocusEngine(isRoot: boolean = false) {
     const db = useSQLiteContext();
 
@@ -29,6 +35,9 @@ export function useFocusEngine(isRoot: boolean = false) {
     const sessionStartTime = useAppStore(state => state.sessionStartTime);
     const sessionEndTime = useAppStore(state => state.sessionEndTime);
     const isStrictSession = useAppStore(state => state.isStrictSession);
+    const isBreakActive = useAppStore(state => state.isBreakActive);
+    const breakEndTime = useAppStore(state => state.breakEndTime);
+    const breaksRemaining = useAppStore(state => state.breaksRemaining);
     const hasUsage = useAppStore(state => state.hasUsage);
     const hasOverlay = useAppStore(state => state.hasOverlay);
     const hasBattery = useAppStore(state => state.hasBattery);
@@ -140,6 +149,17 @@ export function useFocusEngine(isRoot: boolean = false) {
 
             if (nativeSession && nativeSession.isActive) {
                 if (nativeSession.endTime !== -1 && now >= nativeSession.endTime) {
+                }
+
+                const isBreakActive = Boolean(nativeSession.breakEndTime && nativeSession.breakEndTime > now);
+                const breakEndTime = isBreakActive ? (nativeSession.breakEndTime ?? null) : null;
+                const breaksRemaining = nativeSession.breaksRemaining ?? 1;
+                const nativeTotalBreakMs = typeof nativeSession.totalBreakMs === 'number' && nativeSession.totalBreakMs > 0
+                    ? nativeSession.totalBreakMs
+                    : undefined;
+
+                if (storeState.isBreakActive !== isBreakActive || storeState.breakEndTime !== breakEndTime || storeState.breaksRemaining !== breaksRemaining || (nativeTotalBreakMs !== undefined && storeState.totalBreakMs < nativeTotalBreakMs)) {
+                    useAppStore.getState().setBreakState(isBreakActive, breakEndTime, breaksRemaining, nativeTotalBreakMs);
                 }
 
                 if (storeState.isSessionActive && storeState.sessionStartTime === nativeSession.startTime && storeState.sessionEndTime === nativeSession.endTime) {
@@ -276,11 +296,23 @@ export function useFocusEngine(isRoot: boolean = false) {
         FocusBlocker.goHome();
     };
 
+    const startBreak = (durationMinutes: number) => {
+        FocusBlocker.startBreak(durationMinutes);
+        notifyEngineListeners();
+    };
+
+    const endBreak = () => {
+        endFocusBreak();
+    };
+
     return {
         installedApps,
         selectedApps,
         isSessionActive,
         isStrictSession,
+        isBreakActive,
+        breakEndTime,
+        breaksRemaining,
         hasUsage,
         hasOverlay,
         hasBattery,
@@ -289,6 +321,8 @@ export function useFocusEngine(isRoot: boolean = false) {
         loadSelectedApps,
         startSession,
         stopSession,
+        startBreak,
+        endBreak,
         goHome,
         sessionStartTime,
         sessionEndTime,

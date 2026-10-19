@@ -169,10 +169,71 @@ class FocusBlockerModule : Module() {
                     "isActive" to true,
                     "startTime" to FocusService.activeStartTime.toDouble(),
                     "endTime" to FocusService.activeEndTime.toDouble(),
-                    "isStrict" to FocusService.isStrictActive
+                    "isStrict" to FocusService.isStrictActive,
+                    "breakEndTime" to FocusService.breakEndTime.toDouble(),
+                    "breaksRemaining" to FocusService.breaksRemaining,
+                    "totalBreakMs" to FocusService.totalBreakMs.toDouble()
                 )
             }
             return@Function null
+        }
+
+        Function("startBreak") { durationMinutes: Double ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            val allowedDurations = setOf(5.0, 10.0, 20.0, 30.0)
+            if (!allowedDurations.contains(durationMinutes)) {
+                return@Function
+            }
+            if (FocusService.isServiceActive && !FocusService.isStrictActive && FocusService.breaksRemaining > 0) {
+                val breakMs = (durationMinutes * 60 * 1000).toLong()
+                val now = System.currentTimeMillis()
+                if (FocusService.activeEndTime != -1L && (FocusService.activeEndTime - now) < breakMs) {
+                    return@Function
+                }
+                FocusService.breaksRemaining = (FocusService.breaksRemaining - 1).coerceAtLeast(0)
+                FocusService.breakEndTime = now + breakMs
+                FocusService.ignoreBlockingUntil = FocusService.breakEndTime
+                FocusService.totalBreakMs += breakMs
+                if (FocusService.activeEndTime > 0) {
+                    FocusService.activeEndTime += breakMs
+                }
+                if (context != null) {
+                    val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                    prefs.edit()
+                        .putLong("breakEndTime", FocusService.breakEndTime)
+                        .putInt("breaksRemaining", FocusService.breaksRemaining)
+                        .putLong("totalBreakMs", FocusService.totalBreakMs)
+                        .putLong("activeEndTime", FocusService.activeEndTime)
+                        .apply()
+                }
+                FocusService.instance?.updateForegroundNotification(isBreak = true, breakMinutes = durationMinutes.toInt())
+                FocusService.instance?.sendBreakStartedNotification(durationMinutes.toInt())
+            }
+        }
+
+        Function("endBreak") {
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            val now = System.currentTimeMillis()
+            if (FocusService.breakEndTime > now) {
+                val unusedBreakMs = FocusService.breakEndTime - now
+                FocusService.totalBreakMs = (FocusService.totalBreakMs - unusedBreakMs).coerceAtLeast(0L)
+                if (FocusService.activeEndTime > 0) {
+                    FocusService.activeEndTime = (FocusService.activeEndTime - unusedBreakMs).coerceAtLeast(now)
+                }
+            }
+            FocusService.breakEndTime = 0L
+            FocusService.ignoreBlockingUntil = 0L
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                prefs.edit()
+                    .remove("breakEndTime")
+                    .putInt("breaksRemaining", FocusService.breaksRemaining)
+                    .putLong("totalBreakMs", FocusService.totalBreakMs)
+                    .putLong("activeEndTime", FocusService.activeEndTime)
+                    .apply()
+            }
+            FocusService.instance?.updateForegroundNotification(isBreak = false)
+            FocusService.instance?.sendBreakEndedNotification()
         }
 
         Function("updateGlobalBlocklist") { apps: List<String> ->

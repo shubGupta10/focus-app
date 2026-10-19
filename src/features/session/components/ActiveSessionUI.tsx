@@ -6,6 +6,7 @@ import { CentralFocusOrb } from "./CentralFocusOrb";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { formatTimerDisplay } from "@/utils/timeUtils";
+import { useAppStore } from "@/store/useAppStore";
 
 interface ActiveSessionUIProps {
     onStopPress: () => void;
@@ -19,6 +20,9 @@ interface ActiveSessionUIProps {
 export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCount, isStrict, skipsRemaining }: ActiveSessionUIProps) {
     const { width, height } = useWindowDimensions();
     const isSmallDevice = width < 380 || height < 740;
+    const isBreakActive = useAppStore(state => state.isBreakActive);
+    const breakEndTime = useAppStore(state => state.breakEndTime);
+    const [breakTimeLeft, setBreakTimeLeft] = useState("00:00");
     const [timeLeft, setTimeLeft] = useState("00:00");
     const [isInfinite, setIsInfinite] = useState(false);
     const [sessionProgress, setSessionProgress] = useState(1);
@@ -38,20 +42,38 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
         const updateTimer = () => {
             const now = Date.now();
 
-            if (infinite) {
-                const diffMs = now - startTime;
-                const totalSeconds = Math.floor(diffMs / 1000);
+            if (isBreakActive && breakEndTime) {
+                if (breakEndTime > now) {
+                    const breakDiff = Math.max(0, Math.floor((breakEndTime - now) / 1000));
+                    setBreakTimeLeft(formatTimerDisplay(breakDiff));
+                } else {
+                    useAppStore.getState().setBreakState(false, null, useAppStore.getState().breaksRemaining);
+                }
+            }
 
-                setTimeLeft(formatTimerDisplay(totalSeconds));
+            const store = useAppStore.getState();
+            let focusElapsedMs: number;
+            if (isBreakActive) {
+                const breakStart = store.breakStartTime ?? (breakEndTime && store.breakDurationMs ? breakEndTime - store.breakDurationMs : now);
+                focusElapsedMs = Math.max(0, breakStart - startTime - store.totalBreakMs);
+            } else {
+                focusElapsedMs = Math.max(0, now - startTime - store.totalBreakMs);
+            }
+
+            const elapsedFocusSeconds = Math.floor(focusElapsedMs / 1000);
+            const baseCoins = Math.floor(elapsedFocusSeconds / 60);
+            setEarnedCoins(isStrict ? Math.floor(baseCoins * 1.5) : baseCoins);
+
+            if (infinite) {
+                setTimeLeft(formatTimerDisplay(elapsedFocusSeconds));
 
                 setSessionProgress(1);
-                const msInMinute = diffMs % 60000;
+                const msInMinute = focusElapsedMs % 60000;
                 setMinuteProgress(msInMinute / 60000);
-                setEarnedCoins(Math.floor(totalSeconds / 60));
             } else if (endTime && endTime > 0) {
                 const totalDuration = endTime - startTime;
-                const diffMs = endTime - now;
-                if (diffMs <= 0) {
+                const remainingFocusMs = Math.max(0, totalDuration - focusElapsedMs);
+                if (remainingFocusMs <= 0) {
                     setTimeLeft("0m 00s");
                     setSessionProgress(0);
                     setMinuteProgress(0);
@@ -62,17 +84,15 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     }
                     return;
                 }
-                const totalSeconds = Math.floor(diffMs / 1000);
+                const totalSeconds = Math.floor(remainingFocusMs / 1000);
 
                 setTimeLeft(formatTimerDisplay(totalSeconds));
 
-                setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, diffMs / totalDuration)) : 0);
+                setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, remainingFocusMs / totalDuration)) : 0);
 
-                const msInMinute = diffMs % 60000;
-                const minProg = msInMinute === 0 && diffMs > 0 ? 1 : msInMinute / 60000;
+                const msInMinute = remainingFocusMs % 60000;
+                const minProg = msInMinute === 0 && remainingFocusMs > 0 ? 1 : msInMinute / 60000;
                 setMinuteProgress(Math.max(0, Math.min(1, minProg)));
-                const elapsedSeconds = Math.floor((now - startTime) / 1000);
-                setEarnedCoins(Math.floor(elapsedSeconds / 60));
             }
         };
 
@@ -80,7 +100,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
         const interval = setInterval(updateTimer, 500);
 
         return () => clearInterval(interval);
-    }, [startTime, endTime, onStopPress]);
+    }, [startTime, endTime, onStopPress, isBreakActive, breakEndTime]);
 
     return (
         <View className={`flex-1 items-center justify-between px-6 ${isSmallDevice ? "py-4" : "py-10"} w-full max-w-md mx-auto`}>
@@ -106,33 +126,35 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 </View>
 
                 <Text className={`text-text ${isSmallDevice ? "text-2xl" : "text-4xl"} font-black tracking-tight text-center mb-1`}>
-                    {isStrict ? "Locked In" : isInfinite ? "Flow State" : "Focus Session"}
+                    {isBreakActive ? "Taking a Break" : isStrict ? "Locked In" : isInfinite ? "Flow State" : "Focus Session"}
                 </Text>
                 <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-bold tracking-widest uppercase text-center`}>
-                    {isInfinite ? "Stay in the zone" : "Stay on track"}
+                    {isBreakActive ? "Guarded apps temporarily unlocked" : isInfinite ? "Stay in the zone" : "Stay on track"}
                 </Text>
             </Animated.View>
 
             <View className={`items-center justify-center flex-1 w-full ${isSmallDevice ? "pb-2" : "pb-8"}`}>
                 <CentralFocusOrb
                     isActive={true}
-                    timeLeft={timeLeft}
+                    timeLeft={isBreakActive ? breakTimeLeft : timeLeft}
                     earnedCoins={earnedCoins}
                     sessionProgress={sessionProgress}
                     minuteProgress={minuteProgress}
-                    isInfinite={isInfinite}
+                    isInfinite={isBreakActive ? false : isInfinite}
                     isStrict={isStrict}
                     skipsRemaining={skipsRemaining ?? 1}
                     onStopPress={onStopPress}
                 />
 
                 <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(250)} className={`items-center justify-center ${isSmallDevice ? "mt-4 gap-2" : "mt-12 gap-4"} w-full`}>
-                    <View className="flex-row items-center justify-center">
-                        <Text className={`${isSmallDevice ? "text-xl" : "text-2xl"} mr-2`}>🪙</Text>
-                        <Text className={`text-text font-black ${isSmallDevice ? "text-base" : "text-xl"}`}>
-                            +{earnedCoins} coins earned
-                        </Text>
-                    </View>
+                    {!isBreakActive && (
+                        <View className="flex-row items-center justify-center">
+                            <Text className={`${isSmallDevice ? "text-xl" : "text-2xl"} mr-2`}>🪙</Text>
+                            <Text className={`text-text font-black ${isSmallDevice ? "text-base" : "text-xl"}`}>
+                                +{earnedCoins} coins earned
+                            </Text>
+                        </View>
+                    )}
 
                     <View className="flex-row items-center justify-center">
                         {isStrict && (skipsRemaining ?? 1) <= 0 ? (
