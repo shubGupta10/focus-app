@@ -11,6 +11,7 @@ import { SettingsDangerZoneCard } from "../features/settings/components/Settings
 import { SettingsNavigationCard } from "../features/settings/components/SettingsNavigationCard";
 import { SettingsPermissionsCard } from "../features/settings/components/SettingsPermissionsCard";
 import { useSettingsController } from "../features/settings/hooks/useSettingsController";
+import { SettingsDataManagementCard } from "@/features/settings/components/SettingsDataManagementCard";
 
 export default function SettingsTab() {
     const { activeStyle, colors } = useTheme();
@@ -58,6 +59,8 @@ export default function SettingsTab() {
                 />
 
                 <SettingsNavigationCard />
+
+                <SettingsDataManagementCard />
 
                 <SettingsDangerZoneCard resetAllData={resetAllData} />
 
