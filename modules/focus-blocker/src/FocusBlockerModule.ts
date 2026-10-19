@@ -16,6 +16,9 @@ export type ActiveSessionInfo = {
   startTime: number;
   endTime: number;
   isStrict: boolean;
+  breakEndTime?: number;
+  breaksRemaining?: number;
+  totalBreakMs?: number;
 } | null;
 
 export type CompletedSessionInfo = {
@@ -37,6 +40,8 @@ export declare class FocusBlockerModule {
   startService(customBlockedApps: string[], durationMs: number, isStrict?: boolean): Promise<string>;
   stopService(): Promise<string>;
   getActiveSession(): ActiveSessionInfo;
+  startBreak(durationMinutes: number): void;
+  endBreak(): void;
   getPendingCompletedSession(): Promise<CompletedSessionInfo>;
   clearCompletedSession(): Promise<void>;
   claimCompletedSession(): Promise<CompletedSessionInfo>;

@@ -67,12 +67,16 @@ export function useSessionController() {
             } else if (
                 engine.sessionStartTime &&
                 engine.sessionEndTime &&
-                engine.sessionEndTime > 0 &&
-                Date.now() >= engine.sessionEndTime
+                engine.sessionEndTime > 0
             ) {
-                durationSeconds = getDurationSeconds(engine.sessionStartTime, engine.sessionEndTime);
-                wasStrict = engine.isStrictSession;
-                endTimeMs = engine.sessionEndTime;
+                const store = useAppStore.getState();
+                const effectiveEndTime = engine.sessionEndTime + store.totalBreakMs;
+                if (Date.now() >= effectiveEndTime) {
+                    const totalTargetSeconds = getDurationSeconds(engine.sessionStartTime, engine.sessionEndTime);
+                    durationSeconds = totalTargetSeconds;
+                    wasStrict = engine.isStrictSession;
+                    endTimeMs = effectiveEndTime;
+                }
             }
 
             if (durationSeconds > 0) {
@@ -169,7 +173,8 @@ export function useSessionController() {
     }, []);
 
     useEffect(() => {
-        if (!engine.isSessionActive && engine.sessionStartTime && engine.sessionEndTime && Date.now() >= engine.sessionEndTime) {
+        const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime + useAppStore.getState().totalBreakMs : null;
+        if (!engine.isSessionActive && engine.sessionStartTime && effectiveEndTime && Date.now() >= effectiveEndTime) {
             handleCompleteSession();
         }
     }, [engine.isSessionActive, engine.sessionStartTime, engine.sessionEndTime]);
@@ -181,7 +186,15 @@ export function useSessionController() {
         try {
             setIsEndModalVisible(false);
             if (engine.sessionStartTime) {
-                const durationSeconds = getDurationSeconds(engine.sessionStartTime, Date.now());
+                const now = Date.now();
+                const store = useAppStore.getState();
+                let durationSeconds: number;
+                if (store.isBreakActive) {
+                    const breakStart = store.breakStartTime ?? (store.breakEndTime && store.breakDurationMs ? store.breakEndTime - store.breakDurationMs : now);
+                    durationSeconds = Math.max(0, Math.floor((breakStart - engine.sessionStartTime - store.totalBreakMs) / 1000));
+                } else {
+                    durationSeconds = Math.max(0, Math.floor((now - engine.sessionStartTime - store.totalBreakMs) / 1000));
+                }
                 const wasStrict = engine.isStrictSession;
                 const isCountdown = engine.sessionEndTime && engine.sessionEndTime > 0;
 
@@ -219,7 +232,9 @@ export function useSessionController() {
 
     const handleFocusPress = () => {
         if (engine.isSessionActive) {
-            if (engine.sessionEndTime && engine.sessionEndTime > 0 && Date.now() >= engine.sessionEndTime) {
+            const store = useAppStore.getState();
+            const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime + store.totalBreakMs : null;
+            if (effectiveEndTime && Date.now() >= effectiveEndTime) {
                 handleCompleteSession();
                 return;
             }

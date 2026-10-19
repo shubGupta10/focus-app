@@ -37,7 +37,12 @@ class FocusService : Service() {
         var activeStartTime: Long = -1L
         var activeEndTime: Long = -1L
         var isStrictActive: Boolean = false
+        var breakEndTime: Long = 0L
+        var breaksRemaining: Int = 1
+        var ignoreBlockingUntil: Long = 0L
+        var totalBreakMs: Long = 0L
         private val dbExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+        var instance: FocusService? = null
     }
 
     private val CHANNEL_ID = "FocusBlockerChannel_V2"
@@ -55,8 +60,6 @@ class FocusService : Service() {
     private val appLabelCache = mutableMapOf<String, String>()
     private var lastTitleText = ""
     private var lastSubtitleText = ""
-
-    private var ignoreBlockingUntil: Long = 0L
 
     @Volatile
     private var currentForegroundPackage: String? = null
@@ -97,6 +100,7 @@ class FocusService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         createNotificationChannel()
     }
 
@@ -128,6 +132,12 @@ class FocusService : Service() {
             activeStartTime = prefs.getLong("activeStartTime", now)
             activeEndTime = prefs.getLong("activeEndTime", -1L)
             isStrictActive = prefs.getBoolean("isStrictActive", false)
+            breakEndTime = prefs.getLong("breakEndTime", 0L)
+            breaksRemaining = prefs.getInt("breaksRemaining", 1)
+            totalBreakMs = prefs.getLong("totalBreakMs", 0L)
+            if (breakEndTime > now) {
+                ignoreBlockingUntil = breakEndTime
+            }
             endTime = activeEndTime
 
             val savedApps = prefs.getString("customBlockedApps", "") ?: ""
@@ -176,12 +186,19 @@ class FocusService : Service() {
             activeStartTime = now
             activeEndTime = endTime
             isStrictActive = isStrictParam ?: false
+            breakEndTime = 0L
+            breaksRemaining = 1
+            totalBreakMs = 0L
+            ignoreBlockingUntil = 0L
 
             prefs.edit()
                 .putString("customBlockedApps", customBlockedApps.joinToString(","))
                 .putLong("activeStartTime", activeStartTime)
                 .putLong("activeEndTime", activeEndTime)
                 .putBoolean("isStrictActive", isStrictActive)
+                .putLong("breakEndTime", 0L)
+                .putInt("breaksRemaining", 1)
+                .putLong("totalBreakMs", 0L)
                 .apply()
         }
 
@@ -195,44 +212,9 @@ class FocusService : Service() {
         if (!isRunning) {
             isRunning = true
 
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            val pendingIntent = android.app.PendingIntent.getActivity(
-                this,
-                0,
-                launchIntent,
-
-
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val remoteViews = RemoteViews(packageName, R.layout.custom_notification)
-
-            val notification: Notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val builder = Notification.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Lockout")
-                    .setSmallIcon(android.R.drawable.ic_secure)
-                    .setColor(Color.parseColor("#D4C7C3"))
-                    .setCustomContentView(remoteViews)
-                    .setStyle(Notification.DecoratedCustomViewStyle())
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(true)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-                }
-
-                builder.build()
-            } else {
-                Notification.Builder(this)
-                    .setContentTitle("Lockout")
-                    .setSmallIcon(android.R.drawable.ic_secure)
-                    .setColor(Color.parseColor("#D4C7C3"))
-                    .setCustomContentView(remoteViews)
-                    .setStyle(Notification.DecoratedCustomViewStyle())
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(true)
-                    .build()
-            }
+            val isInitialBreak = breakEndTime > now
+            val initialBreakMinutes = if (isInitialBreak) ((breakEndTime - now) / 60000).toInt() else 0
+            val notification = buildForegroundNotification(isInitialBreak, initialBreakMinutes)
 
             startForeground(1, notification)
             startMonitoringLoop()
@@ -269,21 +251,40 @@ class FocusService : Service() {
                 currentForegroundPackage = packageName
             }
 
+            var wasBreakActive = breakEndTime > System.currentTimeMillis()
+
             while (isRunning) {
                 val currentLoopTime = System.currentTimeMillis()
+
+                val isBreakCurrentlyActive = breakEndTime > 0L && currentLoopTime < breakEndTime
+                if (wasBreakActive && !isBreakCurrentlyActive) {
+                    wasBreakActive = false
+                    breakEndTime = 0L
+                    ignoreBlockingUntil = 0L
+                    val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                    prefs.edit().remove("breakEndTime").apply()
+                    updateForegroundNotification(isBreak = false)
+                    sendBreakEndedNotification()
+                } else if (!wasBreakActive && isBreakCurrentlyActive) {
+                    wasBreakActive = true
+                }
 
                 if (endTime == -1L && currentLoopTime - activeStartTime >= 24 * 60 * 60 * 1000L) {
                     Log.d("FocusBlocker", "Time expired! Auto-stopping service")
                     sendSessionEndNotification()
 
+                    val netSeconds = ((currentLoopTime - activeStartTime - totalBreakMs) / 1000L).coerceAtLeast(0L)
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
-                        .putLong("completed_duration", 24 * 60 * 60)
+                        .putLong("completed_duration", netSeconds)
                         .putLong("completed_endTime", currentLoopTime)
                         .putBoolean("completed_isStrict", isStrictActive)
                         .remove("activeStartTime")
                         .remove("activeEndTime")
                         .remove("isStrictActive")
+                        .remove("breakEndTime")
+                        .remove("breaksRemaining")
+                        .remove("totalBreakMs")
                         .apply()
 
                     stopSelf()
@@ -292,7 +293,7 @@ class FocusService : Service() {
                     Log.d("FocusBlocker", "Timer expired! Auto-stopping service")
                     sendSessionEndNotification()
 
-                    val durationSeconds = (endTime - activeStartTime) / 1000L
+                    val durationSeconds = ((endTime - activeStartTime - totalBreakMs) / 1000L).coerceAtLeast(0L)
 
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
@@ -302,6 +303,9 @@ class FocusService : Service() {
                         .remove("activeStartTime")
                         .remove("activeEndTime")
                         .remove("isStrictActive")
+                        .remove("breakEndTime")
+                        .remove("breaksRemaining")
+                        .remove("totalBreakMs")
                         .apply()
 
                     stopSelf()
@@ -475,6 +479,128 @@ class FocusService : Service() {
             subtitleView = subtitle
             container.addView(subtitle)
 
+            if (!isStrictActive) {
+                val breakSection = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER
+                    val params = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(dp(24), dp(18), dp(24), dp(4))
+                    }
+                    layoutParams = params
+                }
+
+                if (breaksRemaining > 0) {
+                    val remainingMs = if (endTime > 0) endTime - System.currentTimeMillis() else -1L
+                    val remainingMinutes = if (remainingMs > 0) (remainingMs + 30000) / 60000 else 999L
+
+                    if (endTime == -1L || remainingMinutes >= 5) {
+                        var isOptionsExpanded = false
+
+                        val toggleButton = TextView(this).apply {
+                            text = "Need a break? ($breaksRemaining left)"
+                            setTextColor(Color.parseColor("#D4C7C3"))
+                            textSize = 14f
+                            setTypeface(null, Typeface.BOLD)
+                            gravity = Gravity.CENTER
+                            val bg = android.graphics.drawable.GradientDrawable().apply {
+                                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                                cornerRadius = dpF(20f)
+                                setColor(Color.parseColor("#1F1E20"))
+                                setStroke(dp(1), Color.parseColor("#333033"))
+                            }
+                            background = bg
+                            setPadding(dp(20), dp(10), dp(20), dp(10))
+                        }
+
+                        val pillsLayout = LinearLayout(this).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            gravity = Gravity.CENTER
+                            visibility = View.GONE
+                            val pParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply {
+                                topMargin = dp(12)
+                            }
+                            layoutParams = pParams
+                        }
+
+                        val durations = listOf(5, 10, 20, 30)
+                        for (mins in durations) {
+                            val isPillEnabled = endTime == -1L || remainingMinutes >= mins
+
+                            val pill = TextView(this).apply {
+                                text = "${mins}m"
+                                textSize = 13f
+                                setTypeface(null, Typeface.BOLD)
+                                gravity = Gravity.CENTER
+                                val pBg = android.graphics.drawable.GradientDrawable().apply {
+                                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                                    cornerRadius = dpF(16f)
+                                    if (isPillEnabled) {
+                                        setColor(Color.parseColor("#2E2A30"))
+                                        setStroke(dp(1), Color.parseColor("#4A4248"))
+                                    } else {
+                                        setColor(Color.parseColor("#171618"))
+                                        setStroke(dp(1), Color.parseColor("#262428"))
+                                    }
+                                }
+                                background = pBg
+                                setTextColor(
+                                    if (isPillEnabled) Color.parseColor("#F0EDEC")
+                                    else Color.parseColor("#5A5255")
+                                )
+                                setPadding(dp(14), dp(8), dp(14), dp(8))
+
+                                val pillMargin = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                ).apply {
+                                    setMargins(dp(4), 0, dp(4), 0)
+                                }
+                                layoutParams = pillMargin
+
+                                if (isPillEnabled) {
+                                    setOnClickListener {
+                                        triggerBreak(mins)
+                                    }
+                                }
+                            }
+                            pillsLayout.addView(pill)
+                        }
+
+                        toggleButton.setOnClickListener {
+                            isOptionsExpanded = !isOptionsExpanded
+                            pillsLayout.visibility = if (isOptionsExpanded) View.VISIBLE else View.GONE
+                        }
+
+                        breakSection.addView(toggleButton)
+                        breakSection.addView(pillsLayout)
+                    } else {
+                        val endingSoonText = TextView(this).apply {
+                            text = "Session ending soon · Breaks unavailable"
+                            setTextColor(Color.parseColor("#6E6568"))
+                            textSize = 12f
+                            gravity = Gravity.CENTER
+                        }
+                        breakSection.addView(endingSoonText)
+                    }
+                } else {
+                    val noBreaksText = TextView(this).apply {
+                        text = "No breaks left for this session"
+                        setTextColor(Color.parseColor("#6E6568"))
+                        textSize = 12f
+                        gravity = Gravity.CENTER
+                    }
+                    breakSection.addView(noBreaksText)
+                }
+
+                container.addView(breakSection)
+            }
+
             val bottomSpacer = Space(this).apply {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
             }
@@ -618,6 +744,34 @@ class FocusService : Service() {
         }
     }
 
+    private fun triggerBreak(minutes: Int) {
+        if (isStrictActive || breaksRemaining <= 0) return
+        val breakMs = minutes * 60 * 1000L
+        // Guard: don't grant a break that would extend past the session end
+        if (endTime != -1L && (endTime - System.currentTimeMillis()) < breakMs) return
+        breaksRemaining = (breaksRemaining - 1).coerceAtLeast(0)
+        breakEndTime = System.currentTimeMillis() + breakMs
+        ignoreBlockingUntil = breakEndTime
+        totalBreakMs += breakMs
+        if (endTime > 0) {
+            endTime += breakMs
+            activeEndTime += breakMs
+        }
+
+        val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putLong("breakEndTime", breakEndTime)
+            .putInt("breaksRemaining", breaksRemaining)
+            .putLong("totalBreakMs", totalBreakMs)
+            .putLong("activeEndTime", activeEndTime)
+            .apply()
+
+        updateForegroundNotification(isBreak = true, breakMinutes = minutes)
+        sendBreakStartedNotification(minutes)
+
+        hideBlockOverlay()
+    }
+
     private fun hideBlockOverlay() {
         if (!isOverlayShowing) return
         Handler(Looper.getMainLooper()).post {
@@ -642,9 +796,16 @@ class FocusService : Service() {
         activeStartTime = -1L
         activeEndTime = -1L
         isStrictActive = false
+        breakEndTime = 0L
+        breaksRemaining = 1
+        totalBreakMs = 0L
+        ignoreBlockingUntil = 0L
         currentForegroundPackage = null
         hideBlockOverlay()
+        instance = null
 
+        val manager = getSystemService(NotificationManager::class.java)
+        manager?.cancel(3)
 
         super.onDestroy()
     }
@@ -695,5 +856,112 @@ class FocusService : Service() {
                 .build()
         }
         manager?.notify(2, notification)
+    }
+
+    fun buildForegroundNotification(isBreak: Boolean, breakMinutes: Int = 0): Notification {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this,
+            0,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val remoteViews = RemoteViews(packageName, R.layout.custom_notification)
+        val title = if (isBreak) "Session Paused" else "Session Active"
+        val desc = if (isBreak) {
+            if (breakMinutes > 0) "Taking a ${breakMinutes}m break · Guarded apps unlocked"
+            else "Taking a break · Guarded apps unlocked"
+        } else {
+            "Monitoring apps..."
+        }
+
+        remoteViews.setTextViewText(R.id.notification_title, title)
+        remoteViews.setTextViewText(R.id.notification_description, desc)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val builder = Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(desc)
+                .setSmallIcon(android.R.drawable.ic_secure)
+                .setColor(Color.parseColor("#D4C7C3"))
+                .setCustomContentView(remoteViews)
+                .setStyle(Notification.DecoratedCustomViewStyle())
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+            }
+
+            builder.build()
+        } else {
+            Notification.Builder(this)
+                .setContentTitle(title)
+                .setContentText(desc)
+                .setSmallIcon(android.R.drawable.ic_secure)
+                .setColor(Color.parseColor("#D4C7C3"))
+                .setCustomContentView(remoteViews)
+                .setStyle(Notification.DecoratedCustomViewStyle())
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .build()
+        }
+    }
+
+    fun updateForegroundNotification(isBreak: Boolean, breakMinutes: Int = 0) {
+        val notification = buildForegroundNotification(isBreak, breakMinutes)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager?.notify(1, notification)
+    }
+
+    fun sendBreakStartedNotification(minutes: Int) {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this,
+            0,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+        val manager = getSystemService(NotificationManager::class.java)
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            Notification.Builder(this)
+        }
+        val notification = builder
+            .setContentTitle("Session Paused")
+            .setContentText("Taking a ${minutes}m break. Guarded apps are temporarily unlocked.")
+            .setSmallIcon(android.R.drawable.ic_secure)
+            .setColor(Color.parseColor("#D4C7C3"))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        manager?.notify(3, notification)
+    }
+
+    fun sendBreakEndedNotification() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this,
+            0,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+        val manager = getSystemService(NotificationManager::class.java)
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            Notification.Builder(this)
+        }
+        val notification = builder
+            .setContentTitle("Session Active")
+            .setContentText("Your break has ended. Focus session is active again.")
+            .setSmallIcon(android.R.drawable.ic_secure)
+            .setColor(Color.parseColor("#D4C7C3"))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        manager?.notify(3, notification)
     }
 }
