@@ -22,6 +22,10 @@ FUTURE_FEATURES.md
 tracker.md
 AGENTS.md
 
+credentials.json
+credentials/
+
+
 # Native
 .kotlin/
 *.orig.*
