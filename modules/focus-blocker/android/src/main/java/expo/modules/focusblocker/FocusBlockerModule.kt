@@ -207,7 +207,6 @@ class FocusBlockerModule : Module() {
                         .apply()
                 }
                 FocusService.instance?.updateForegroundNotification(isBreak = true, breakMinutes = durationMinutes.toInt())
-                FocusService.instance?.sendBreakStartedNotification(durationMinutes.toInt())
             }
         }
 

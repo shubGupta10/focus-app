@@ -767,7 +767,6 @@ class FocusService : Service() {
             .apply()
 
         updateForegroundNotification(isBreak = true, breakMinutes = minutes)
-        sendBreakStartedNotification(minutes)
 
         hideBlockOverlay()
     }
