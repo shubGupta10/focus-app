@@ -5,7 +5,7 @@
 
   <p>
     <a href="https://github.com/shubGupta10/focus-app/releases/latest">
-      <img src="https://img.shields.io/badge/Download_APK-v1.1.7-2ea44f?style=for-the-badge&logo=android&logoColor=white" height="38" alt="Download APK" />
+      <img src="https://img.shields.io/github/v/release/shubGupta10/focus-app?label=Download%20APK&style=for-the-badge&logo=android&logoColor=white&color=2ea44f" height="38" alt="Download APK" />
     </a>
     &nbsp;
     <a href="https://github.com/shubGupta10/focus-app/releases">
@@ -26,7 +26,7 @@ Get the latest build directly from GitHub Releases:
 
 | Platform | File | Direct Link | Compatibility | Status |
 | :--- | :--- | :---: | :---: | :---: |
-| 🤖 **Android** | **Standalone `.apk`** | [**Download Latest APK (v1.1.7)**](https://github.com/shubGupta10/focus-app/releases/latest) | Android 8.0+ | ![Release](https://img.shields.io/badge/Stable-brightgreen?style=flat-square) |
+| 🤖 **Android** | **Standalone `.apk`** | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Android 8.0+ | ![Release](https://img.shields.io/badge/Stable-brightgreen?style=flat-square) |
 | 📦 **All Releases** | **Assets & Changelogs** | [**View Release Archive**](https://github.com/shubGupta10/focus-app/releases) | — | ![GitHub](https://img.shields.io/badge/GitHub-Releases-blue?style=flat-square) |
 
 > **Note on Installation:** Since you are downloading directly from GitHub outside of Google Play, Android will ask you to allow **"Install unknown apps"** for your browser. This is normal for open-source APKs.
