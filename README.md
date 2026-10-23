@@ -26,7 +26,7 @@ Get the latest build directly from GitHub Releases:
 
 | Platform | File | Direct Link | Compatibility | Status |
 | :--- | :--- | :---: | :---: | :---: |
-| 🤖 **Android** | **Standalone `.apk`** | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Android 8.0+ | ![Release](https://img.shields.io/badge/Stable-brightgreen?style=flat-square) |
+| 🤖 **Android** | **Standalone `.apk`** | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Android 10+ | ![Release](https://img.shields.io/badge/Stable-brightgreen?style=flat-square) |
 | 📦 **All Releases** | **Assets & Changelogs** | [**View Release Archive**](https://github.com/shubGupta10/focus-app/releases) | — | ![GitHub](https://img.shields.io/badge/GitHub-Releases-blue?style=flat-square) |
 
 > **Note on Installation:** Since you are downloading directly from GitHub outside of Google Play, Android will ask you to allow **"Install unknown apps"** for your browser. This is normal for open-source APKs.
@@ -89,9 +89,11 @@ Lockout requires specific Android system permissions strictly to perform app blo
 
 ## 🛡️ Privacy & Offline First
 
-- **100% On-Device:** All focus stats, session histories, coin balances, and blocklists are stored locally in an embedded SQLite database.
-- **Zero Cloud Tracking:** No user tracking, no third-party analytics selling, and no account registration required.
-- **Works Completely Offline:** Full blocking, timer tracking, and customization features function with zero internet connection.
+- **100% On-Device Data:** Focus session logs, streak histories, coin balances, routines, and app blocklists are stored entirely in a local SQLite database on your device.
+- **Privacy-Preserving Telemetry:** Lockout uses [Aptabase](https://aptabase.com), an open-source analytics platform, strictly to collect high-level anonymous metrics (such as app opens and session completions). It never collects IP addresses, advertising IDs, or personal data.
+- **Full User Control:** Anonymous telemetry can be turned on or off at any time during onboarding (Step 3) or inside Settings (*About & Support*).
+- **No User Accounts:** No sign-up, email, passwords, or cloud sync required.
+- **Core Features Work Offline:** Full blocking, timer tracking, and customization features function completely without an internet connection.
 
 ---
 
