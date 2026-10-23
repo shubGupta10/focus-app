@@ -53,13 +53,13 @@ export function useAutoUpdateCheck() {
                         await addNotification(db, {
                             id: `update_${latest}`,
                             type: "update",
-                            title: `Update available (v${latest})`,
+                            title: `Full update available (v${latest})`,
                             description:
                                 data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
                                 "A new update is ready for you with fixes and improvements.",
                             timestamp: Date.now(),
-                            action_label: "Download update",
-                            action_url: downloadUrl,
+                            action_label: "View update",
+                            action_url: "/updates",
                         })
 
                     }

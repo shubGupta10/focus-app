@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
+import { analytics } from "@/utils/analytics";
+
 
 
 const engineListeners = new Set<() => void>();
@@ -129,6 +131,10 @@ export function useFocusEngine(isRoot: boolean = false) {
             }));
 
             setSessionState(true, now, endTime, isStrict);
+            analytics.track("session_started", {
+                duration_minutes: durationMinutes,
+                is_strict: isStrict
+            });
         } catch (error: any) {
             alert("Error Starting:" + error.message);
         } finally {

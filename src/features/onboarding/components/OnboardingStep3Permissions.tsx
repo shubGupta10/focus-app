@@ -3,6 +3,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, Text, View } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
+import { Material3Switch } from "@/components/Material3Switch";
+import { getAnalyticsEnabled, setAnalyticsEnabled } from "@/utils/analytics";
+import { useEffect, useState } from "react";
 
 interface OnboardingStep3PermissionsProps {
     hasUsage: boolean;
@@ -24,13 +27,20 @@ export function OnboardingStep3Permissions({
     onComplete
 }: OnboardingStep3PermissionsProps) {
     const { colors } = useTheme();
+    const [analyticsAllowed, setAnalyticsAllowed] = useState(true);
+
+    useEffect(() => {
+        getAnalyticsEnabled().then(setAnalyticsAllowed);
+    }, []);
+
+    const handleToggleAnalytics = (val: boolean) => {
+        setAnalyticsAllowed(val);
+        setAnalyticsEnabled(val);
+    }
 
     return (
         <View className="flex-1 px-6 justify-between py-6">
             <View className="flex-1 justify-center">
-                <View className="w-14 h-14 rounded-2xl bg-accent/15 items-center justify-center mb-6">
-                    <Ionicons name="options-outline" size={28} color={colors.accent} />
-                </View>
                 <Text className="text-text text-3xl font-black tracking-tight mb-2">
                     Enable Focus Engine
                 </Text>
@@ -72,6 +82,21 @@ export function OnboardingStep3Permissions({
                         accessibilityLabel="Notifications permission"
                         accessibilityHint="Prompts to allow notifications"
                     />
+
+                    <View className="p-4 rounded-2xl flex-row justify-between items-center bg-surfaceElevated">
+                        <View className="flex-1 mr-3">
+                            <Text className="text-text font-bold text-base mb-0.5">
+                                Anonymous Usage Data
+                            </Text>
+                            <Text className="text-textSecondary text-xs leading-4">
+                                Share anonymous stats like session completions to help make the app better. Zero personal data is collected.
+                            </Text>
+                        </View>
+                        <Material3Switch
+                            value={analyticsAllowed}
+                            onValueChange={handleToggleAnalytics}
+                        />
+                    </View>
                 </View>
             </View>
 

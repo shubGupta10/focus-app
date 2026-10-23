@@ -91,7 +91,13 @@ export default function NotificationScreen() {
                     </Text>
                     {item.action_label && item.action_url && (
                         <Pressable
-                            onPress={() => Linking.openURL(item.action_url!)}
+                            onPress={() => {
+                                if (item.type === "update" || item.action_url?.startsWith("/")) {
+                                    router.push("/updates");
+                                } else if (item.action_url) {
+                                    Linking.openURL(item.action_url);
+                                }
+                            }}
                             className="mt-3 bg-accent px-3.5 py-1.5 rounded-xl self-start active:opacity-75"
                         >
                             <Text className="text-accentForeground font-semibold text-xs">

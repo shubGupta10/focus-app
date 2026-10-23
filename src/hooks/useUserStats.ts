@@ -4,6 +4,8 @@ import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback } from "react";
 import { addNotification } from "./useNotifications";
+import { analytics } from "@/utils/analytics";
+
 
 export function useUserStats() {
     const db = useSQLiteContext();
@@ -29,6 +31,9 @@ export function useUserStats() {
 
             updateStatsLocally(earnedCoins, durationSeconds, newStreak);
             refreshStats(db);
+            analytics.track("session_completed", {
+                duration_minutes: Math.round(durationSeconds / 60)
+            });
 
             if (newStreak > previousStreak) {
                 const todayStr = new Date().toISOString().split("T")[0];

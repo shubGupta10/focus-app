@@ -3,8 +3,22 @@ import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import { Material3Switch } from "@/components/Material3Switch";
+import { getAnalyticsEnabled, setAnalyticsEnabled } from "@/utils/analytics";
+import { useEffect, useState } from "react";
 
 export function SettingsAboutCard() {
+    const [analyticsAllowed, setAnalyticsAllowed] = useState(true);
+
+    useEffect(() => {
+        getAnalyticsEnabled().then(setAnalyticsAllowed);
+    }, []);
+
+    const handleToggleAnalytics = (val: boolean) => {
+        setAnalyticsAllowed(val);
+        setAnalyticsEnabled(val);
+    };
+
     const handleContactSupport = () => {
         Linking.openURL("https://shubhamgupta.online");
     };
@@ -111,6 +125,27 @@ export function SettingsAboutCard() {
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
                 </Pressable>
+
+                <View className="flex-row items-center justify-between px-5 py-4">
+                    <View className="flex-row items-center flex-1 mr-3">
+                        <View className="w-8 h-8 rounded-full bg-[#10b981]/10 items-center justify-center mr-4">
+                            <Ionicons name="analytics" size={16} color="#10b981" />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-text font-bold text-[16px]">
+                                Anonymous Usage Data
+                            </Text>
+                            <Text className="text-textSecondary text-xs leading-4 mt-0.5">
+                                Share stats to help improve Lockout. No personal info.
+                            </Text>
+                        </View>
+                    </View>
+                    <Material3Switch
+                        value={analyticsAllowed}
+                        onValueChange={handleToggleAnalytics}
+                    />
+                </View>
+
             </View>
 
             <View className="items-center mt-6">

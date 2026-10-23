@@ -12,6 +12,10 @@ import { useEffect } from "react";
 import { Text, TextInput, Alert } from "react-native";
 import "../global.css";
 import * as Updates from "expo-updates"
+import { initAnalytics, analytics } from "@/utils/analytics";
+
+initAnalytics();
+
 
 
 interface TextWithDefaultProps extends Function {
@@ -30,9 +34,12 @@ TextInputOverride.defaultProps.style = { includeFontPadding: false };
 SplashScreen.preventAutoHideAsync();
 
 
-
 function Layout() {
   const { isUpdatePending } = Updates.useUpdates();
+
+  useEffect(() => {
+    analytics.track("app_started");
+  }, [])
 
   useEffect(() => {
     if (__DEV__) return;
