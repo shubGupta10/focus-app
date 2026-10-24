@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 import { StarterTemplate } from "../components/RoutineEmptyState";
+import { analytics } from "@/utils/analytics";
 
 export function useRoutinesController() {
     const engine = useFocusEngine();
@@ -80,6 +81,9 @@ export function useRoutinesController() {
         } else {
             await addRoutine(input);
             showToast(`"${input.name}" routine created`);
+            analytics.track("routine_created", {
+                has_repeat: Boolean(input.days_of_week && input.days_of_week.length > 0)
+            });
         }
     }, [engine.isSessionActive, selectedRoutine, editRoutine, addRoutine, showToast]);
 
