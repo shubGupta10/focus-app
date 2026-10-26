@@ -41,10 +41,17 @@ class BootReceiver : BroadcastReceiver() {
                 Log.e("BootReceiver", "Failed to query selected_apps; proceeding without custom blocklist", e)
             }
 
-            val cursor = db.rawQuery(
-                "SELECT id, start_time, end_time, days_of_week, is_strict FROM routines WHERE is_enabled = 1",
-                null
-            )
+            val cursor = try {
+                db.rawQuery(
+                    "SELECT id, start_time, end_time, days_of_week, is_strict, blocked_apps FROM routines WHERE is_enabled = 1",
+                    null
+                )
+            } catch (e: Exception) {
+                db.rawQuery(
+                    "SELECT id, start_time, end_time, days_of_week, is_strict FROM routines WHERE is_enabled = 1",
+                    null
+                )
+            }
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -54,6 +61,13 @@ class BootReceiver : BroadcastReceiver() {
                 val endTime = cursor.getString(2)
                 val daysOfWeek = cursor.getString(3)
                 val isStrict = cursor.getInt(4) == 1
+                val blockedAppsIndex = cursor.getColumnIndex("blocked_apps")
+                val blockedAppsStr = if (blockedAppsIndex != -1) cursor.getString(blockedAppsIndex) ?: "" else ""
+                val routineApps = if (blockedAppsStr.isNotBlank()) {
+                    ArrayList(blockedAppsStr.split(",").filter { it.isNotBlank() })
+                } else {
+                    appsList
+                }
 
                 val triggerMs = calculateNextTrigger(startTime, daysOfWeek)
                 if (triggerMs != null) {
@@ -63,7 +77,7 @@ class BootReceiver : BroadcastReceiver() {
                         putExtra("routineId", routineId)
                         putExtra("durationMs", durationMs)
                         putExtra("isStrict", isStrict)
-                        putStringArrayListExtra("blockedApps", appsList)
+                        putStringArrayListExtra("blockedApps", routineApps)
                         putExtra("daysOfWeek", daysOfWeek)
                         putExtra("startTime", startTime)
                         putExtra("endTime", endTime)
