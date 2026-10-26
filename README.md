@@ -8,7 +8,7 @@
       <img src="https://img.shields.io/github/v/release/shubGupta10/focus-app?label=Download%20APK&style=for-the-badge&logo=android&logoColor=white&color=2ea44f" height="38" alt="Download APK" />
     </a>
     &nbsp;
-    <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add?url=https://github.com/shubGupta10/focus-app">
+    <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/shubGupta10/focus-app">
       <img src="https://img.shields.io/badge/Install%20with-Obtainium-4ba3e3?style=for-the-badge&logo=android&logoColor=white" height="38" alt="Install with Obtainium" />
     </a>
     &nbsp;
@@ -49,7 +49,7 @@ Get the latest build directly from GitHub Releases or manage automatic updates w
 | Method | Source | Link | Updates |
 | :--- | :--- | :---: | :---: |
 | 🤖 **Direct Download** | Standalone `.apk` (Android 10+) | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Manual |
-| 🔄 **Obtainium** *(Recommended)* | Direct from GitHub | [**Add to Obtainium**](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add?url=https://github.com/shubGupta10/focus-app) | **Automatic** |
+| 🔄 **Obtainium** *(Recommended)* | Direct from GitHub | [**Add to Obtainium**](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/shubGupta10/focus-app) | **Automatic** |
 | 📦 **Release Archive** | All `.apk` assets & changelogs | [**View Releases**](https://github.com/shubGupta10/focus-app/releases) | — |
 
 > **💡 What is Obtainium?** [Obtainium](https://github.com/ImranR98/Obtainium) allows you to install and update open-source Android apps directly from their GitHub release pages, providing an app-store-like auto-update experience without Google Play.
