@@ -1,11 +1,15 @@
 <div align="center">
   <img src="./assets/images/icon.png" width="96" height="96" alt="Lockout Icon" style="border-radius: 22px;" />
   <h1>Lockout</h1>
-  <p>An Android app to block distracting apps and stay focused.</p>
+  <p><strong>Lockout is a free and open-source Android app that blocks distracting apps while you focus. It works offline, tracks your focus time, and keeps your data strictly private on your device.</strong></p>
 
   <p>
     <a href="https://github.com/shubGupta10/focus-app/releases/latest">
       <img src="https://img.shields.io/github/v/release/shubGupta10/focus-app?label=Download%20APK&style=for-the-badge&logo=android&logoColor=white&color=2ea44f" height="38" alt="Download APK" />
+    </a>
+    &nbsp;
+    <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add?url=https://github.com/shubGupta10/focus-app">
+      <img src="https://img.shields.io/badge/Install%20with-Obtainium-4ba3e3?style=for-the-badge&logo=android&logoColor=white" height="38" alt="Install with Obtainium" />
     </a>
     &nbsp;
     <a href="https://github.com/shubGupta10/focus-app/releases">
@@ -17,19 +21,6 @@
     </a>
   </p>
 </div>
-
----
-
-## 📥 Download
-
-Get the latest build directly from GitHub Releases:
-
-| Platform | File | Direct Link | Compatibility | Status |
-| :--- | :--- | :---: | :---: | :---: |
-| 🤖 **Android** | **Standalone `.apk`** | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Android 10+ | ![Release](https://img.shields.io/badge/Stable-brightgreen?style=flat-square) |
-| 📦 **All Releases** | **Assets & Changelogs** | [**View Release Archive**](https://github.com/shubGupta10/focus-app/releases) | — | ![GitHub](https://img.shields.io/badge/GitHub-Releases-blue?style=flat-square) |
-
-> **Note on Installation:** Since you are downloading directly from GitHub outside of Google Play, Android will ask you to allow **"Install unknown apps"** for your browser. This is normal for open-source APKs.
 
 ---
 
@@ -48,6 +39,22 @@ Get the latest build directly from GitHub Releases:
 <p align="center">
   <img src="./assets/screenshots/Screenshot_shop_black.png" width="31%" alt="Customization Shop" />
 </p>
+
+---
+
+## 📥 Download
+
+Get the latest build directly from GitHub Releases or manage automatic updates with Obtainium:
+
+| Method | Source | Link | Updates |
+| :--- | :--- | :---: | :---: |
+| 🤖 **Direct Download** | Standalone `.apk` (Android 10+) | [**Download Latest APK**](https://github.com/shubGupta10/focus-app/releases/latest) | Manual |
+| 🔄 **Obtainium** *(Recommended)* | Direct from GitHub | [**Add to Obtainium**](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add?url=https://github.com/shubGupta10/focus-app) | **Automatic** |
+| 📦 **Release Archive** | All `.apk` assets & changelogs | [**View Releases**](https://github.com/shubGupta10/focus-app/releases) | — |
+
+> **💡 What is Obtainium?** [Obtainium](https://github.com/ImranR98/Obtainium) allows you to install and update open-source Android apps directly from their GitHub release pages, providing an app-store-like auto-update experience without Google Play.
+> 
+> **Note on Manual Installation:** If downloading the APK directly in your browser outside an app store, Android will ask you to allow **"Install unknown apps"**. This is standard for all open-source APKs.
 
 ---
 
