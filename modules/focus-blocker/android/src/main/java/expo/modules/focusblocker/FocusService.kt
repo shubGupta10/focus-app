@@ -207,6 +207,22 @@ class FocusService : Service() {
             "[Native] onStartCommand active session apps: ${customBlockedApps.size}, endTime: $endTime, isStrict: $isStrictActive"
         )
 
+        val hasListenerPermission = androidx.core.app.NotificationManagerCompat
+            .getEnabledListenerPackages(this)
+            .contains(packageName)
+
+        val silencePref = if (intent != null && intent.hasExtra("silenceNotifications")) {
+            val s = intent.getBooleanExtra("silenceNotifications", false)
+            prefs.edit().putBoolean("silenceNotifications", s).apply()
+            s
+        } else {
+            prefs.getBoolean("silenceNotifications", false)
+        }
+
+        val silenceNotification = silencePref && hasListenerPermission
+
+        LockoutNotificationListener.updateSessionState(silenceNotification, customBlockedApps)
+
         isServiceActive = true
 
         if (!isRunning) {
@@ -287,6 +303,7 @@ class FocusService : Service() {
                         .remove("totalBreakMs")
                         .apply()
 
+                    LockoutNotificationListener.clearSessionState();
                     stopSelf()
                     break
                 } else if (endTime > 0 && currentLoopTime >= endTime) {
@@ -308,6 +325,7 @@ class FocusService : Service() {
                         .remove("totalBreakMs")
                         .apply()
 
+                    LockoutNotificationListener.clearSessionState()
                     stopSelf()
                     break
                 }
@@ -801,6 +819,7 @@ class FocusService : Service() {
         ignoreBlockingUntil = 0L
         currentForegroundPackage = null
         hideBlockOverlay()
+        LockoutNotificationListener.clearSessionState()
         instance = null
 
         val manager = getSystemService(NotificationManager::class.java)

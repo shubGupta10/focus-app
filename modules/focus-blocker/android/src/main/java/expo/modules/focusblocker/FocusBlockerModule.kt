@@ -107,8 +107,38 @@ class FocusBlockerModule : Module() {
                     try {
                         context.startActivity(intent)
                     } catch (e: Exception) {
-                        // Fallback if intent is not available
                     }
+                }
+            }
+        }
+
+        Function("hasNotificationListenerPermission") {
+            val context = appContext.reactContext ?: return@Function false
+            val enabledListeners = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context)
+            return@Function enabledListeners.contains(context.packageName)
+        }
+
+        Function("requestNotificationListenerPermission") {
+            val context = appContext.reactContext
+            if (context != null) {
+                val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("FocusBlocker", "Failed to open notification listener settings", e)
+                }
+            }
+        }
+
+        Function("setSilenceNotifications") { enabled: Boolean ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("silenceNotifications", enabled).apply()
+
+                if (!enabled) {
+                    LockoutNotificationListener.clearSessionState()
                 }
             }
         }
@@ -123,7 +153,7 @@ class FocusBlockerModule : Module() {
             }
         }
 
-        AsyncFunction("startService") { customBlockedApps: List<String>, durationMs: Double, isStrict: Boolean?, promise: expo.modules.kotlin.Promise ->
+        AsyncFunction("startService") { customBlockedApps: List<String>, durationMs: Double, isStrict: Boolean?, silenceNotification: Boolean?, promise: expo.modules.kotlin.Promise ->
             try {
                 val context = appContext.reactContext
                 if (context != null) {
@@ -133,6 +163,7 @@ class FocusBlockerModule : Module() {
 
                     intent.putExtra("durationMs", durationMs)
                     intent.putExtra("isStrict", isStrict ?: false)
+                    intent.putExtra("silenceNotifications", silenceNotification ?: false)
 
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         context.startForegroundService(intent)
@@ -206,7 +237,10 @@ class FocusBlockerModule : Module() {
                         .putLong("activeEndTime", FocusService.activeEndTime)
                         .apply()
                 }
-                FocusService.instance?.updateForegroundNotification(isBreak = true, breakMinutes = durationMinutes.toInt())
+                FocusService.instance?.updateForegroundNotification(
+                    isBreak = true,
+                    breakMinutes = durationMinutes.toInt()
+                )
             }
         }
 
