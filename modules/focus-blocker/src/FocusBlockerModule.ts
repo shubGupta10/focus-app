@@ -36,8 +36,11 @@ export declare class FocusBlockerModule {
   requestBatteryPermission(): void;
   hasExactAlarmPermission(): boolean;
   requestExactAlarmPermission(): void;
+  hasNotificationListenerPermission(): boolean;
+  requestNotificationListenerPermission(): void;
+  setSilenceNotifications(enabled: boolean): void;
 
-  startService(customBlockedApps: string[], durationMs: number, isStrict?: boolean): Promise<string>;
+  startService(customBlockedApps: string[], durationMs: number, isStrict?: boolean, silenceNotification?: boolean): Promise<string>;
   stopService(): Promise<string>;
   getActiveSession(): ActiveSessionInfo;
   startBreak(durationMinutes: number): void;

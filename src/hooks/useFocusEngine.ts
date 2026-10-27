@@ -109,7 +109,14 @@ export function useFocusEngine(isRoot: boolean = false) {
             console.log(`[Lockout JS] Apps to block: ${JSON.stringify(appsToBlock)}`);
             console.log(`[Lockout JS] Strict mode: ${isStrict}`);
 
-            await FocusBlocker.startService(appsToBlock, durationMs, isStrict);
+            let silenceNotification = false;
+
+            try {
+                const silenceSetting = await db.getFirstAsync<{ value: string }>("SELECT value FROM settings WHERE key = 'silence_notifications_enabled'");
+                silenceNotification = silenceSetting?.value === "true" && FocusBlocker.hasNotificationListenerPermission();
+            } catch (error) { }
+
+            await FocusBlocker.startService(appsToBlock, durationMs, isStrict, silenceNotification);
 
 
             try {
@@ -201,8 +208,14 @@ export function useFocusEngine(isRoot: boolean = false) {
                             });
                         }
 
+                        let silenceNotifications = false;
+                        try {
+                            const silenceSetting = await db.getFirstAsync<{ value: string }>("SELECT value FROM settings WHERE key =  'silence_notifications_enabled'");
+                            silenceNotifications = silenceSetting?.value === "true" && FocusBlocker.hasNotificationListenerPermission();
+                        } catch (error) { }
+
                         const remainingMs = parsed.endTime !== -1 ? parsed.endTime - now : -1;
-                        await FocusBlocker.startService(appsToBlock, remainingMs, parsed.isStrict);
+                        await FocusBlocker.startService(appsToBlock, remainingMs, parsed.isStrict, silenceNotifications);
 
                         setSessionState(true, parsed.startTime, parsed.endTime, parsed.isStrict);
                         return;
