@@ -54,6 +54,24 @@ export function useFocusEngine(isRoot: boolean = false) {
                 package_name: string
             }>("SELECT package_name FROM selected_apps");
             const apps = rows.map(row => row.package_name);
+
+            const installedPackages = new Set(
+                useAppStore.getState().installedApps.map(a => a.packageName)
+            );
+
+            if (installedPackages.size > 0) {
+                const staleApps = apps.filter(pkg => !installedPackages.has(pkg));
+                if (staleApps.length > 0) {
+                    for (const pkg of staleApps) {
+                        await db.runAsync("DELETE FROM selected_apps WHERE package_name = ?", [pkg]);
+                    }
+                }
+                const cleanApps = apps.filter(pkg => installedPackages.has(pkg));
+                setEngineState({ selectedApps: cleanApps });
+                FocusBlocker.updateGlobalBlocklist(cleanApps);
+                return;
+            }
+
             setEngineState({ selectedApps: apps });
             FocusBlocker.updateGlobalBlocklist(apps);
         } catch (error) {
@@ -237,6 +255,7 @@ export function useFocusEngine(isRoot: boolean = false) {
         try {
             const apps = await FocusBlocker.getInstalledApps();
             setEngineState({ installedApps: apps.sort((a, b) => a.name.localeCompare(b.name)) });
+            loadSelectedApps();
         } catch (error) {
             console.error(error);
         }

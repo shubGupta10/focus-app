@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lockout",
     "slug": "lockout",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -17,7 +17,7 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.shubham720.lockout",
-      "versionCode": 14,
+      "versionCode": 15,
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",

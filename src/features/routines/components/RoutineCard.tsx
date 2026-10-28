@@ -31,9 +31,10 @@ export function RoutineCardInner({
     const isCustomBlocklist = Boolean(routine.blocked_apps && routine.blocked_apps.trim().length > 0);
     const customBlockedPackages = isCustomBlocklist ? routine.blocked_apps.split(",") : [];
 
-    const displayApps = installedApps.filter((app) => customBlockedPackages.includes(app.packageName)).slice(0, 5);
+    const validBlockedPackages = installedApps.filter((app) => customBlockedPackages.includes(app.packageName));
+    const displayApps = validBlockedPackages.slice(0, 5);
 
-    const extraCount = Math.max(0, customBlockedPackages.length - 5);
+    const extraCount = Math.max(0, validBlockedPackages.length - 5);
 
     const formatDurationText = (start: string, end: string) => {
         const mins = getRoutineDurationMinutes(start, end);

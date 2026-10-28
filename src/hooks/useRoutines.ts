@@ -18,7 +18,7 @@ export function useRoutine() {
             if (trigger) {
                 const durationMinutes = getRoutineDurationMinutes(routine.start_time, routine.end_time);
 
-                const apps = routine.blocked_apps && routine.blocked_apps.trim().length > 0 
+                const apps = routine.blocked_apps && routine.blocked_apps.trim().length > 0
                     ? routine.blocked_apps.split(",")
                     : [];
 
@@ -41,8 +41,25 @@ export function useRoutine() {
     const loadRoutines = useCallback(async () => {
         setIsLoading(true);
         const data = await getRoutines(db);
-        setRoutines(data);
-        for (const r of data) {
+        const installedPackages = new Set(
+            useAppStore.getState().installedApps.map((a) => a.packageName)
+        );
+
+        const cleanData = data.map((routine) => {
+            if (!routine.blocked_apps || installedPackages.size === 0) {
+                return routine;
+            }
+            const valid = routine.blocked_apps
+                .split(",")
+                .filter((pkg) => installedPackages.has(pkg));
+            return {
+                ...routine,
+                blocked_apps: valid.join(",")
+            };
+        });
+
+        setRoutines(cleanData);
+        for (const r of cleanData) {
             await syncAlarmForRoutine(r);
         }
         setIsLoading(false);
