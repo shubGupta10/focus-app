@@ -8,7 +8,7 @@ import TimerSelectionModal from "@/features/session/components/modals/TimerSelec
 import { useSettings } from "@/hooks/useSettings";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -25,7 +25,7 @@ export default function Index() {
     const { width, height } = useWindowDimensions();
     const isSmallDevice = width < 380 || height < 740;
     const { getSetting } = useSettings();
-    const { activeStyle, colors, isDarkMode } = useTheme();
+    const { activeStyle, colors } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
     const { hasUnread, unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
@@ -91,7 +91,7 @@ export default function Index() {
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <StatusBar style={isDarkMode ? "light" : "dark"} />
+
 
             {!engine.isSessionActive && (
                 <Animated.View

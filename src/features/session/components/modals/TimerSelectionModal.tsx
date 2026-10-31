@@ -21,7 +21,7 @@ interface TimerSelectionModalProps {
 const PRESET_TIMES = [5, 15, 25, 30, 45, 60, 90, 120];
 
 export default function TimerSelectionModal({ visible, onClose, onStartSession }: TimerSelectionModalProps) {
-    const { colors, isDarkMode } = useTheme();
+    const { colors, isDarkMode, activeStyle } = useTheme();
     const { skipsRemaining, resetCountdownText, refreshStrictMode } = useStrictMode();
     const { getSetting } = useSettings();
     const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
@@ -56,7 +56,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surfaceElevated rounded-t-3xl p-6" style={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}>
+                <View className="bg-surfaceElevated rounded-t-3xl p-6" style={[{ paddingBottom: Math.max(insets.bottom + 12, 24) }, activeStyle]}>
                     <View className="flex-row justify-between items-center mb-6">
                         <View className="flex-row items-center gap-3">
                             <Text className="text-text text-xl font-black tracking-tight">Start a Session</Text>

@@ -1,7 +1,9 @@
 import { Colors } from "@/constants/Colors";
 import { SHOP_CATALOG } from "@/features/shop/data/shopCatalog";
 import { useSettings } from "@/hooks/useSettings";
-import { useColorScheme, vars } from "nativewind";
+import { vars } from "nativewind";
+import { useColorScheme as useRNColorScheme } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 function getWCAGRelativeLuminance(hex: string) {
@@ -47,7 +49,7 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const { getSetting, setSetting } = useSettings();
-    const { colorScheme, setColorScheme } = useColorScheme();
+    const systemColorScheme = useRNColorScheme() ?? "light";
     const [orbTheme, setOrbTheme] = useState("theme_default");
     const [themeMode, setThemeModeState] = useState<"light" | "dark" | "system">("system");
 
@@ -58,24 +60,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         getSetting("colorScheme").then((val) => {
             if (val === "dark" || val === "light" || val === "system") {
                 setThemeModeState(val as "light" | "dark" | "system");
-                setColorScheme(val);
+
             }
         });
-    }, [getSetting, setColorScheme]);
+    }, [getSetting]);
 
-    const isDarkMode = colorScheme === "dark";
+    const isDarkMode = themeMode === "system"
+        ? systemColorScheme === "dark"
+        : themeMode === "dark";
 
-    const toggleDarkMode = async (val: boolean) => {
+    const toggleDarkMode = (val: boolean) => {
         const nextScheme = val ? "dark" : "light";
         setThemeModeState(nextScheme);
-        setColorScheme(nextScheme);
-        await setSetting("colorScheme", nextScheme);
+
+        setSetting("colorScheme", nextScheme);
     };
 
-    const setThemeMode = async (mode: "light" | "dark" | "system") => {
+    const setThemeMode = (mode: "light" | "dark" | "system") => {
         setThemeModeState(mode);
-        setColorScheme(mode);
-        await setSetting("colorScheme", mode);
+
+        setSetting("colorScheme", mode);
     };
 
     const baseTheme = isDarkMode ? Colors.dark : Colors.light;
@@ -142,13 +146,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 themeMode,
                 setThemeMode,
                 colorScheme: isDarkMode ? "dark" : "light",
-                setColorScheme,
+                setColorScheme: () => { },
                 colors,
                 activeStyle,
                 switchColors,
                 setGlobalOrbTheme: setOrbTheme,
             }}
         >
+            <StatusBar style={isDarkMode ? "light" : "dark"} />
             {children}
         </ThemeContext.Provider>
     );

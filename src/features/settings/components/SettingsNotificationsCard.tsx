@@ -118,6 +118,7 @@ export function SettingNotificationCard() {
                     </View>
                 </Pressable>
 
+                {/* Temporarily disabled until Google Play Protect whitelist clears
                 <View className="h-[1px] bg-border/40 mx-5" />
 
                 <Pressable
@@ -142,6 +143,7 @@ export function SettingNotificationCard() {
                         />
                     </View>
                 </Pressable>
+                */}
             </View>
         </View>
     );
