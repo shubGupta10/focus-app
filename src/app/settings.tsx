@@ -32,7 +32,8 @@ export default function SettingsTab() {
             <View className="flex-row items-center px-6 pt-5 pb-2">
                 <Pressable
                     onPress={() => router.back()}
-                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back to Home"
                 >

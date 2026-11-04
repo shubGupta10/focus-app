@@ -42,7 +42,7 @@ export function OnboardingStep3Permissions({
         <View className="flex-1 px-6 justify-between py-6">
             <View className="flex-1 justify-center">
                 <Text className="text-text text-3xl font-black tracking-tight mb-2">
-                    Enable Focus Engine
+                    Enable Lockout Protection
                 </Text>
                 <Text className="text-textSecondary text-sm leading-relaxed mb-8">
                     Android requires these system capabilities so Lockout can detect distractions and present the blocking guard.

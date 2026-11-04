@@ -107,7 +107,8 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/notifications")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            style={{ elevation: 2 }}
                         >
                             <Ionicons name="notifications-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
 
@@ -122,7 +123,8 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/shop")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Shop"
                         >
@@ -131,7 +133,8 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/settings")}
-                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70`}
+                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Settings"
                         >
@@ -160,7 +163,14 @@ export default function Index() {
                                             setShowPermission(true);
                                         }
                                     }}
-                                    className={`flex-row items-center bg-surfaceElevated px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75`}
+                                    className={`flex-row items-center bg-surfaceElevated px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75 shadow-sm`}
+                                    style={{
+                                        elevation: 3,
+                                        shadowColor: "#000",
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowOpacity: 0.06,
+                                        shadowRadius: 8,
+                                    }}
                                 >
                                     <Ionicons
                                         name={!hasSelectedApps ? "apps-outline" : "shield-outline"}
@@ -199,9 +209,9 @@ export default function Index() {
                             >
                                 <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
                                 <Text className="text-text font-medium text-sm">
-                                    {engine.selectedApps.length} Apps blocked
+                                    {engine.selectedApps.length} {engine.selectedApps.length === 1 ? "app blocked" : "apps blocked"}
                                 </Text>
-                                <Ionicons name="chevron-down" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
+                                <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
                             </Pressable>
                         </View>
                     </Animated.View>

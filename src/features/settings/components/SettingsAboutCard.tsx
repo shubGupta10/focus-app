@@ -45,10 +45,19 @@ export function SettingsAboutCard() {
                 About & Support
             </Text>
 
-            <View className="bg-surfaceElevated rounded-3xl overflow-hidden py-2">
+            <View
+                className="bg-surfaceElevated border border-border rounded-3xl overflow-hidden py-2"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 10,
+                }}
+            >
                 <Pressable
                     onPress={() => router.push("/updates")}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-black dark:active:bg-white"
                 >
                     <View className="flex-row items-center">
                         <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">

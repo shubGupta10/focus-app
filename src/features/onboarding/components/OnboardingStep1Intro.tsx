@@ -12,14 +12,11 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
     return (
         <View className="flex-1 px-6 justify-between py-6">
             <View className="flex-1 justify-center">
-                <View className="w-14 h-14 rounded-2xl bg-accent/15 items-center justify-center mb-6">
-                    <Ionicons name="shield-checkmark" size={28} color={colors.accent} />
-                </View>
                 <Text className="text-text text-4xl font-black tracking-tight mb-3">
                     Welcome to Lockout
                 </Text>
                 <Text className="text-textSecondary text-base leading-relaxed mb-10">
-                    Intentional focus, zero distractions. Reclaim your attention through deliberate app guarding.
+                    Put up a wall between you and your distractions so you can stay locked into what matters.
                 </Text>
 
                 <View className="space-y-6">
@@ -28,21 +25,21 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
                             <Ionicons name="hourglass-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-text font-bold text-lg mb-1">Calm Sessions</Text>
+                            <Text className="text-text font-bold text-lg mb-1">Timed Focus & Strict Mode</Text>
                             <Text className="text-textSecondary text-sm leading-relaxed">
-                                Choose preset or custom timers with an optional Strict Mode to curb impulsive phone unlocks.
+                                Set a quick countdown or free-flow stopwatch. Turn on Strict Mode when you need zero loopholes.
                             </Text>
                         </View>
                     </View>
 
                     <View className="flex-row items-start mb-6">
                         <View className="w-10 h-10 rounded-xl bg-accent/10 items-center justify-center mr-4 mt-0.5">
-                            <Ionicons name="lock-closed-outline" size={22} color={colors.accent} />
+                            <Ionicons name="shield-checkmark-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-text font-bold text-lg mb-1">System-Level Guard</Text>
+                            <Text className="text-text font-bold text-lg mb-1">Instant App Shield</Text>
                             <Text className="text-textSecondary text-sm leading-relaxed">
-                                Distracting apps are gently intercepted the moment you attempt to open them.
+                                The moment you habitually open a distracting app, Lockout steps in and sends you back to focus.
                             </Text>
                         </View>
                     </View>
@@ -52,9 +49,9 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
                             <Ionicons name="finger-print-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-text font-bold text-lg mb-1">100% Private & Local</Text>
+                            <Text className="text-text font-bold text-lg mb-1">100% Offline & Private</Text>
                             <Text className="text-textSecondary text-sm leading-relaxed">
-                                No tracking, no external servers, and no user accounts. Your data never leaves your device.
+                                No sign-up, no ads, and no tracking. Your focus history and guarded apps stay private on your phone.
                             </Text>
                         </View>
                     </View>

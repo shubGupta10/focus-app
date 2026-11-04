@@ -17,7 +17,6 @@ import { initAnalytics, analytics } from "@/utils/analytics";
 initAnalytics();
 
 
-
 interface TextWithDefaultProps extends Function {
   defaultProps?: { allowFontScaling?: boolean; style?: any };
 }

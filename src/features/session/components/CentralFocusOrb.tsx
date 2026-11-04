@@ -183,131 +183,163 @@ export function CentralFocusOrb({
         <View style={{ width: containerSize, height: containerSize }} className="items-center justify-center">
             <View style={{ width: 340, height: 340, transform: [{ scale }] }} className="items-center justify-center">
                 <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                {orbAnimation && (() => {
-                    const OrbBg = getOrbBackground(
-                        orbAnimation.replace("animation_", "")
-                    );
-                    return (
-                        <OrbBg
-                            isActive={isActive}
-                            colorAccent={colorAccent}
-                            colorTrack={colorTrack}
-                            colorDotCenter={colorDotCenter}
-                            outerRadius={outerRadius}
-                            innerRadius={innerRadius}
-                            sessionProgress={sessionProgress}
-                            minuteProgress={minuteProgress}
-                        />
-                    )
-                })()}
-            </View>
-
-            {isActive && (
-                <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                    <Svg width="340" height="340" viewBox="0 0 340 340">
-                        <AnimatedCircle
-                            cx="170"
-                            cy="170"
-                            r={coreRadius + 3}
-                            stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
-                            strokeWidth="5"
-                            fill="none"
-                            strokeDasharray={2 * Math.PI * (coreRadius + 3)}
-                            strokeDashoffset={holdProgress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [2 * Math.PI * (coreRadius + 3), 0],
-                            })}
-                            strokeLinecap="round"
-                            transform="rotate(-90 170 170)"
-                        />
-                    </Svg>
+                    {orbAnimation && (() => {
+                        const OrbBg = getOrbBackground(
+                            orbAnimation.replace("animation_", "")
+                        );
+                        return (
+                            <OrbBg
+                                isActive={isActive}
+                                colorAccent={colorAccent}
+                                colorTrack={colorTrack}
+                                colorDotCenter={colorDotCenter}
+                                outerRadius={outerRadius}
+                                innerRadius={innerRadius}
+                                sessionProgress={sessionProgress}
+                                minuteProgress={minuteProgress}
+                            />
+                        )
+                    })()}
                 </View>
-            )}
 
-            {isActive ? (
-                <Animated.View
-                    style={{
-                        transform: [{ scale: breathAnim }],
-                    }}
-                >
+                {isActive && (
+                    <View className="absolute inset-0 items-center justify-center pointer-events-none">
+                        <Svg width="340" height="340" viewBox="0 0 340 340">
+                            <AnimatedCircle
+                                cx="170"
+                                cy="170"
+                                r={coreRadius + 3}
+                                stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
+                                strokeWidth="5"
+                                fill="none"
+                                strokeDasharray={2 * Math.PI * (coreRadius + 3)}
+                                strokeDashoffset={holdProgress.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [2 * Math.PI * (coreRadius + 3), 0],
+                                })}
+                                strokeLinecap="round"
+                                transform="rotate(-90 170 170)"
+                            />
+                        </Svg>
+                    </View>
+                )}
+
+                {isActive ? (
+                    <View className="items-center justify-center">
+                        <Animated.View
+                            style={{
+                                transform: [{ scale: breathAnim }],
+                            }}
+                        >
+                            <Pressable
+                                onPress={() => {
+                                    setShowHoldHint(true);
+                                    setTimeout(() => setShowHoldHint(false), 2200);
+                                }}
+                                onPressIn={handlePressIn}
+                                onPressOut={handlePressOut}
+                                className={`w-48 h-48 rounded-full items-center justify-center ${isHolding
+                                    ? "bg-destructiveMuted"
+                                    : "bg-surfaceElevated"
+                                    }`}
+                                style={{
+                                    shadowColor: "#000",
+                                    shadowOffset: { width: 0, height: 10 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 20,
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
+                            >
+                                <View className="flex-row items-center justify-center h-4 mb-2">
+                                    <Text
+                                        className={`font-black text-[12px] tracking-widest uppercase ${isStrict && skipsRemaining <= 0 ? "text-warning" : "text-destructive"
+                                            }`}
+                                    >
+                                        {isHolding
+                                            ? "HOLDING TO END..."
+                                            : showHoldHint
+                                                ? isStrict
+                                                    ? skipsRemaining <= 0
+                                                        ? "NO SKIPS LEFT"
+                                                        : "HOLD TO SKIP"
+                                                    : "HOLD TO END"
+                                                : ""}
+                                    </Text>
+                                </View>
+
+                                <Text
+                                    className="text-text font-black text-5xl tracking-tighter tabular-nums text-center"
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.75}
+                                    numberOfLines={1}
+                                >
+                                    {timeLeft}
+                                </Text>
+
+                                <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
+                                    {isInfinite ? "Active" : "Remaining"}
+                                </Text>
+                            </Pressable>
+                        </Animated.View>
+
+                        <View className="absolute inset-0 items-center justify-center pointer-events-none">
+                            <Svg width="340" height="340" viewBox="0 0 340 340">
+                                {isHolding && (
+                                    <Circle
+                                        cx="170"
+                                        cy="170"
+                                        r={104}
+                                        stroke={colors.border}
+                                        strokeWidth="6"
+                                        fill="none"
+                                        opacity={0.4}
+                                    />
+                                )}
+                                <AnimatedCircle
+                                    cx="170"
+                                    cy="170"
+                                    r={104}
+                                    stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
+                                    strokeWidth="6"
+                                    fill="none"
+                                    strokeDasharray={2 * Math.PI * 104}
+                                    strokeDashoffset={holdProgress.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [2 * Math.PI * 104, 0],
+                                    })}
+                                    strokeLinecap="round"
+                                    transform="rotate(-90 170 170)"
+                                />
+                            </Svg>
+                        </View>
+                    </View>
+                ) : (
                     <Pressable
                         onPress={() => {
-                            setShowHoldHint(true);
-                            setTimeout(() => setShowHoldHint(false), 2200);
+                            if (useAppStore.getState().hapticsEnabled) {
+                                try { Vibration.vibrate(12); } catch { }
+                            }
+                            onStartPress?.();
                         }}
-                        onPressIn={handlePressIn}
-                        onPressOut={handlePressOut}
-                        className={`w-48 h-48 rounded-full items-center justify-center ${isHolding
-                            ? "bg-destructiveMuted"
-                            : "bg-surfaceElevated"
-                            }`}
+                        className="w-44 h-44 rounded-full items-center justify-center active:opacity-85"
                         style={{
-                            shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 10 },
-                            shadowOpacity: 0.3,
-                            shadowRadius: 20,
-                            // Removed elevation to prevent Android octagon artifact
+                            backgroundColor: colorAccent,
+                            shadowColor: colorAccent,
+                            shadowOffset: { width: 0, height: 8 },
+                            shadowOpacity: 0.4,
+                            shadowRadius: 16,
+                            // elevation: 12 removed to prevent Android octagon artifact
                         }}
                         accessibilityRole="button"
-                        accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
+                        accessibilityLabel="Start focus session"
+                        accessibilityHint="Double tap to configure and begin a focus session"
                     >
-                        <View className="flex-row items-center justify-center h-4 mb-2">
-                            <Text
-                                className={`font-black text-[12px] tracking-widest uppercase ${isStrict && skipsRemaining <= 0 ? "text-warning" : "text-destructive"
-                                    }`}
-                            >
-                                {isHolding
-                                    ? "HOLDING TO END..."
-                                    : showHoldHint
-                                        ? isStrict
-                                            ? skipsRemaining <= 0
-                                                ? "NO SKIPS LEFT"
-                                                : "HOLD TO SKIP"
-                                            : "HOLD TO END"
-                                        : ""}
-                            </Text>
-                        </View>
-
-                        <Text
-                            className="text-text font-black text-5xl tracking-tighter tabular-nums text-center"
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.75}
-                            numberOfLines={1}
-                        >
-                            {timeLeft}
-                        </Text>
-
-                        <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
-                            {isInfinite ? "Active" : "Remaining"}
+                        <Text className="text-accentForeground font-black text-xl tracking-[0.25em] ml-1 uppercase">
+                            Start
                         </Text>
                     </Pressable>
-                </Animated.View>
-            ) : (
-                <Pressable
-                    onPress={() => {
-                        if (useAppStore.getState().hapticsEnabled) {
-                            try { Vibration.vibrate(12); } catch { }
-                        }
-                        onStartPress?.();
-                    }}
-                    className="w-44 h-44 rounded-full items-center justify-center active:opacity-85"
-                    style={{
-                        backgroundColor: colorAccent,
-                        shadowColor: colorAccent,
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.4,
-                        shadowRadius: 16,
-                        // elevation: 12 removed to prevent Android octagon artifact
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel="Start focus session"
-                    accessibilityHint="Double tap to configure and begin a focus session"
-                >
-                    <Text className="text-accentForeground font-black text-xl tracking-[0.25em] ml-1 uppercase">
-                        Start
-                    </Text>
-                </Pressable>
-            )}
+                )}
             </View>
         </View>
     );

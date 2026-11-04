@@ -9,7 +9,16 @@ export function SettingsDataManagementCard() {
                 Data Management
             </Text>
 
-            <View className="bg-surfaceElevated rounded-3xl overflow-hidden py-2">
+            <View
+                className="bg-surfaceElevated border border-border rounded-3xl overflow-hidden py-2"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 10,
+                }}
+            >
                 <Pressable
                     onPress={() => router.push("/data-management")}
                     className="flex-row items-center justify-between px-5 py-4 active:bg-background dark:active:bg-background"

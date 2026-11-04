@@ -28,7 +28,16 @@ export function SettingsPermissionsCard({
                 Device
             </Text>
 
-            <View className="bg-surfaceElevated rounded-3xl p-5">
+            <View
+                className="bg-surfaceElevated border border-border rounded-3xl p-5"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 10,
+                }}
+            >
                 <View className="flex-row items-center justify-between mb-3">
                     <Text className="text-text font-bold text-[16px]">System Permissions</Text>
                     <View className={`px-3 py-1.5 rounded-full ${allPermissionsGranted ? 'bg-success/10' : 'bg-warning/10'}`}>

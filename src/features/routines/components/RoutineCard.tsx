@@ -50,6 +50,13 @@ export function RoutineCardInner({
             onPress={onPress}
             className={`bg-surfaceElevated rounded-[24px] p-5 mb-3 ${isEnabled ? "" : "opacity-55"
                 } active:opacity-80 border border-border`}
+            style={{
+                elevation: isEnabled ? 2 : 0,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: isEnabled ? 0.06 : 0,
+                shadowRadius: 10,
+            }}
             accessibilityRole="button"
             accessibilityLabel={`Routine ${routine.name}`}
         >

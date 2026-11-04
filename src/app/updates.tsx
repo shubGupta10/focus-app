@@ -99,80 +99,91 @@ export default function UpdatesScreen() {
     };
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
-            <View className="flex-row items-center px-6 pt-5 pb-5 border-b border-border">
+            <View className="flex-row items-center px-6 pt-5 pb-3">
                 <Pressable
                     onPress={() => router.back()}
-                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
-                    <Ionicons name="chevron-back" size={24} color={colors.text} />
+                    <Ionicons name="chevron-back" size={20} color={colors.text} />
                 </Pressable>
-                <Text className="text-text text-3xl font-black tracking-tight">App Updates</Text>
+                <Text className="text-text text-2xl font-black tracking-tight">App Updates</Text>
             </View>
 
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 40 }}>
-                <Text className="text-textSecondary text-base leading-relaxed mb-6">
-                    Keep your app running smoothly with the latest features and bug fixes.
+                <Text className="text-textSecondary text-sm leading-relaxed mb-6 font-medium">
+                    Keep your app running smoothly with the latest features, improvements, and fixes.
                 </Text>
 
-                <View className="bg-surfaceElevated rounded-2xl overflow-hidden border border-border mb-6">
+                <View
+                    className="bg-surfaceElevated rounded-3xl overflow-hidden border border-border mb-6 shadow-sm"
+                    style={{
+                        elevation: 2,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 10,
+                    }}
+                >
                     <Pressable
                         onPress={checkForUpdates}
                         disabled={isChecking}
                         className="p-5 border-b border-border active:bg-surface"
                     >
-                        <View className="flex-row items-center justify-between mb-2">
+                        <View className="flex-row items-center justify-between mb-1.5">
                             <View className="flex-row items-center">
                                 {isChecking ? (
                                     <View style={{ marginRight: 12 }}>
-                                        <GlobalLoader color="#3b82f6" size="small" />
+                                        <GlobalLoader color={colors.accent} size="small" />
                                     </View>
                                 ) : (
                                     <Ionicons
-                                        name="cloud-download"
-                                        size={20}
-                                        color="#3b82f6"
+                                        name="cloud-download-outline"
+                                        size={22}
+                                        color={colors.accent}
                                         style={{ marginRight: 12 }}
                                     />
                                 )}
                                 <Text className="text-text font-bold text-base">
-                                    {isChecking ? "Checking for updates..." : "Check for Update (OTA)"}
+                                    {isChecking ? "Checking for updates..." : "Quick Update"}
                                 </Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
                         </View>
-                        <Text className="text-textSecondary text-sm ml-8">
-                            Seamlessly update the app's interface and logic over the air. No downloading required!
+                        <Text className="text-textSecondary text-xs leading-relaxed ml-9">
+                            Applies the latest interface improvements and fixes instantly without reinstalling.
                         </Text>
                     </Pressable>
 
                     <Pressable
                         onPress={handleFullUpdate}
+                        disabled={isFetchingRelease}
                         className="p-5 active:bg-surface"
                     >
-                        <View className="flex-row items-center justify-between mb-2">
+                        <View className="flex-row items-center justify-between mb-1.5">
                             <View className="flex-row items-center">
                                 {isFetchingRelease ? (
                                     <View style={{ marginRight: 12 }}>
-                                        <GlobalLoader color="#10b981" size="small" />
+                                        <GlobalLoader color={colors.accent} size="small" />
                                     </View>
                                 ) : (
                                     <Ionicons
                                         name="logo-github"
-                                        size={20}
-                                        color="#10b981"
+                                        size={22}
+                                        color={colors.accent}
                                         style={{ marginRight: 12 }}
                                     />
                                 )}
                                 <Text className="text-text font-bold text-base">
-                                    {isFetchingRelease ? "Finding update..." : "Full App Update (.apk)"}
+                                    {isFetchingRelease ? "Finding latest release..." : "Full App Release"}
                                 </Text>
                             </View>
-                            <Ionicons name="open-outline" size={20} color="#9ca3af" />
+                            <Ionicons name="open-outline" size={18} color={colors.textSecondary} />
                         </View>
-                        <Text className="text-textSecondary text-sm ml-8">
-                            Download the latest native app directly from GitHub. Use this for major engine overhauls.
+                        <Text className="text-textSecondary text-xs leading-relaxed ml-9">
+                            Download the newest standalone release directly from GitHub with all core system upgrades.
                         </Text>
                     </Pressable>
                 </View>

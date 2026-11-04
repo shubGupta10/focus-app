@@ -9,7 +9,7 @@ import { Alert, Linking, Pressable, ScrollView, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationScreen() {
-    const { colors, isDarkMode } = useTheme();
+    const { activeStyle, colors, isDarkMode } = useTheme();
     const { notifications, grouped, markAllAsRead, clearAll } = useNotification();
 
     useEffect(() => {
@@ -21,14 +21,13 @@ export default function NotificationScreen() {
 
         Alert.alert(
             "Clear Notifications",
-            "Are you sure you want to delete all notification?",
+            "Are you sure you want to clear all notifications?",
             [
                 { text: "Cancel", style: "cancel" },
                 { text: "Clear All", style: "destructive", onPress: () => clearAll() }
             ]
         );
     };
-
 
     const getBadgeConfig = (type: NotificationItem["type"]) => {
         switch (type) {
@@ -65,7 +64,14 @@ export default function NotificationScreen() {
         return (
             <View
                 key={item.id}
-                className="bg-surfaceElevated rounded-2xl p-4 mb-3 flex-row items-start"
+                className="bg-surfaceElevated border border-border rounded-2xl p-4 mb-3 flex-row items-start"
+                style={{
+                    elevation: 1.5,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 6,
+                }}
             >
                 <View
                     style={{ backgroundColor: badge.bg }}
@@ -124,14 +130,16 @@ export default function NotificationScreen() {
             </View>
         );
     };
+
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
             <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
                 <Pressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
@@ -140,8 +148,9 @@ export default function NotificationScreen() {
                 <Pressable
                     onPress={handleClearAll}
                     disabled={notifications.length === 0}
-                    className={`w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 ${notifications.length === 0 ? "opacity-30" : ""
+                    className={`w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm ${notifications.length === 0 ? "opacity-30" : ""
                         }`}
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Clear all notifications"
                 >

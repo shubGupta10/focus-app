@@ -66,12 +66,11 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                             ? `This will consume your ONLY emergency skip this week (${resetCountdownText}). Any future strict sessions this week cannot be ended early.`
                             : "Your focus session will end early and you won't earn the completion reward for this session."}
                     </Text>
-                    <View className="flex-row items-center gap-3">
-                        {/* Primary Action: Keep Focusing */}
+                    <View className="flex-col gap-3">
                         <AnimatedPressable
                             onPress={onClose}
                             hapticMode="light"
-                            className="flex-1 bg-accent py-3.5 rounded-xl items-center justify-center"
+                            className="w-full bg-accent py-3.5 rounded-2xl items-center justify-center"
                             accessibilityRole="button"
                             accessibilityLabel="Keep focusing"
                         >
@@ -83,29 +82,26 @@ export function EndSessionModal({ visible, onClose, onConfirmEnd, isStrict = fal
                             </Text>
                         </AnimatedPressable>
 
-                        {/* Destructive Action: End Session */}
                         <AnimatedPressable
                             onPress={isButtonDisabled ? undefined : onConfirmEnd}
                             disabled={isButtonDisabled}
                             hapticMode="heavy"
-                            className={`flex-1 py-3.5 rounded-xl items-center justify-center ${
-                                isButtonDisabled
-                                    ? "bg-surface opacity-50"
-                                    : "bg-destructive"
-                            }`}
+                            className={`w-full py-3.5 rounded-2xl items-center justify-center ${isButtonDisabled
+                                ? "bg-surface opacity-50 border border-border"
+                                : "bg-transparent border border-border"
+                                }`}
                             accessibilityRole="button"
                             accessibilityLabel={isStrict ? "Use Emergency Skip" : "End session"}
                         >
                             <Text
-                                className={`font-bold text-sm tracking-wide uppercase text-center ${
-                                    isButtonDisabled ? "text-textMuted" : "text-white"
-                                }`}
+                                className={`font-bold text-sm tracking-wide uppercase text-center ${isButtonDisabled ? "text-textMuted" : "text-destructive "
+                                    }`}
                                 numberOfLines={1}
                             >
                                 {isStrict
                                     ? isButtonDisabled
-                                        ? `Skip (${countdown}s)`
-                                        : "Emergency Skip"
+                                        ? `Emergency Skip (${countdown}s)`
+                                        : " Use Emergency Skip"
                                     : "End session"}
                             </Text>
                         </AnimatedPressable>

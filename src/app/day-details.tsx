@@ -36,7 +36,7 @@ export default function DayDetailsScreen() {
     const sessionCount = dayDetails?.sessions.length ?? 0;
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
             {/* Header */}
             <View className="flex-row items-center px-6 pt-5 pb-3">
                 <Pressable
@@ -56,8 +56,8 @@ export default function DayDetailsScreen() {
             </View>
 
             <ScrollView
-                className="flex-1 px-6"
-                contentContainerStyle={{ paddingBottom: 60, paddingTop: 8 }}
+                className="flex-1"
+                contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60, paddingTop: 8 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Day Summary Card */}
@@ -95,8 +95,8 @@ export default function DayDetailsScreen() {
                         {totalCoins > 0 ? (
                             <>
                                 <Text className="text-textSecondary font-medium text-sm mx-2">•</Text>
-                                <Text className="text-warning font-bold text-sm tabular-nums">
-                                    +{totalCoins} coins
+                                <Text className="text-warning font-bold text-base tabular-nums">
+                                    +{totalCoins} {totalCoins === 1 ? "coin" : "coins"}
                                 </Text>
                             </>
                         ) : null}
@@ -118,7 +118,7 @@ export default function DayDetailsScreen() {
                     <View>
                         {dayDetails.sessions.map((session: any, index: any) => {
                             const durationMins = Math.round(session.duration_seconds / 60);
-                            const durationLabel = durationMins < 1 ? "< 1 min" : `${durationMins} mins`;
+                            const durationLabel = durationMins < 1 ? "< 1 min" : `${durationMins} ${durationMins === 1 ? "min" : "mins"}`;
 
                             return (
                                 <View
@@ -140,7 +140,7 @@ export default function DayDetailsScreen() {
                                         </View>
 
                                         <Text className="text-warning font-bold text-sm tabular-nums">
-                                            +{session.coins_earned} coins
+                                            +{session.coins_earned} {session.coins_earned === 1 ? "coin" : "coins"}
                                         </Text>
                                     </View>
 

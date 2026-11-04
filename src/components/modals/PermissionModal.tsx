@@ -100,7 +100,7 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                         </TouchableOpacity>
                     </View>
                     <Text className="text-textSecondary text-sm leading-5 mb-5 font-medium">
-                        Focus needs a few permissions to block distractions and keep the timer running smoothly.
+                        Lockout needs a few permissions to block distractions and keep the timer running smoothly.
                     </Text>
 
                     <View className="gap-3">

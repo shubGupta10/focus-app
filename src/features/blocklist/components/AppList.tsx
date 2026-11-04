@@ -4,6 +4,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Pressable, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { AppListItem } from "./AppListItem";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AppListProps {
     installedAppsLength: number;
@@ -25,6 +26,7 @@ export function AppList({
     handleToggleApp
 }: AppListProps) {
     const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
 
     if (installedAppsLength === 0) {
         return (
@@ -70,7 +72,7 @@ export function AppList({
             data={filteredApps}
             keyExtractor={(app) => app.packageName}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 130 }}
+            contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 100 }}
             renderItem={({ item: app }) => (
                 <AppListItem
                     app={app}

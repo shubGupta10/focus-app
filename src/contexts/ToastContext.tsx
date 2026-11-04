@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ToastContextType {
     showToast: (message: string) => void;
@@ -11,6 +12,7 @@ const ToastContext = createContext<ToastContextType | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
     const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
     const [message, setMessage] = useState("");
     const [visible, setVisible] = useState(false);
     const opacity = useRef(new Animated.Value(0)).current;
@@ -65,7 +67,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <Animated.View
                     style={{
                         position: "absolute",
-                        bottom: 100,
+                        bottom: Math.max(insets.bottom, 16) + 104,
                         left: 24,
                         right: 24,
                         alignItems: "center",

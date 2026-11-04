@@ -1,6 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 // import { AllTimeStatsCard } from "../../features/stats/components/cards/AllTimeStatsCard";
 import { RecentInterceptionsCard } from "../../features/stats/components/cards/RecentInterceptionsCard";
 import { TodayFocusCard } from "../../features/stats/components/cards/TodayFocusCard";
@@ -8,6 +8,7 @@ import { WeeklyRhythmCard } from "../../features/stats/components/cards/WeeklyRh
 
 export default function ProgressTab() {
     const { activeStyle } = useTheme();
+    const insets = useSafeAreaInsets();
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
@@ -18,7 +19,7 @@ export default function ProgressTab() {
 
             <ScrollView
                 className="flex-1 px-6"
-                contentContainerStyle={{ paddingBottom: 130, paddingTop: 16 }}
+                contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 100, paddingTop: 16 }}
                 showsVerticalScrollIndicator={false}
             >
                 <TodayFocusCard />

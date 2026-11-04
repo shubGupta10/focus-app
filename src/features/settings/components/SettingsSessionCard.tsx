@@ -25,7 +25,16 @@ export function SettingsSessionCard() {
                 Session Preferences
             </Text>
 
-            <View className="bg-surfaceElevated rounded-3xl p-5">
+            <View
+                className="bg-surfaceElevated border border-border rounded-3xl p-5"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 10,
+                }}
+            >
                 <View className="mb-5">
                     <Text className="text-text font-bold text-[16px] mb-1">Default Timer</Text>
                     <Text className="text-textSecondary text-sm leading-5">

@@ -88,16 +88,10 @@ export function OnboardingStep2Apps({
 
             <View className="pt-3 flex-row gap-3">
                 <Pressable
-                    onPress={onSkip}
-                    className="flex-1 bg-surface border border-border py-4 rounded-full items-center justify-center active:opacity-80"
-                >
-                    <Text className="text-text font-bold text-[15px] tracking-wide">
-                        Skip
-                    </Text>
-                </Pressable>
-                <Pressable
                     onPress={onContinue}
-                    className="flex-1 bg-accent py-4 rounded-full items-center justify-center active:opacity-90"
+                    className="w-full bg-accent py-4 rounded-full items-center justify-center active:opacity-90"
+                    accessibilityRole="button"
+                    accessibilityLabel="Continue to permissions"
                 >
                     <Text className="text-accentForeground font-bold text-[15px] tracking-wide">
                         Continue

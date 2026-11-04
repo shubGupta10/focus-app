@@ -94,7 +94,16 @@ export function SettingNotificationCard() {
                 Notification & Sounds
             </Text>
 
-            <View className="bg-surfaceElevated rounded-3xl overflow-hidden">
+            <View
+                className="bg-surfaceElevated border border-border rounded-3xl overflow-hidden"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 10,
+                }}
+            >
                 <Pressable
                     onPress={() => handleHapticsToggle(!hapticsEnabled)}
                     className="flex-row items-center justify-between p-5 active:opacity-80"

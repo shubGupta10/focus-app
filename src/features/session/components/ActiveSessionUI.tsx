@@ -151,7 +151,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                         <View className="flex-row items-center justify-center">
                             <Text className={`${isSmallDevice ? "text-xl" : "text-2xl"} mr-2`}>🪙</Text>
                             <Text className={`text-text font-black ${isSmallDevice ? "text-base" : "text-xl"}`}>
-                                +{earnedCoins} coins earned
+                                +{earnedCoins} {earnedCoins === 1 ? "coin" : "coins"} earned
                             </Text>
                         </View>
                     )}

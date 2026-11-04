@@ -21,6 +21,13 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
             onPress={() => onToggle(app.packageName)}
             disabled={disabled}
             className={`flex-row justify-between items-center p-4 mb-2.5 bg-surfaceElevated rounded-[24px] ${disabled ? "opacity-50" : "active:opacity-80"}`}
+            style={{
+                elevation: 1,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.04,
+                shadowRadius: 4,
+            }}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
             accessibilityLabel={`${app.name}, ${isSelected ? "selected to block" : "not blocked"}`}

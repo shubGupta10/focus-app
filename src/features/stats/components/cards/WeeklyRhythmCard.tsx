@@ -18,7 +18,16 @@ export function WeeklyRhythmCard() {
     };
 
     return (
-        <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
+        <View
+            className="bg-surfaceElevated border border-border rounded-3xl p-6 mb-4"
+            style={{
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.06,
+                shadowRadius: 10,
+            }}
+        >
             <View className="flex-row justify-between items-baseline mb-14">
                 <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest">
                     Weekly Rhythm

@@ -80,8 +80,12 @@ export default function TabLayout() {
                     height: 72,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    elevation: 0,
-                    shadowOpacity: 0,
+                    elevation: 8,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 14,
+
                 },
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {

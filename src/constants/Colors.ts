@@ -1,23 +1,23 @@
 export const Colors = {
   light: {
-    background: '#F7F5F4',
-    surface: '#FFFFFF',
-    surfaceElevated: '#EFECEB',
-    text: '#1C1618',
-    textSecondary: '#5C5355',
-    textMuted: '#8A8082',
-    border: '#aea5a0',
-    icon: '#5C5355',
+    background: '#E5E8ED',
+    surface: '#EFF1F5',           // Distinct studio canvas (calm, visible depth, no glare)
+    surfaceElevated: '#FFFFFF',   // 100% crisp white for floating tab bar, cards & pills
+    text: '#111215',              // Deep rich charcoal for sharp text contrast
+    textSecondary: '#5B616E',     // Clean slate secondary text
+    textMuted: '#848A96',
+    border: '#DDE1E6',            // Clearly defined hairline border (stops elements from vanishing)
+    icon: '#5B616E',
     accent: '#A35265',
     accentForeground: '#FFFFFF',
     accentMuted: '#F5E8EB',
-    success: '#2D7D55',
-    successMuted: '#E8F5EE',
-    warning: '#92650E',
-    warningMuted: '#FBF3E2',
-    destructive: '#C03030',
-    destructiveMuted: '#FCEAEA',
-    scrim: 'rgba(28, 22, 24, 0.40)',
+    success: '#228A58',
+    successMuted: '#EAF7F0',
+    warning: '#B26A00',
+    warningMuted: '#FDF3E2',
+    destructive: '#D9383A',
+    destructiveMuted: '#FDEEEE',
+    scrim: 'rgba(18, 19, 22, 0.45)',
   },
   dark: {
     background: '#161517',

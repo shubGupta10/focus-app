@@ -1,13 +1,13 @@
 import { Pressable, Text, View } from "react-native";
 
 const DAYS = [
-    { label: "M", value: 1 },
-    { label: "T", value: 2 },
-    { label: "W", value: 3 },
-    { label: "T", value: 4 },
-    { label: "F", value: 5 },
-    { label: "S", value: 6 },
-    { label: "S", value: 7 }
+    { label: "Mo", value: 1 },
+    { label: "Tu", value: 2 },
+    { label: "We", value: 3 },
+    { label: "Th", value: 4 },
+    { label: "Fr", value: 5 },
+    { label: "Sa", value: 6 },
+    { label: "Su", value: 7 }
 ];
 
 interface RoutineDaySelectorProps {
@@ -41,7 +41,7 @@ export function RoutineDaySelector({
                                 {day.label}
                             </Text>
                         </Pressable>
-                    );
+                    );9
                 })}
             </View>
         </View>

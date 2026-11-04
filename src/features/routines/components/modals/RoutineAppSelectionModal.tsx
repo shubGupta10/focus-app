@@ -1,7 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { AppList } from "@/features/blocklist/components/AppList";
+import { BlocklistSearchHeader } from "@/features/blocklist/components/BlocklistSearchHeader";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FocusBlocker from "../../../../../modules/focus-blocker/src/FocusBlockerModule";
@@ -24,6 +25,7 @@ export function RoutineAppSelectionModal({
     const [installedApps, setInstalledApps] = useState<any[]>([]);
     const [selectedApps, setSelectedApps] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [filteredMode, setFilteredMode] = useState<"all" | "guarded">("all")
 
     useEffect(() => {
         if (visible) {
@@ -38,11 +40,23 @@ export function RoutineAppSelectionModal({
             })
         } else {
             setSearchQuery("");
+            setFilteredMode("all");
         }
     }, [visible, initialSelectedApps]);
 
 
-    const filteredApps = installedApps.filter((app) => app.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filteredApps = useMemo(() => {
+        return installedApps.filter((app) => {
+            const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+            if (!matchesSearch) return false;
+
+            if (filteredMode === "guarded") {
+                return selectedApps.includes(app.packageName);
+            }
+            return true;
+        })
+    }, [installedApps, searchQuery, filteredMode, selectedApps]);
 
 
     const handleToggleApp = (packageName: string) => {
@@ -66,6 +80,8 @@ export function RoutineAppSelectionModal({
                     </Text>
                     <Pressable onPress={() => onSave(selectedApps)}
                         className="bg-accent px-5 py-2 rounded-full active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel="Save app selections"
                     >
                         <Text className="text-accentForeground font-bold text-xs uppercase tracking-wider">
                             Save
@@ -75,9 +91,18 @@ export function RoutineAppSelectionModal({
 
                 <View className="px-6 pb-2">
                     <Text className="text-textSecondary text-sm">
-                        {selectedApps.length} apps selected to be blocked.
+                        {selectedApps.length} {selectedApps.length === 1 ? "app" : "apps"} selected to be blocked.
                     </Text>
                 </View>
+
+                <BlocklistSearchHeader
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    filterMode={filteredMode}
+                    setFilterMode={setFilteredMode}
+                    installedAppsCount={installedApps.length}
+                    selectedAppsCount={selectedApps.length}
+                />
 
                 <View className="flex-1 px-6">
                     <AppList
