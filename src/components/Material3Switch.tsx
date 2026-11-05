@@ -45,6 +45,8 @@ export function Material3Switch({ value, onValueChange, disabled }: Material3Swi
     return (
         <Pressable
             onPress={() => !disabled && onValueChange(!value)}
+            accessibilityRole='switch'
+            accessibilityState={{ checked: value, disabled: !!disabled }}
             style={[{ width: 52, height: 32, justifyContent: 'center' }, disabled ? { opacity: 0.5 } : {}]}
         >
             <Animated.View

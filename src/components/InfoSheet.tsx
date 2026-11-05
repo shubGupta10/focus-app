@@ -1,14 +1,18 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ReactNode, useState, useEffect, useRef } from "react";
-import { Modal, Pressable, Text, View, Animated } from "react-native";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { Animated, Modal, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface InfoSheetProps {
     title: string;
     description: string;
-    children?: ReactNode
+    children?: ReactNode;
 }
 
 export function InfoSheet({ title, description, children }: InfoSheetProps) {
+    const { colors, activeStyle } = useTheme();
+    const insets = useSafeAreaInsets();
     const [isVisible, setIsVisible] = useState(false);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -17,8 +21,8 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
     useEffect(() => {
         if (isVisible) {
             Animated.parallel([
-                Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-                Animated.spring(slideAnim, { toValue: 0, friction: 8, useNativeDriver: true })
+                Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+                Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 65, useNativeDriver: true })
             ]).start();
         }
     }, [isVisible]);
@@ -34,45 +38,54 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
         <>
             <Pressable
                 onPress={() => setIsVisible(true)}
-                className="w-8 h-8 rounded-full bg-surfaceElevated items-center justify-center border border-border active:opacity-70"
+                className="w-8 h-8 rounded-full bg-surfaceElevated items-center justify-center border border-border active:opacity-70 shadow-sm"
+                style={{ elevation: 1 }}
+                accessibilityRole="button"
+                accessibilityLabel={`More information about ${title}`}
             >
-                <Ionicons name="information-circle-outline" size={18} color="#8A8082" />
+                <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
             </Pressable>
 
-
-            <Modal transparent={true} visible={isVisible} animationType="none">
+            <Modal transparent={true} visible={isVisible} animationType="none" onRequestClose={closeSheet}>
                 <View className="flex-1 justify-end">
-
-
+                    {/* Standard Scrim Backdrop */}
                     <Animated.View
-                        style={{ opacity: fadeAnim }}
-                        className="absolute top-0 bottom-0 left-0 right-0 bg-scrim"
+                        style={{ opacity: fadeAnim, backgroundColor: colors.scrim }}
+                        className="absolute inset-0"
                     >
                         <Pressable className="flex-1" onPress={closeSheet} />
                     </Animated.View>
 
-
+                    {/* Bottom Sheet Card */}
                     <Animated.View
-                        style={{ transform: [{ translateY: slideAnim }] }}
-                        className="bg-surface rounded-t-[32px] p-6 pb-10 shadow-lg mt-24"
+                        style={[
+                            {
+                                transform: [{ translateY: slideAnim }],
+                                paddingBottom: Math.max(insets.bottom + 16, 28)
+                            },
+                            activeStyle
+                        ]}
+                        className="bg-surfaceElevated rounded-t-[32px] border-t border-border p-6 shadow-2xl mt-24"
                     >
+                        {/* Drag / Pill Handle */}
+                        <View className="w-10 h-1 bg-border rounded-full self-center mb-6" />
 
-                        <View className="w-12 h-1.5 bg-surfaceElevated rounded-full self-center mb-6" />
-
-                        <Text className="text-text font-black text-2xl mb-5">{title}</Text>
-                        <Text className="text-textSecondary text-base leading-relaxed mb-6">{description}</Text>
+                        <Text className="text-text font-black text-2xl mb-3 tracking-tight">{title}</Text>
+                        <Text className="text-textSecondary text-sm leading-relaxed mb-6 font-medium">{description}</Text>
 
                         {children}
 
                         <Pressable
                             onPress={closeSheet}
-                            className="mt-4 bg-accent py-4 rounded-full items-center active:opacity-80 border border-border"
+                            className="mt-2 bg-accent py-4 rounded-full items-center active:opacity-85"
+                            accessibilityRole="button"
+                            accessibilityLabel="Dismiss sheet"
                         >
-                            <Text className="text-accentForeground  font-bold text-base">Got it</Text>
+                            <Text className="text-accentForeground font-bold text-base uppercase tracking-wider">Got it</Text>
                         </Pressable>
                     </Animated.View>
                 </View>
             </Modal>
         </>
-    )
+    );
 }

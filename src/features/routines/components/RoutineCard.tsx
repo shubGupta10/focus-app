@@ -66,8 +66,8 @@ export function RoutineCardInner({
                         {routine.name}
                     </Text>
                     {Boolean(routine.is_strict) && (
-                        <View className="px-2 py-0.5 rounded-md">
-                            <Text className="text-accent text-[10px] font-bold uppercase">
+                        <View className="bg-accent/15 px-2 py-0.5 rounded-md">
+                            <Text className="text-accent text-[10px] font-bold uppercase tracking-wider">
                                 Strict
                             </Text>
                         </View>
@@ -98,16 +98,16 @@ export function RoutineCardInner({
                                 >
                                     <Image
                                         source={{ uri: `data:image/png;base64,${app.icon}` }}
-                                        className="w-4 h-4"
+                                        className="w-full h-full rounded-full"
                                     />
                                 </View>
                             ))}
                             {extraCount > 0 && (
                                 <View
-                                    className="w-6 h-6 rounded-full bg-surfaceMuted border border-surfaceElevated items-center justify-center"
+                                    className="w-6 h-6 rounded-full bg-surface border border-surfaceElevated items-center justify-center"
                                     style={{ marginLeft: -8, zIndex: 0 }}
                                 >
-                                    <Text className="text-text font-bold" style={{ fontSize: 9 }}>
+                                    <Text className="text-textSecondary font-bold" style={{ fontSize: 9 }}>
                                         +{extraCount}
                                     </Text>
                                 </View>

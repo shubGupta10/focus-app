@@ -12,6 +12,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { addNotification } from "@/hooks/useNotifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppStore } from "@/store/useAppStore";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export function useSessionController() {
     const db = useSQLiteContext();
@@ -19,6 +20,7 @@ export function useSessionController() {
     const { savedCompletedSession, todayStats, refreshStats } = useUserStats();
     const { skipsRemaining, resetCountdownText, useEmergencySkip } = useStrictMode();
     const { getSetting } = useSettings();
+    const { allPermissionsGranted, checkPermissions } = usePermissions();
 
     const [showPermission, setShowPermission] = useState(false);
     const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
@@ -227,7 +229,7 @@ export function useSessionController() {
         }
     };
 
-    const hasAllPermissions = engine.hasUsage && engine.hasOverlay && engine.hasBattery;
+    const hasAllPermissions = allPermissionsGranted;
     const hasSelectedApps = engine.selectedApps.length > 0;
 
     const handleFocusPress = () => {
@@ -256,8 +258,7 @@ export function useSessionController() {
             return;
         }
 
-        engine.checkPermissions();
-        if (!engine.hasUsage || !engine.hasOverlay || !engine.hasBattery) {
+        if (!allPermissionsGranted) {
             setShowPermission(true);
             return;
         }
@@ -267,8 +268,8 @@ export function useSessionController() {
 
     const handleClosePermissionModal = () => {
         setShowPermission(false);
-        engine.checkPermissions();
-        if (hasSelectedApps && engine.hasUsage && engine.hasOverlay && engine.hasBattery) {
+        checkPermissions();
+        if (hasSelectedApps && allPermissionsGranted) {
             setIsTimerModalVisible(true);
         }
     };

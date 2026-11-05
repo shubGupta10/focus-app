@@ -15,17 +15,7 @@ import { SettingsDataManagementCard } from "@/features/settings/components/Setti
 
 export default function SettingsTab() {
     const { activeStyle, colors } = useTheme();
-    const {
-        permissionModalVisible,
-        setPermissionModalVisible,
-        hasUsage,
-        hasOverlay,
-        hasBattery,
-        allPermissionsGranted,
-        resetAllData,
-        hasNotification,
-        requestNotification,
-    } = useSettingsController();
+    const { resetAllData } = useSettingsController();
 
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
@@ -48,16 +38,7 @@ export default function SettingsTab() {
                 <SettingsSessionCard />
                 <SettingNotificationCard />
 
-                <SettingsPermissionsCard
-                    allPermissionsGranted={allPermissionsGranted}
-                    hasUsage={hasUsage}
-                    hasOverlay={hasOverlay}
-                    hasBattery={hasBattery}
-                    hasNotification={hasNotification}
-                    requestNotification={requestNotification}
-                    permissionModalVisible={permissionModalVisible}
-                    setPermissionModalVisible={setPermissionModalVisible}
-                />
+                <SettingsPermissionsCard />
 
                 <SettingsNavigationCard />
 

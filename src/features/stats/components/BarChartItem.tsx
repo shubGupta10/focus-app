@@ -45,12 +45,17 @@ export function BarChartItem({
             accessibilityRole={onPress ? "button" : "text"}
         >
             <View className="h-28 w-full items-center justify-end">
+                {/* Background Track / Capsule */}
+                <View
+                    className="w-full max-w-[20px] h-full rounded-full bg-surface absolute bottom-0"
+                    style={{ opacity: 0.55 }}
+                />
 
                 <Animated.View
                     className="w-full max-w-[20px] rounded-full absolute bottom-0"
                     style={[
                         animatedStyle,
-                        { opacity: isToday ? 1 : 0.55 }
+                        { opacity: isToday ? 1 : 0.65 }
                     ]}
                 />
 

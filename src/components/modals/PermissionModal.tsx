@@ -4,6 +4,7 @@ import { cssInterop } from "nativewind";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import FocusBlocker from "../../../modules/focus-blocker/src/FocusBlockerModule";
 import { useTheme } from "../../contexts/ThemeContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 cssInterop(Ionicons, {
     className: {
@@ -17,9 +18,9 @@ cssInterop(Ionicons, {
 interface PermissionModalProps {
     visible: boolean;
     onClose: () => void;
-    hasUsage: boolean;
-    hasOverlay: boolean;
-    hasBattery: boolean;
+    hasUsage?: boolean;
+    hasOverlay?: boolean;
+    hasBattery?: boolean;
     hasNotification?: boolean;
     requestNotification?: () => void;
 }
@@ -54,7 +55,6 @@ export function PermissionRow({
             <View className="flex-1 mr-3">
                 <View className="flex-row items-center mb-0.5">
                     <Text className="text-text font-bold text-base mr-2">{label}</Text>
-                    {/* P2: ✓ / → instead of ● ● — not color alone */}
                     <Text className={`text-[11px] font-bold ${isGranted ? 'text-success' : 'text-warning'}`}>
                         {isGranted ? "✓ Granted" : "→ Setup"}
                     </Text>
@@ -71,8 +71,24 @@ export function PermissionRow({
     );
 }
 
-export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBattery, hasNotification, requestNotification }: PermissionModalProps) {
+export function PermissionModal({
+    visible,
+    onClose,
+    hasUsage: propHasUsage,
+    hasOverlay: propHasOverlay,
+    hasBattery: propHasBattery,
+    hasNotification: propHasNotification,
+    requestNotification: propRequestNotification,
+}: PermissionModalProps) {
     const { colors, isDarkMode } = useTheme();
+    const permissions = usePermissions();
+
+    const hasUsage = propHasUsage ?? permissions.hasUsage;
+    const hasOverlay = propHasOverlay ?? permissions.hasOverlay;
+    const hasBattery = propHasBattery ?? permissions.hasBattery;
+    const hasNotification = propHasNotification ?? permissions.hasNotification;
+    const requestNotification = propRequestNotification ?? permissions.requestNotification;
+
     return (
         <Modal visible={visible} transparent animationType="fade">
             <BlurView
@@ -128,16 +144,14 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                             accessibilityLabel="Ignore Battery Optimization permission"
                             accessibilityHint="Opens system settings to disable battery optimization"
                         />
-                        {hasNotification !== undefined && requestNotification && (
-                            <PermissionRow
-                                label="4. Notifications"
-                                description="To alert you when a session ends"
-                                isGranted={hasNotification}
-                                onRequest={requestNotification}
-                                accessibilityLabel="Notifications permission"
-                                accessibilityHint="Prompts to allow notifications"
-                            />
-                        )}
+                        <PermissionRow
+                            label="4. Notifications"
+                            description="To alert you when a session ends"
+                            isGranted={hasNotification}
+                            onRequest={requestNotification}
+                            accessibilityLabel="Notifications permission"
+                            accessibilityHint="Prompts to allow notifications"
+                        />
                     </View>
 
                     <TouchableOpacity
@@ -151,5 +165,5 @@ export function PermissionModal({ visible, onClose, hasUsage, hasOverlay, hasBat
                 </View>
             </BlurView>
         </Modal>
-    )
+    );
 }

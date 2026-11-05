@@ -1,27 +1,31 @@
 import { PermissionModal } from "@/components/modals/PermissionModal";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 interface SettingsPermissionsCardProps {
-    allPermissionsGranted: boolean;
-    hasUsage: boolean;
-    hasOverlay: boolean;
-    hasBattery: boolean;
-    hasNotification: boolean;
-    requestNotification: () => void;
-    permissionModalVisible: boolean;
-    setPermissionModalVisible: (visible: boolean) => void;
+    allPermissionsGranted?: boolean;
+    hasUsage?: boolean;
+    hasOverlay?: boolean;
+    hasBattery?: boolean;
+    hasNotification?: boolean;
+    requestNotification?: () => void;
+    permissionModalVisible?: boolean;
+    setPermissionModalVisible?: (visible: boolean) => void;
 }
 
 export function SettingsPermissionsCard({
-    allPermissionsGranted,
-    hasUsage,
-    hasOverlay,
-    hasBattery,
-    hasNotification,
-    requestNotification,
-    permissionModalVisible,
-    setPermissionModalVisible
-}: SettingsPermissionsCardProps) {
+    allPermissionsGranted: propAllGranted,
+    permissionModalVisible: propVisible,
+    setPermissionModalVisible: propSetVisible,
+}: SettingsPermissionsCardProps = {}) {
+    const [internalVisible, setInternalVisible] = useState(false);
+    const { allPermissionsGranted: hookAllGranted } = usePermissions();
+
+    const isVisible = propVisible ?? internalVisible;
+    const setVisible = propSetVisible ?? setInternalVisible;
+    const allPermissionsGranted = propAllGranted ?? hookAllGranted;
+
     return (
         <View className="px-6 mb-6">
             <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
@@ -52,7 +56,7 @@ export function SettingsPermissionsCard({
                 </Text>
 
                 <Pressable
-                    onPress={() => setPermissionModalVisible(true)}
+                    onPress={() => setVisible(true)}
                     className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
                 >
                     <Text className="text-accentForeground font-bold text-[14px] tracking-wide">
@@ -62,13 +66,8 @@ export function SettingsPermissionsCard({
             </View>
 
             <PermissionModal
-                visible={permissionModalVisible}
-                onClose={() => setPermissionModalVisible(false)}
-                hasUsage={hasUsage}
-                hasOverlay={hasOverlay}
-                hasBattery={hasBattery}
-                hasNotification={hasNotification}
-                requestNotification={requestNotification}
+                visible={isVisible}
+                onClose={() => setVisible(false)}
             />
         </View>
     );

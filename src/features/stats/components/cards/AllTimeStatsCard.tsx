@@ -7,7 +7,7 @@ export function AllTimeStatsCard() {
     const { hours: allTimeHours, minutes: allTimeMinutes } = secondsToHoursAndMinutes(stats.total_focus_seconds);
 
     return (
-        <View className="bg-surfaceElevated rounded-3xl p-6 mb-4">
+        <View className="bg-surfaceElevated rounded-3xl p-6 mb-4 border border-border" style={{ elevation: 2 }}>
             <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-6">
                 All-Time Stats
             </Text>

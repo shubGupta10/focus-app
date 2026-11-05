@@ -57,7 +57,7 @@ export function SettingsAboutCard() {
             >
                 <Pressable
                     onPress={() => router.push("/updates")}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black dark:active:bg-white"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface dark:active:bg-surface"
                 >
                     <View className="flex-row items-center">
                         <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">

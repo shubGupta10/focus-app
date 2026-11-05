@@ -24,19 +24,20 @@ export default function ShopAnimationsScreen() {
     const allAnimations = catalog.filter(item => item.type === "animation");
 
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <StatusBar style={isDarkMode ? "light" : 'dark'} />
 
             <View className="flex-row items-center justify-between px-6 py-4">
                 <Pressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center border border-border shadow-sm active:opacity-70"
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
                     <Ionicons name="arrow-back" size={20} color={colors.text} />
                 </Pressable>
-                <View className="flex-row items-center bg-surfaceElevated px-3 py-1.5 rounded-full">
+                <View className="flex-row items-center bg-surfaceElevated px-3 py-1.5 rounded-full border border-border shadow-sm" style={{ elevation: 2 }}>
                     <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
                     <Text className="text-text font-bold text-base">{totalCoins}</Text>
                 </View>

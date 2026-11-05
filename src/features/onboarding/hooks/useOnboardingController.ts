@@ -1,46 +1,17 @@
 import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { AppState, PermissionsAndroid, Platform } from "react-native";
 
 export function useOnboardingController() {
     const engine = useFocusEngine();
     const { setSetting } = useSettings();
+    const permissions = usePermissions();
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSet, setSelectedSet] = useState<Set<string>>(new Set(engine.selectedApps));
-
-    const [hasNotification, setHasNotification] = useState(true);
-
-    const checkExtraPermissions = async () => {
-        if (Platform.OS === 'android' && Platform.Version >= 33) {
-            const status = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-            setHasNotification(status);
-        }
-    };
-
-    const requestNotification = async () => {
-        if (Platform.OS === 'android' && Platform.Version >= 33) {
-            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-            setHasNotification(granted === PermissionsAndroid.RESULTS.GRANTED);
-        }
-    };
-
-    useEffect(() => {
-        if (step === 3) {
-            engine.checkPermissions();
-            checkExtraPermissions();
-            const subscription = AppState.addEventListener("change", (state) => {
-                if (state === "active") {
-                    engine.checkPermissions();
-                    checkExtraPermissions();
-                }
-            })
-            return () => subscription.remove();
-        }
-    }, [step])
 
     useEffect(() => {
         if (engine.selectedApps.length > 0 && selectedSet.size === 0) {
@@ -60,21 +31,25 @@ export function useOnboardingController() {
     }, [engine.installedApps, searchQuery]);
 
     const toggleAppSelection = (packageName: string) => {
-        setSelectedSet((prev) => {
-            const next = new Set(prev);
-            if (next.has(packageName)) {
-                next.delete(packageName);
-            } else {
-                next.add(packageName);
-            }
-            return next;
-        });
+        const next = new Set(selectedSet);
+        if (next.has(packageName)) {
+            next.delete(packageName);
+        } else {
+            next.add(packageName);
+        }
+        setSelectedSet(next);
     };
 
     const handleSaveAppsAndContinue = async () => {
-        for (const pkg of selectedSet) {
-            if (!engine.selectedApps.includes(pkg)) {
-                await engine.toggleApp(pkg);
+        const toSave = Array.from(selectedSet);
+        for (const app of engine.selectedApps) {
+            if (!selectedSet.has(app)) {
+                await engine.toggleApp(app);
+            }
+        }
+        for (const app of toSave) {
+            if (!engine.selectedApps.includes(app)) {
+                await engine.toggleApp(app);
             }
         }
         setStep(3);
@@ -84,8 +59,6 @@ export function useOnboardingController() {
         await setSetting("has_completed_onboarding", "true");
         router.replace("/(tabs)");
     };
-
-    const allPermissionsGranted = engine.hasUsage && engine.hasOverlay && engine.hasBattery && hasNotification;
 
     return {
         engine,
@@ -98,8 +71,11 @@ export function useOnboardingController() {
         toggleAppSelection,
         handleSaveAppsAndContinue,
         handleCompleteOnboarding,
-        allPermissionsGranted,
-        hasNotification,
-        requestNotification
+        allPermissionsGranted: permissions.allPermissionsGranted,
+        hasUsage: permissions.hasUsage,
+        hasOverlay: permissions.hasOverlay,
+        hasBattery: permissions.hasBattery,
+        hasNotification: permissions.hasNotification,
+        requestNotification: permissions.requestNotification,
     };
 }

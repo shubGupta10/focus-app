@@ -9,7 +9,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
-import { Text, TextInput, Alert } from "react-native";
+import { Text, TextInput, Alert, useColorScheme } from "react-native";
 import "../global.css";
 import * as Updates from "expo-updates"
 import { initAnalytics, analytics } from "@/utils/analytics";
@@ -35,6 +35,9 @@ SplashScreen.preventAutoHideAsync();
 
 function Layout() {
   const { isUpdatePending } = Updates.useUpdates();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const rootBgColor = isDark ? "#161517" : "#EFF1F5";
 
   useEffect(() => {
     analytics.track("app_started");
@@ -98,7 +101,7 @@ function Layout() {
               headerShown: false,
               animation: 'default',
               contentStyle: {
-                backgroundColor: "#161517"
+                backgroundColor: rootBgColor
               }
             }}
             >

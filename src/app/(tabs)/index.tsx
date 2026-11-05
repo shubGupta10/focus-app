@@ -107,14 +107,16 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/notifications")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
                             style={{ elevation: 2 }}
+                            accessibilityRole="button"
+                            accessibilityLabel="Open Notifications"
                         >
                             <Ionicons name="notifications-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
 
                             {unreadCount > 0 && (
-                                <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 items-center justify-center px-1 border-2 border-surface">
-                                    <Text className="text-white text-[10px] font-black leading-none">
+                                <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-destructive items-center justify-center px-1 border-2 border-surfaceElevated">
+                                    <Text className="text-accentForeground text-[10px] font-black leading-none">
                                         {unreadCount > 9 ? "9+" : unreadCount}
                                     </Text>
                                 </View>
@@ -123,7 +125,7 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/shop")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Shop"
@@ -133,7 +135,7 @@ export default function Index() {
 
                         <Pressable
                             onPress={() => router.push("/settings")}
-                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 shadow-sm`}
+                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Settings"
@@ -163,7 +165,7 @@ export default function Index() {
                                             setShowPermission(true);
                                         }
                                     }}
-                                    className={`flex-row items-center bg-surfaceElevated px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75 shadow-sm`}
+                                    className={`flex-row items-center bg-surfaceElevated border border-border px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75 shadow-sm`}
                                     style={{
                                         elevation: 3,
                                         shadowColor: "#000",
@@ -188,7 +190,7 @@ export default function Index() {
                             <View className={`items-center ${isSmallDevice ? "mt-2 mb-1" : "mt-6 mb-2"}`}>
                                 <Text className={`text-text font-black ${isSmallDevice ? "text-xl" : "text-2xl"} tracking-tight mb-1`}>{greeting}</Text>
                                 <Text className={`text-textSecondary ${isSmallDevice ? "text-[13px]" : "text-[15px]"} font-medium`}>
-                                    <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> sessions
+                                    <Text className="text-accent font-bold">{todayTimeString}</Text> focused today · <Text className="text-accent font-bold">{todayStats.today_sessions}</Text> {todayStats.today_sessions === 1 ? "session" : "sessions"}
                                 </Text>
                             </View>
                         )}
@@ -246,9 +248,6 @@ export default function Index() {
             <PermissionModal
                 visible={showPermission}
                 onClose={handleClosePermissionModal}
-                hasUsage={engine.hasUsage}
-                hasOverlay={engine.hasOverlay}
-                hasBattery={engine.hasBattery}
             />
 
             <SessionResultModal

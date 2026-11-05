@@ -41,7 +41,8 @@ export default function DayDetailsScreen() {
             <View className="flex-row items-center px-6 pt-5 pb-3">
                 <Pressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-4"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-4 border border-border shadow-sm"
+                    style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
@@ -61,7 +62,7 @@ export default function DayDetailsScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Day Summary Card */}
-                <View className="bg-surfaceElevated rounded-3xl p-6 mb-5">
+                <View className="bg-surfaceElevated border border-border rounded-3xl p-6 mb-5 shadow-sm" style={{ elevation: 2 }}>
                     <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-3">
                         Total Focus Time
                     </Text>
@@ -123,7 +124,8 @@ export default function DayDetailsScreen() {
                             return (
                                 <View
                                     key={session.id}
-                                    className="bg-surfaceElevated rounded-2xl p-5 mb-3"
+                                    className="bg-surfaceElevated border border-border rounded-2xl p-5 mb-3 shadow-sm"
+                                    style={{ elevation: 1 }}
                                 >
                                     <View className="flex-row items-center justify-between mb-2">
                                         <View className="flex-row items-center">

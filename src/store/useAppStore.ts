@@ -44,6 +44,7 @@ interface AppState {
     hasUsage: boolean;
     hasOverlay: boolean;
     hasBattery: boolean;
+    hasNotification: boolean;
 
     setEngineState: (state: Partial<AppState>) => void;
 
@@ -188,6 +189,7 @@ export const useAppStore = create<AppState>((set) => ({
     hasUsage: false,
     hasOverlay: false,
     hasBattery: false,
+    hasNotification: true,
 
     setEngineState: (newState) => set((state) => ({ ...state, ...newState })),
 }));

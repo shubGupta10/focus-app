@@ -8,7 +8,7 @@ export function StreakAndBlockedCard() {
 
     return (
         <View className="flex-row items-stretch mb-4" style={{ gap: 16 }}>
-            <View className="flex-1 bg-surfaceElevated rounded-3xl p-6">
+            <View className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-6 shadow-sm" style={{ elevation: 2 }}>
                 <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-3">
                     Day Streak
                 </Text>
@@ -20,7 +20,7 @@ export function StreakAndBlockedCard() {
                 </Text>
             </View>
 
-            <View className="flex-1 bg-surfaceElevated rounded-3xl p-6">
+            <View className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-6 shadow-sm" style={{ elevation: 2 }}>
                 <Text className="text-textSecondary font-medium text-[11px] uppercase tracking-widest mb-3">
                     Apps Blocked
                 </Text>
