@@ -13,6 +13,8 @@ import { addNotification } from "@/hooks/useNotifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppStore } from "@/store/useAppStore";
 import { usePermissions } from "@/hooks/usePermissions";
+import { analytics } from "@/utils/analytics";
+
 
 export function useSessionController() {
     const db = useSQLiteContext();
@@ -91,8 +93,13 @@ export function useSessionController() {
                 }
 
                 const { earnedCoins } = await savedCompletedSession(durationSeconds, wasStrict, endTimeMs);
-
                 const minutes = Math.max(1, Math.floor(durationSeconds / 60));
+
+                analytics.track("session_completed", {
+                    duration_minutes: minutes,
+                    is_strict: wasStrict,
+                    coins_earned: earnedCoins,
+                });
 
                 await addNotification(db, {
                     id: `session_${endTimeMs || Date.now()}`,
@@ -204,6 +211,16 @@ export function useSessionController() {
                     if (wasStrict) {
                         await useEmergencySkip();
                     }
+
+                    const elaspedMinutes = Math.floor(durationSeconds / 60);
+                    const targetMinutes = engine.sessionEndTime && engine.sessionStartTime ? Math.round((engine.sessionEndTime - engine.sessionStartTime) / 60000) : 0;
+
+                    analytics.track("session_cancelled", {
+                        elapsed_minutes: elaspedMinutes,
+                        target_minutes: targetMinutes,
+                        is_strict: wasStrict,
+                        reason: wasStrict ? "emergency_skip" : "hold_to_cancel",
+                    })
 
                     setSessionResult({
                         type: "canceled",

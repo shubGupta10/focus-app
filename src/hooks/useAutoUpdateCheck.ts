@@ -12,20 +12,56 @@ export type AppNotification = {
     downloadUrl?: string;
 };
 
+export type WhatsNewData = {
+    version: string;
+    title: string;
+    body: string;
+} | null;
+
+
 export function useAutoUpdateCheck() {
     const db = useSQLiteContext();
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [hasUnread, setHasUnread] = useState(false);
+    const [whatsNew, setWhatsNew] = useState<WhatsNewData>(null);
+
+    const dismissWhatsNew = async () => {
+        setWhatsNew(null);
+        const currentVersion = Constants.expoConfig?.version;
+        if (currentVersion) {
+            await AsyncStorage.setItem("lastSeenVersion", currentVersion);
+        }
+    };
 
     useEffect(() => {
         const checkForUpdates = async () => {
             if (__DEV__) return;
-            const currentVersion = Constants.expoConfig?.version!;
+            const currentVersion = Constants.expoConfig?.version ?? "1.0.0";
             let newNotifications: AppNotification[] = [];
 
             try {
                 const lastSeenVersion = await AsyncStorage.getItem("lastSeenVersion");
-                if (lastSeenVersion && lastSeenVersion !== currentVersion) {
+
+                if (!lastSeenVersion) {
+                    await AsyncStorage.setItem("lastSeenVersion", currentVersion);
+                } else if (lastSeenVersion !== currentVersion) {
+                    try {
+                        let response = await fetch(`https://api.github.com/repos/shubGupta10/focus-app/releases/tags/v${currentVersion}`);
+                        if (!response.ok) {
+                            response = await fetch(`https://api.github.com/repos/shubGupta10/focus-app/releases/latest`);
+                        }
+                        const data = await response.json();
+                        if (data.body && data.body.trim().length > 0) {
+                            setWhatsNew({
+                                version: currentVersion,
+                                title: data.name || `Release v${currentVersion}`,
+                                body: data.body,
+                            });
+                        }
+                    } catch (error) {
+                        console.log("Could not fetch release notes for modal:", error);
+                    }
+
                     await addNotification(db, {
                         id: `ota_celebrate_${currentVersion}`,
                         type: "update",
@@ -34,11 +70,7 @@ export function useAutoUpdateCheck() {
                         timestamp: Date.now(),
                         action_label: null,
                         action_url: null,
-                    })
-
-                    await AsyncStorage.setItem("lastSeenVersion", currentVersion);
-                } else if (!lastSeenVersion) {
-                    await AsyncStorage.setItem("lastSeenVersion", currentVersion);
+                    });
                 }
 
                 const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
@@ -86,5 +118,11 @@ export function useAutoUpdateCheck() {
         }
     };
 
-    return { notifications, hasUnread, markAsRead };
+    return {
+        notifications,
+        hasUnread,
+        markAsRead,
+        whatsNew,
+        dismissWhatsNew,
+    };
 }

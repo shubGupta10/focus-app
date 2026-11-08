@@ -2,9 +2,10 @@ import { Colors } from "@/constants/Colors";
 import { SHOP_CATALOG } from "@/features/shop/data/shopCatalog";
 import { useSettings } from "@/hooks/useSettings";
 import { vars } from "nativewind";
-import { useColorScheme as useRNColorScheme } from "react-native";
+import { AppState, useColorScheme as useRNColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import FocusBlocker, { DynamicPalette } from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 function getWCAGRelativeLuminance(hex: string) {
     const c = hex.startsWith('#') ? hex.substring(1) : hex;
@@ -38,6 +39,10 @@ interface ThemeContextType {
     colors: ThemeColors;
     activeStyle: any;
     setGlobalOrbTheme: (val: string) => void;
+    useDynamicTheme: boolean;
+    setUseDynamicTheme: (val: boolean) => void;
+    isDynamicColorSupported: boolean;
+    dynamicPalette: DynamicPalette | null;
     switchColors: {
         trackActive: string;
         thumbActive: string;
@@ -52,6 +57,31 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const systemColorScheme = useRNColorScheme() ?? "light";
     const [orbTheme, setOrbTheme] = useState("theme_default");
     const [themeMode, setThemeModeState] = useState<"light" | "dark" | "system">("system");
+    const [useDynamicTheme, setUseDynamicThemeState] = useState(false);
+
+    const isDynamicColorSupported = typeof FocusBlocker?.isDynamicColorSupported === "function"
+        ? FocusBlocker.isDynamicColorSupported()
+        : false;
+
+    const [dynamicPalette, setDynamicPalette] = useState<DynamicPalette | null>(() => {
+        try {
+            return FocusBlocker?.getDynamicColors?.() ?? null;
+        } catch {
+            return null;
+        }
+    });
+
+    useEffect(() => {
+        const sub = AppState.addEventListener("change", (state) => {
+            if (state === "active") {
+                try {
+                    const latest = FocusBlocker?.getDynamicColors?.();
+                    if (latest) setDynamicPalette(latest);
+                } catch { }
+            }
+        });
+        return () => sub.remove();
+    }, []);
 
     useEffect(() => {
         getSetting("equipped_orb_theme").then((val) => {
@@ -60,30 +90,57 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         getSetting("colorScheme").then((val) => {
             if (val === "dark" || val === "light" || val === "system") {
                 setThemeModeState(val as "light" | "dark" | "system");
-
+            }
+        });
+        getSetting("use_dynamic_theme").then((val) => {
+            if (val !== null) {
+                setUseDynamicThemeState(val === "true");
             }
         });
     }, [getSetting]);
 
-    const isDarkMode = themeMode === "system"
-        ? systemColorScheme === "dark"
-        : themeMode === "dark";
-
     const toggleDarkMode = (val: boolean) => {
         const nextScheme = val ? "dark" : "light";
         setThemeModeState(nextScheme);
-
         setSetting("colorScheme", nextScheme);
     };
 
     const setThemeMode = (mode: "light" | "dark" | "system") => {
         setThemeModeState(mode);
-
         setSetting("colorScheme", mode);
     };
 
+    const setUseDynamicTheme = (val: boolean) => {
+        setUseDynamicThemeState(val);
+        setSetting("use_dynamic_theme", val ? "true" : "false");
+    };
+
+    const isDarkMode = themeMode === "system"
+        ? systemColorScheme === "dark"
+        : themeMode === "dark";
+
     const baseTheme = isDarkMode ? Colors.dark : Colors.light;
     let colors: ThemeColors = baseTheme;
+
+    if (useDynamicTheme && dynamicPalette) {
+        const dynamicBg = isDarkMode ? dynamicPalette.darkBackground : dynamicPalette.lightBackground;
+        const dynamicSurface = isDarkMode ? dynamicPalette.darkSurface : dynamicPalette.lightSurface;
+        const dynamicElevated = isDarkMode
+            ? (dynamicPalette.darkSurfaceElevated ?? Colors.dark.surfaceElevated)
+            : (dynamicPalette.lightSurfaceElevated ?? Colors.light.surfaceElevated);
+        const dynamicBorder = isDarkMode ? dynamicPalette.darkBorder : dynamicPalette.lightBorder;
+        const dynamicAccent = dynamicPalette.accent;
+
+        colors = {
+            ...colors,
+            background: dynamicBg,
+            surface: dynamicSurface,
+            surfaceElevated: dynamicElevated,
+            border: dynamicBorder,
+            accent: dynamicAccent,
+            accentMuted: dynamicPalette.accentMuted || (dynamicAccent + "33"),
+        };
+    }
 
     if (orbTheme !== "theme_default") {
         let customAccent = colors.accent;
@@ -93,22 +150,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             customAccent = shopTheme.hexColor;
         }
 
-        const accentLuminance = getWCAGRelativeLuminance(customAccent);
-        const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
-        const darkLuminance = getWCAGRelativeLuminance('#1C1618');
-
-        const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
-        const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
-
-        const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#1C1618';
-
         colors = {
             ...colors,
             accent: customAccent,
-            accentForeground: bestForeground,
             accentMuted: customAccent + "33",
         };
     }
+
+    const accentLuminance = getWCAGRelativeLuminance(colors.accent);
+    const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
+    const darkLuminance = getWCAGRelativeLuminance('#1C1618');
+
+    const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
+    const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
+
+    const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#1C1618';
+
+    colors = {
+        ...colors,
+        accentForeground: bestForeground,
+    };
 
     const activeStyle = vars({
         "--color-background": colors.background,
@@ -151,6 +212,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 activeStyle,
                 switchColors,
                 setGlobalOrbTheme: setOrbTheme,
+                useDynamicTheme,
+                setUseDynamicTheme,
+                isDynamicColorSupported,
+                dynamicPalette,
             }}
         >
             <StatusBar style={isDarkMode ? "light" : "dark"} />

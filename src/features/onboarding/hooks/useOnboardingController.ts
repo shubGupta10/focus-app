@@ -3,6 +3,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
+import { analytics } from "@/utils/analytics";
 
 export function useOnboardingController() {
     const engine = useFocusEngine();
@@ -12,6 +13,10 @@ export function useOnboardingController() {
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSet, setSelectedSet] = useState<Set<string>>(new Set(engine.selectedApps));
+
+    useEffect(() => {
+        analytics.track("onboarding_step_viewed", { step })
+    }, [step]);
 
     useEffect(() => {
         if (engine.selectedApps.length > 0 && selectedSet.size === 0) {
@@ -56,6 +61,10 @@ export function useOnboardingController() {
     };
 
     const handleCompleteOnboarding = async () => {
+        analytics.track("onboarding_completed", {
+            selected_apps_count: engine.selectedApps.length,
+        });
+
         await setSetting("has_completed_onboarding", "true");
         router.replace("/(tabs)");
     };

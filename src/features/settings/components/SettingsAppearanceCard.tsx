@@ -1,9 +1,23 @@
+import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Haptics from "expo-haptics";
 import { Pressable, Text, View } from "react-native";
 
 export function SettingsAppearanceCard() {
-    const { themeMode, setThemeMode, colors } = useTheme();
+    const {
+        themeMode,
+        setThemeMode,
+        colors,
+        useDynamicTheme,
+        setUseDynamicTheme,
+        isDynamicColorSupported,
+    } = useTheme();
+
+    const handleDynamicToggle = (val: boolean) => {
+        setUseDynamicTheme(val);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
+    };
 
     return (
         <View className="px-6 mt-6 mb-6">
@@ -59,6 +73,38 @@ export function SettingsAppearanceCard() {
                         );
                     })}
                 </View>
+
+                <View className="h-[1px] bg-border my-4" />
+
+                <Pressable
+                    onPress={() => isDynamicColorSupported && handleDynamicToggle(!useDynamicTheme)}
+                    className={`flex-row items-center justify-between ${isDynamicColorSupported ? "active:opacity-80" : "opacity-60"
+                        }`}
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: useDynamicTheme, disabled: !isDynamicColorSupported }}
+                    accessibilityLabel="Toggle Dynamic Colors (Material You)"
+                    disabled={!isDynamicColorSupported}
+                >
+                    <View className="flex-1 pr-4">
+                        <View className="flex-row items-center gap-2 mb-1">
+                            <Text className="text-text font-bold text-[16px]">
+                                Dynamic Colors
+                            </Text>
+                            <View className="bg-accent/15 px-2 py-0.5 rounded-full">
+                            </View>
+                        </View>
+                        <Text className="text-textSecondary text-sm leading-5">
+                            {isDynamicColorSupported
+                                ? "Match app colors with your phone's active wallpaper & palette."
+                                : "Requires Android 12 or newer."}
+                        </Text>
+                    </View>
+                    <Material3Switch
+                        value={useDynamicTheme}
+                        onValueChange={handleDynamicToggle}
+                        disabled={!isDynamicColorSupported}
+                    />
+                </Pressable>
             </View>
         </View>
     );

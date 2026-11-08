@@ -513,5 +513,46 @@ class FocusBlockerModule : Module() {
             notificationManager.notify((System.currentTimeMillis() % Int.MAX_VALUE).toInt(), notification)
         }
 
+        Function("isDynamicColorSupported") {
+            return@Function Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        }
+
+        Function("getDynamicColors") {
+            val context = appContext.reactContext ?: return@Function null
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@Function null
+
+            try {
+                fun toHex(resId: Int, fallbackResId: Int? = null): String {
+                    return try {
+                        val color = context.getColor(resId)
+                        String.format("#%06X", 0xFFFFFF and color)
+                    } catch (e: Exception) {
+                        if (fallbackResId != null) {
+                            val color = context.getColor(fallbackResId)
+                            String.format("#%06X", 0xFFFFFF and color)
+                        } else {
+                            "#000000"
+                        }
+                    }
+                }
+
+                return@Function mapOf(
+                    "accent" to toHex(android.R.color.system_accent1_500),
+                    "accentMuted" to toHex(android.R.color.system_accent1_100),
+
+                    "lightBackground" to toHex(android.R.color.system_neutral1_50),
+                    "lightSurface" to toHex(android.R.color.system_neutral1_100),
+                    "lightSurfaceElevated" to toHex(android.R.color.system_neutral1_10, android.R.color.system_neutral1_50),
+                    "lightBorder" to toHex(android.R.color.system_neutral2_200),
+
+                    "darkBackground" to toHex(android.R.color.system_neutral1_900),
+                    "darkSurface" to toHex(android.R.color.system_neutral1_900),
+                    "darkSurfaceElevated" to toHex(android.R.color.system_neutral1_800),
+                    "darkBorder" to toHex(android.R.color.system_neutral2_700)
+                )
+            } catch (e: Exception) {
+                return@Function null
+            }
+        }
     }
 }

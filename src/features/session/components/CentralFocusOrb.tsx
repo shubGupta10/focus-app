@@ -1,9 +1,10 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSettings } from "@/hooks/useSettings";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, Vibration, View, useWindowDimensions } from "react-native";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { getOrbBackground } from "./orb-themes";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -182,6 +183,21 @@ export function CentralFocusOrb({
     return (
         <View style={{ width: containerSize, height: containerSize }} className="items-center justify-center">
             <View style={{ width: 340, height: 340, transform: [{ scale }] }} className="items-center justify-center">
+                {/* Seamless Universal Ambient Radial Bloom (Adapts to all 9 animation styles with zero hard edges) */}
+                <View className="absolute inset-0 items-center justify-center pointer-events-none">
+                    <Svg width="340" height="340" viewBox="0 0 340 340">
+                        <Defs>
+                            <RadialGradient id="ambientOrbBloom" cx="50%" cy="50%" rx="50%" ry="50%">
+                                <Stop offset="0%" stopColor={colorAccent} stopOpacity="0.14" />
+                                <Stop offset="45%" stopColor={colorAccent} stopOpacity="0.08" />
+                                <Stop offset="75%" stopColor={colorAccent} stopOpacity="0.02" />
+                                <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
+                            </RadialGradient>
+                        </Defs>
+                        <Circle cx="170" cy="170" r="170" fill="url(#ambientOrbBloom)" />
+                    </Svg>
+                </View>
+
                 <View className="absolute inset-0 items-center justify-center pointer-events-none">
                     {orbAnimation && (() => {
                         const OrbBg = getOrbBackground(
@@ -209,7 +225,7 @@ export function CentralFocusOrb({
                                 cx="170"
                                 cy="170"
                                 r={coreRadius + 3}
-                                stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
+                                stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.accent}
                                 strokeWidth="5"
                                 fill="none"
                                 strokeDasharray={2 * Math.PI * (coreRadius + 3)}
@@ -238,23 +254,29 @@ export function CentralFocusOrb({
                                 }}
                                 onPressIn={handlePressIn}
                                 onPressOut={handlePressOut}
-                                className={`w-48 h-48 rounded-full items-center justify-center ${isHolding
-                                    ? "bg-destructiveMuted"
-                                    : "bg-surfaceElevated"
+                                className={`w-48 h-48 rounded-full items-center justify-center border ${isHolding ? "border-transparent" : "border-border"
                                     }`}
                                 style={{
-                                    shadowColor: "#000",
-                                    shadowOffset: { width: 0, height: 10 },
-                                    shadowOpacity: 0.3,
-                                    shadowRadius: 20,
+                                    backgroundColor: isHolding ? colors.accent : colors.surfaceElevated,
+                                    shadowColor: isHolding ? colors.accent : "#000",
+                                    shadowOffset: { width: 0, height: 6 },
+                                    shadowOpacity: isHolding ? 0.35 : 0.15,
+                                    shadowRadius: 16,
+                                    elevation: 2,
                                 }}
                                 accessibilityRole="button"
                                 accessibilityLabel={`Active focus session. ${timeLeft} remaining. Press and hold to stop.`}
                             >
                                 <View className="flex-row items-center justify-center h-4 mb-2">
                                     <Text
-                                        className={`font-black text-[12px] tracking-widest uppercase ${isStrict && skipsRemaining <= 0 ? "text-warning" : "text-destructive"
-                                            }`}
+                                        style={{
+                                            color: isStrict && skipsRemaining <= 0
+                                                ? colors.warning
+                                                : isHolding
+                                                    ? colors.accentForeground
+                                                    : colors.accent,
+                                        }}
+                                        className="font-black text-[12px] tracking-widest uppercase"
                                     >
                                         {isHolding
                                             ? "HOLDING TO END..."
@@ -269,7 +291,10 @@ export function CentralFocusOrb({
                                 </View>
 
                                 <Text
-                                    className="text-text font-black text-5xl tracking-tighter tabular-nums text-center"
+                                    style={{
+                                        color: isHolding ? colors.accentForeground : colors.text,
+                                    }}
+                                    className="font-black text-5xl tracking-tighter tabular-nums text-center"
                                     adjustsFontSizeToFit
                                     minimumFontScale={0.75}
                                     numberOfLines={1}
@@ -277,7 +302,13 @@ export function CentralFocusOrb({
                                     {timeLeft}
                                 </Text>
 
-                                <Text className="text-textSecondary text-xs font-bold tracking-widest uppercase mt-2">
+                                <Text
+                                    style={{
+                                        color: isHolding ? colors.accentForeground : colors.textSecondary,
+                                        opacity: isHolding ? 0.8 : 1,
+                                    }}
+                                    className="text-xs font-bold tracking-widest uppercase mt-2"
+                                >
                                     {isInfinite ? "Active" : "Remaining"}
                                 </Text>
                             </Pressable>
@@ -300,7 +331,7 @@ export function CentralFocusOrb({
                                     cx="170"
                                     cy="170"
                                     r={104}
-                                    stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.destructive}
+                                    stroke={isStrict && skipsRemaining <= 0 ? colors.warning : colors.accent}
                                     strokeWidth="6"
                                     fill="none"
                                     strokeDasharray={2 * Math.PI * 104}
@@ -322,22 +353,34 @@ export function CentralFocusOrb({
                             }
                             onStartPress?.();
                         }}
-                        className="w-44 h-44 rounded-full items-center justify-center active:opacity-85"
+                        className="w-48 h-48 rounded-full items-center justify-center active:opacity-85"
                         style={{
                             backgroundColor: colorAccent,
                             shadowColor: colorAccent,
                             shadowOffset: { width: 0, height: 8 },
-                            shadowOpacity: 0.4,
-                            shadowRadius: 16,
-                            // elevation: 12 removed to prevent Android octagon artifact
+                            shadowOpacity: 0.35,
+                            shadowRadius: 20,
+                            borderWidth: 1.5,
+                            borderColor: "rgba(255, 255, 255, 0.22)",
                         }}
                         accessibilityRole="button"
                         accessibilityLabel="Start focus session"
                         accessibilityHint="Double tap to configure and begin a focus session"
                     >
-                        <Text className="text-accentForeground font-black text-xl tracking-[0.25em] ml-1 uppercase">
-                            Start
-                        </Text>
+                        <View className="w-40 h-40 rounded-full items-center justify-center border border-white/10">
+                            <Ionicons
+                                name="play"
+                                size={28}
+                                color={colors.accentForeground}
+                                style={{ marginLeft: 3, marginBottom: 4 }}
+                            />
+                            <Text
+                                style={{ color: colors.accentForeground }}
+                                className="font-black text-xs tracking-[0.3em] uppercase"
+                            >
+                                Start
+                            </Text>
+                        </View>
                     </Pressable>
                 )}
             </View>

@@ -1,5 +1,5 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { migrateDbIfNeeded } from "@/store/database";
 import { Inter_400Regular, Inter_900Black } from "@expo-google-fonts/inter";
@@ -33,11 +33,48 @@ TextInputOverride.defaultProps.style = { includeFontPadding: false };
 SplashScreen.preventAutoHideAsync();
 
 
+function RootNavigator() {
+  const { colors } = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "default",
+        contentStyle: {
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <Stack.Screen name="(tabs)" />
+
+      <Stack.Screen name="onboarding" />
+
+      <Stack.Screen
+        name="shop"
+        options={{
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen
+        name="settings"
+        options={{
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen name="day-details" />
+
+      <Stack.Screen name="notifications" />
+
+      <Stack.Screen name="shop-animations" />
+    </Stack>
+  );
+}
+
 function Layout() {
   const { isUpdatePending } = Updates.useUpdates();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const rootBgColor = isDark ? "#161517" : "#EFF1F5";
 
   useEffect(() => {
     analytics.track("app_started");
@@ -97,40 +134,7 @@ function Layout() {
       >
         <ThemeProvider>
           <ToastProvider>
-            <Stack screenOptions={{
-              headerShown: false,
-              animation: 'default',
-              contentStyle: {
-                backgroundColor: rootBgColor
-              }
-            }}
-            >
-              <Stack.Screen name="(tabs)" />
-
-              <Stack.Screen
-                name="onboarding"
-              />
-
-              <Stack.Screen
-                name="shop"
-                options={{
-                  presentation: "modal"
-                }}
-              />
-
-              <Stack.Screen
-                name="settings"
-                options={{
-                  presentation: "modal"
-                }}
-              />
-
-              <Stack.Screen name="day-details" />
-
-              <Stack.Screen name="notifications" />
-
-              <Stack.Screen name="shop-animations" />
-            </Stack>
+            <RootNavigator />
           </ToastProvider>
         </ThemeProvider>
       </SQLiteProvider>

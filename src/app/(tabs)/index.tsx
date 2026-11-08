@@ -19,7 +19,7 @@ import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { useNotification } from "@/hooks/useNotifications";
 import { useAppStore } from "@/store/useAppStore";
-
+import { WhatsNewModal } from "@/components/modals/WhatsNewModal";
 
 export default function Index() {
     const { width, height } = useWindowDimensions();
@@ -29,8 +29,7 @@ export default function Index() {
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
     const { hasUnread, unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
-
-    useAutoUpdateCheck();
+    const { whatsNew, dismissWhatsNew } = useAutoUpdateCheck();
 
     const {
         engine,
@@ -207,7 +206,14 @@ export default function Index() {
                         <View className="w-full mt-auto" style={{ marginBottom: isSmallDevice ? 94 : 116 }}>
                             <Pressable
                                 onPress={() => router.push("/(tabs)/apps")}
-                                className={`self-center bg-surfaceElevated rounded-full px-5 ${isSmallDevice ? "py-2.5" : "py-3"} flex-row items-center justify-center active:opacity-70`}
+                                className={`self-center bg-surfaceElevated border border-border rounded-full px-5 ${isSmallDevice ? "py-2.5" : "py-3"} flex-row items-center justify-center active:opacity-70 shadow-sm`}
+                                style={{
+                                    elevation: 2,
+                                    shadowColor: "#000",
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.05,
+                                    shadowRadius: 6,
+                                }}
                             >
                                 <Ionicons name="shield-checkmark" size={16} color={colors.accent} style={{ marginRight: 8 }} />
                                 <Text className="text-text font-medium text-sm">
@@ -262,6 +268,12 @@ export default function Index() {
                 onConfirmEnd={confirmEndSession}
                 isStrict={engine.isStrictSession}
                 resetCountdownText={resetCountdownText}
+            />
+
+            <WhatsNewModal
+                visible={Boolean(whatsNew)}
+                data={whatsNew}
+                onClose={dismissWhatsNew}
             />
         </SafeAreaView>
     );

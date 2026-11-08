@@ -27,6 +27,19 @@ export type CompletedSessionInfo = {
   endTime: number;
 } | null;
 
+export type DynamicPalette = {
+  accent: string;
+  accentMuted: string;
+  lightBackground: string;
+  lightSurface: string;
+  lightSurfaceElevated?: string;
+  lightBorder: string;
+  darkBackground: string;
+  darkSurface: string;
+  darkSurfaceElevated?: string;
+  darkBorder: string;
+};
+
 export declare class FocusBlockerModule {
   hasUsagePermission(): boolean;
   requestUsagePermission(): void;
@@ -65,6 +78,8 @@ export declare class FocusBlockerModule {
   cancelRoutineAlarm(routineId: number): void;
   showTimePicker(initialHour: number, initialMinute: number, is24Hour?: boolean): Promise<TimePickerResult>;
   sendNotification(title: string, message: string): void;
+  isDynamicColorSupported(): boolean;
+  getDynamicColors(): DynamicPalette | null;
 }
 
 export default requireNativeModule<FocusBlockerModule>('FocusBlocker');

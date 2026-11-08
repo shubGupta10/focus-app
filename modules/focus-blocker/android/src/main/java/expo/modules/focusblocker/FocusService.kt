@@ -453,9 +453,45 @@ class FocusService : Service() {
             fun dp(v: Int): Int = (v * density).toInt()
             fun dpF(v: Float): Float = v * density
 
+            val isDynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+            val dynamicBg = if (isDynamicColorSupported) {
+                try { getColor(android.R.color.system_neutral1_900) } catch (e: Exception) { Color.parseColor("#161517") }
+            } else {
+                Color.parseColor("#161517")
+            }
+
+            val dynamicSurface = if (isDynamicColorSupported) {
+                try { getColor(android.R.color.system_neutral1_800) } catch (e: Exception) { Color.parseColor("#1F1E20") }
+            } else {
+                Color.parseColor("#1F1E20")
+            }
+
+            val dynamicBorder = if (isDynamicColorSupported) {
+                try { getColor(android.R.color.system_neutral2_700) } catch (e: Exception) { Color.parseColor("#333033") }
+            } else {
+                Color.parseColor("#333033")
+            }
+
+            val dynamicAccent = if (isDynamicColorSupported) {
+                try { getColor(android.R.color.system_accent1_500) } catch (e: Exception) { Color.parseColor("#3B82F6") }
+            } else {
+                Color.parseColor("#3B82F6")
+            }
+
+            val dynamicAccentText = if (isDynamicColorSupported) {
+                val r = Color.red(dynamicAccent) / 255.0
+                val g = Color.green(dynamicAccent) / 255.0
+                val b = Color.blue(dynamicAccent) / 255.0
+                val luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+                if (luminance > 0.5) Color.parseColor("#1C1618") else Color.WHITE
+            } else {
+                Color.WHITE
+            }
+
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Color.parseColor("#161517"))
+                setBackgroundColor(dynamicBg)
                 gravity = Gravity.CENTER
                 layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
@@ -526,8 +562,8 @@ class FocusService : Service() {
                             val bg = android.graphics.drawable.GradientDrawable().apply {
                                 shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                                 cornerRadius = dpF(20f)
-                                setColor(Color.parseColor("#1F1E20"))
-                                setStroke(dp(1), Color.parseColor("#333033"))
+                                setColor(dynamicSurface)
+                                setStroke(dp(1), dynamicBorder)
                             }
                             background = bg
                             setPadding(dp(20), dp(10), dp(20), dp(10))
@@ -559,11 +595,11 @@ class FocusService : Service() {
                                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                                     cornerRadius = dpF(16f)
                                     if (isPillEnabled) {
-                                        setColor(Color.parseColor("#2E2A30"))
-                                        setStroke(dp(1), Color.parseColor("#4A4248"))
+                                        setColor(dynamicSurface)
+                                        setStroke(dp(1), dynamicBorder)
                                     } else {
-                                        setColor(Color.parseColor("#171618"))
-                                        setStroke(dp(1), Color.parseColor("#262428"))
+                                        setColor(dynamicBg)
+                                        setStroke(dp(1), dynamicBorder)
                                     }
                                 }
                                 background = pBg
@@ -626,7 +662,7 @@ class FocusService : Service() {
 
             val homeButton = Button(this).apply {
                 text = "RETURN TO HOME"
-                setTextColor(Color.parseColor("#FFFFFF"))
+                setTextColor(dynamicAccentText)
                 textSize = 15f
                 setTypeface(null, Typeface.BOLD)
                 isAllCaps = true
@@ -635,7 +671,7 @@ class FocusService : Service() {
                 val shape = android.graphics.drawable.GradientDrawable().apply {
                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                     cornerRadius = dpF(24f)
-                    setColor(Color.parseColor("#C07480"))
+                    setColor(dynamicAccent)
                 }
                 background = shape
 
@@ -681,8 +717,8 @@ class FocusService : Service() {
                 val shape = android.graphics.drawable.GradientDrawable().apply {
                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                     cornerRadius = dpF(24f)
-                    setColor(Color.parseColor("#201E20"))
-                    setStroke((1.5f * density).toInt().coerceAtLeast(1), Color.parseColor("#3D3840"))
+                    setColor(dynamicSurface)
+                    setStroke((1.5f * density).toInt().coerceAtLeast(1), dynamicBorder)
                 }
                 background = shape
 
@@ -720,7 +756,7 @@ class FocusService : Service() {
             val scrollView = ScrollView(this).apply {
                 isFillViewport = true
                 overScrollMode = View.OVER_SCROLL_NEVER
-                setBackgroundColor(Color.parseColor("#161517"))
+                setBackgroundColor(dynamicBg)
             }
             scrollView.addView(container)
 

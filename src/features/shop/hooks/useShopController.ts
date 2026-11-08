@@ -7,6 +7,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { SHOP_CATALOG, ShopItem } from "../data/shopCatalog";
+import { analytics } from "@/utils/analytics";
 
 export function useShopController() {
     const db = useSQLiteContext();
@@ -64,6 +65,12 @@ export function useShopController() {
                             await loadShopData();
                             await refreshStats();
                             await handleEquipItem(item.id);
+
+                            analytics.track("theme_purchased", {
+                                item_id: item.id,
+                                item_type: item.type,
+                                cost: item.cost,
+                            })
                         } else {
                             Alert.alert("Error", "Transaction failed, Please try again");
                         }
@@ -85,6 +92,10 @@ export function useShopController() {
             await setSetting("equipped_orb_animation", itemId);
             setEquippedAnimation(itemId);
         }
+        analytics.track("theme_equipped", {
+            item_id: item.id,
+            item_type: item.type,
+        })
 
     }
 
