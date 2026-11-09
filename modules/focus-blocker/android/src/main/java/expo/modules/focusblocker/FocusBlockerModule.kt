@@ -537,7 +537,7 @@ class FocusBlockerModule : Module() {
                 }
 
                 return@Function mapOf(
-                    "accent" to toHex(android.R.color.system_accent1_500),
+                    "accent" to toHex(android.R.color.system_accent1_600, android.R.color.system_accent1_500),
                     "accentMuted" to toHex(android.R.color.system_accent1_100),
 
                     "lightAccent" to toHex(android.R.color.system_accent1_600, android.R.color.system_accent1_500),
@@ -547,7 +547,7 @@ class FocusBlockerModule : Module() {
                     "darkAccentMuted" to toHex(android.R.color.system_accent1_800, android.R.color.system_accent1_700),
 
                     "lightBackground" to toHex(android.R.color.system_neutral1_50),
-                    "lightSurface" to toHex(android.R.color.system_neutral1_100),
+                    "lightSurface" to toHex(android.R.color.system_neutral1_100, android.R.color.system_neutral1_50),
                     "lightSurfaceElevated" to toHex(android.R.color.system_neutral1_10, android.R.color.system_neutral1_50),
                     "lightBorder" to toHex(android.R.color.system_neutral2_200),
 

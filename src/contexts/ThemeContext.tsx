@@ -124,7 +124,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     if (useDynamicTheme && dynamicPalette) {
         const dynamicBg = isDarkMode ? dynamicPalette.darkBackground : dynamicPalette.lightBackground;
-        const dynamicSurface = isDarkMode ? dynamicPalette.darkSurface : dynamicPalette.lightSurface;
+        const dynamicSurface = isDarkMode
+            ? dynamicPalette.darkSurface
+            : (dynamicPalette.lightSurface ?? Colors.light.surface);
         const dynamicElevated = isDarkMode
             ? (dynamicPalette.darkSurfaceElevated ?? Colors.dark.surfaceElevated)
             : (dynamicPalette.lightSurfaceElevated ?? Colors.light.surfaceElevated);

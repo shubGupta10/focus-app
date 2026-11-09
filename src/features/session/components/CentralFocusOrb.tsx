@@ -183,20 +183,6 @@ export function CentralFocusOrb({
     return (
         <View style={{ width: containerSize, height: containerSize }} className="items-center justify-center">
             <View style={{ width: 340, height: 340, transform: [{ scale }] }} className="items-center justify-center">
-                {/* Seamless Universal Ambient Radial Bloom (Adapts to all 9 animation styles with zero hard edges) */}
-                <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                    <Svg width="340" height="340" viewBox="0 0 340 340">
-                        <Defs>
-                            <RadialGradient id="ambientOrbBloom" cx="50%" cy="50%" rx="50%" ry="50%">
-                                <Stop offset="0%" stopColor={colorAccent} stopOpacity="0.14" />
-                                <Stop offset="45%" stopColor={colorAccent} stopOpacity="0.08" />
-                                <Stop offset="75%" stopColor={colorAccent} stopOpacity="0.02" />
-                                <Stop offset="100%" stopColor={colorAccent} stopOpacity="0" />
-                            </RadialGradient>
-                        </Defs>
-                        <Circle cx="170" cy="170" r="170" fill="url(#ambientOrbBloom)" />
-                    </Svg>
-                </View>
 
                 <View className="absolute inset-0 items-center justify-center pointer-events-none">
                     {orbAnimation && (() => {
@@ -370,16 +356,10 @@ export function CentralFocusOrb({
                         <View className="w-40 h-40 rounded-full items-center justify-center border border-white/10">
                             <Ionicons
                                 name="play"
-                                size={28}
+                                size={48}
                                 color={colors.accentForeground}
-                                style={{ marginLeft: 3, marginBottom: 4 }}
+                                style={{ marginLeft: 5 }}
                             />
-                            <Text
-                                style={{ color: colors.accentForeground }}
-                                className="font-black text-xs tracking-[0.3em] uppercase"
-                            >
-                                Start
-                            </Text>
                         </View>
                     </Pressable>
                 )}

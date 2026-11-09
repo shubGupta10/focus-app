@@ -117,7 +117,7 @@ export default function Index() {
                             <Ionicons name="notifications-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
 
                             {unreadCount > 0 && (
-                                <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-destructive items-center justify-center px-1 border-2 border-surfaceElevated">
+                                <View className="absolute -top-1 -right-1 min-w-[19px] h-[19px] rounded-full bg-accent items-center justify-center px-1 border-[1.5px] border-surfaceElevated">
                                     <Text className="text-accentForeground text-[10px] font-black leading-none">
                                         {unreadCount > 9 ? "9+" : unreadCount}
                                     </Text>
