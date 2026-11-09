@@ -60,11 +60,11 @@ export function SettingsAppearanceCard() {
                                 <Ionicons
                                     name={iconName}
                                     size={16}
-                                    color={isActive ? "#ffffff" : colors.textSecondary}
+                                    color={isActive ? colors.accentForeground : colors.textSecondary}
                                     style={{ marginRight: 6 }}
                                 />
                                 <Text
-                                    className={`text-sm font-medium ${isActive ? "text-white" : "text-textSecondary"
+                                    className={`text-sm font-medium ${isActive ? "text-accentForeground" : "text-textSecondary"
                                         }`}
                                 >
                                     {label}
@@ -90,8 +90,6 @@ export function SettingsAppearanceCard() {
                             <Text className="text-text font-bold text-[16px]">
                                 Dynamic Colors
                             </Text>
-                            <View className="bg-accent/15 px-2 py-0.5 rounded-full">
-                            </View>
                         </View>
                         <Text className="text-textSecondary text-sm leading-5">
                             {isDynamicColorSupported

@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -23,13 +24,16 @@ export function BlocklistSearchHeader({
 
     return (
         <View className="px-6 mb-4">
-            <View className="flex-row items-center bg-surfaceElevated rounded-2xl px-4 py-3" style={{
-                elevation: 2,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 6,
-            }}>
+            <View
+                className="flex-row items-center bg-surfaceElevated border border-border rounded-2xl px-4 py-3"
+                style={{
+                    elevation: 2,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 6,
+                }}
+            >
                 <Ionicons name="search" size={20} color={colors.textSecondary} />
                 <TextInput
                     className="flex-1 ml-2.5 text-text text-[15px] font-medium py-0"
@@ -55,11 +59,13 @@ export function BlocklistSearchHeader({
             </View>
 
             <View className="flex-row gap-2.5 mt-3.5">
-                <Pressable
+                <AnimatedPressable
                     onPress={() => setFilterMode("all")}
-                    className={`px-4 py-2 rounded-full ${filterMode === "all"
-                        ? "bg-accent"
-                        : "bg-surfaceElevated active:opacity-75"
+                    hapticMode="light"
+                    scaleTo={0.92}
+                    className={`px-4 py-2 rounded-full border ${filterMode === "all"
+                        ? "bg-accent border-transparent"
+                        : "bg-surfaceElevated border-border"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show all apps"
@@ -70,13 +76,15 @@ export function BlocklistSearchHeader({
                     >
                         All ({installedAppsCount})
                     </Text>
-                </Pressable>
+                </AnimatedPressable>
 
-                <Pressable
+                <AnimatedPressable
                     onPress={() => setFilterMode("guarded")}
-                    className={`px-4 py-2 rounded-full ${filterMode === "guarded"
-                        ? "bg-accent"
-                        : "bg-surfaceElevated active:opacity-75"
+                    hapticMode="light"
+                    scaleTo={0.92}
+                    className={`px-4 py-2 rounded-full border ${filterMode === "guarded"
+                        ? "bg-accent border-transparent"
+                        : "bg-surfaceElevated border-border"
                         }`}
                     accessibilityRole="button"
                     accessibilityLabel="Show guarded apps only"
@@ -87,7 +95,7 @@ export function BlocklistSearchHeader({
                     >
                         Blocked ({selectedAppsCount})
                     </Text>
-                </Pressable>
+                </AnimatedPressable>
             </View>
         </View>
     );

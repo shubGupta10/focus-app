@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAppUpdate } from "@/hooks/useAppUpdater";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -100,16 +101,18 @@ export default function UpdatesScreen() {
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-3">
-                <Pressable
+                <AnimatedPressable
                     onPress={() => router.back()}
-                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    scaleTo={0.88}
+                    hapticMode="light"
+                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm"
                     style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
                     <Ionicons name="chevron-back" size={20} color={colors.text} />
-                </Pressable>
-                <Text className="text-text text-2xl font-black tracking-tight">App Updates</Text>
+                </AnimatedPressable>
+                <Text className="text-text text-3xl font-black tracking-tight">App Updates</Text>
             </View>
 
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 40 }}>

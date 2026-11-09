@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { NotificationItem, useNotification } from "@/hooks/useNotifications";
 import { formatTimeAgo } from "@/utils/timeUtils";
@@ -5,7 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Alert, Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Linking, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationScreen() {
@@ -72,6 +73,7 @@ export default function NotificationScreen() {
                     shadowOpacity: 0.05,
                     shadowRadius: 6,
                 }}
+
             >
                 <View
                     style={{ backgroundColor: badge.bg }}
@@ -96,7 +98,7 @@ export default function NotificationScreen() {
                         {item.description}
                     </Text>
                     {item.action_label && item.action_url && (
-                        <Pressable
+                        <AnimatedPressable scaleTo={0.92} hapticMode="light"
                             onPress={() => {
                                 if (item.type === "update" || item.action_url?.startsWith("/")) {
                                     router.push("/updates");
@@ -104,12 +106,14 @@ export default function NotificationScreen() {
                                     Linking.openURL(item.action_url);
                                 }
                             }}
-                            className="mt-3 bg-accent px-3.5 py-1.5 rounded-xl self-start active:opacity-75"
+                            className="mt-3 bg-accent px-4 py-1.5 rounded-full self-start"
+                            accessibilityRole="button"
+                            accessibilityLabel={item.action_label}
                         >
-                            <Text className="text-accentForeground font-semibold text-xs">
+                            <Text className="text-accentForeground font-bold text-xs uppercase tracking-wider">
                                 {item.action_label}
                             </Text>
-                        </Pressable>
+                        </AnimatedPressable>
                     )}
                 </View>
             </View>
@@ -120,10 +124,7 @@ export default function NotificationScreen() {
         if (items.length === 0) return null;
         return (
             <View key={title} className="mb-5">
-                <Text
-                    style={{ color: colors.warning }}
-                    className="font-bold text-xs uppercase tracking-wider mb-2.5 px-0.5"
-                >
+                <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                     {title}
                 </Text>
                 {items.map(renderCard)}
@@ -135,31 +136,31 @@ export default function NotificationScreen() {
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
-            <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
-                <Pressable
+            <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
+                <AnimatedPressable scaleTo={0.88} hapticMode="light"
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm"
                     style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
                     <Ionicons name="chevron-back" size={24} color={colors.text} />
-                </Pressable>
-                <Pressable
+                </AnimatedPressable>
+                <AnimatedPressable scaleTo={0.88} hapticMode="light"
                     onPress={handleClearAll}
                     disabled={notifications.length === 0}
-                    className={`w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm ${notifications.length === 0 ? "opacity-30" : ""
+                    className={`w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm ${notifications.length === 0 ? "opacity-30" : ""
                         }`}
                     style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Clear all notifications"
                 >
                     <Ionicons name="trash-outline" size={20} color={colors.textSecondary} />
-                </Pressable>
+                </AnimatedPressable>
             </View>
 
             <View className="px-6 pt-2 pb-4">
-                <Text className="text-text text-3xl font-black">Notifications</Text>
+                <Text className="text-text text-3xl font-black tracking-tight">Notifications</Text>
             </View>
 
             <ScrollView

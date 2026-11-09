@@ -30,6 +30,10 @@ export type CompletedSessionInfo = {
 export type DynamicPalette = {
   accent: string;
   accentMuted: string;
+  lightAccent?: string;
+  lightAccentMuted?: string;
+  darkAccent?: string;
+  darkAccentMuted?: string;
   lightBackground: string;
   lightSurface: string;
   lightSurfaceElevated?: string;

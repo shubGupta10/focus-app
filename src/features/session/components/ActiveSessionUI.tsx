@@ -107,9 +107,9 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
             <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(150)} className={`items-center w-full ${isSmallDevice ? "pt-2" : "pt-6"}`}>
                 <View className={`flex-row items-center justify-center gap-3 ${isSmallDevice ? "mb-3" : "mb-6"}`}>
                     {isStrict && (
-                        <View className={`flex-row items-center bg-accentMuted ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
-                            <Ionicons name="shield-checkmark" size={isSmallDevice ? 14 : 16} color={colors.accent} style={{ marginRight: 6 }} />
-                            <Text className={`text-accent ${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold tracking-widest uppercase`}>
+                        <View className={`flex-row items-center bg-accent ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
+                            <Ionicons name="shield-checkmark" size={isSmallDevice ? 14 : 16} color={colors.accentForeground} style={{ marginRight: 6 }} />
+                            <Text className={`text-accentForeground ${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold tracking-widest uppercase`}>
                                 Strict Mode
                             </Text>
                         </View>

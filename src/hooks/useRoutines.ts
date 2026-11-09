@@ -59,15 +59,17 @@ export function useRoutine() {
         });
 
         setRoutines(cleanData);
-        for (const r of cleanData) {
-            await syncAlarmForRoutine(r);
-        }
         setIsLoading(false);
     }, [db]);
 
     useEffect(() => {
-        loadRoutines();
-    }, [loadRoutines])
+        loadRoutines().then(async () => {
+            const data = await getRoutines(db);
+            for (const r of data) {
+                await syncAlarmForRoutine(r);
+            }
+        });
+    }, [db]);
 
     const addRoutine = async (input: RoutineInput) => {
         const id = await createRoutine(db, input);

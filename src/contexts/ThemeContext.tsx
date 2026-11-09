@@ -129,7 +129,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             ? (dynamicPalette.darkSurfaceElevated ?? Colors.dark.surfaceElevated)
             : (dynamicPalette.lightSurfaceElevated ?? Colors.light.surfaceElevated);
         const dynamicBorder = isDarkMode ? dynamicPalette.darkBorder : dynamicPalette.lightBorder;
-        const dynamicAccent = dynamicPalette.accent;
+        const dynamicAccent = isDarkMode
+            ? (dynamicPalette.darkAccent ?? dynamicPalette.accent)
+            : (dynamicPalette.lightAccent ?? dynamicPalette.accent);
+        const dynamicAccentMuted = isDarkMode
+            ? (dynamicPalette.darkAccentMuted ?? dynamicPalette.accentMuted ?? Colors.dark.accentMuted)
+            : (dynamicPalette.lightAccentMuted ?? dynamicPalette.accentMuted ?? Colors.light.accentMuted);
 
         colors = {
             ...colors,
@@ -138,7 +143,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             surfaceElevated: dynamicElevated,
             border: dynamicBorder,
             accent: dynamicAccent,
-            accentMuted: dynamicPalette.accentMuted || (dynamicAccent + "33"),
+            accentMuted: dynamicAccentMuted,
         };
     }
 

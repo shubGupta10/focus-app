@@ -55,7 +55,7 @@ export function TodayFocusCard() {
                     <Text className="text-textMuted font-medium text-sm mt-1"> coin balance</Text>
                 </View>
 
-                <View className="w-px h-10 bg-border opacity-40" />
+                <View className="w-px h-10 bg-border" />
 
                 <View className="items-center">
                     <Text className="text-accent font-black text-3xl tabular-nums leading-none">
@@ -64,7 +64,7 @@ export function TodayFocusCard() {
                     <Text className="text-textMuted font-medium text-sm mt-1">day streak</Text>
                 </View>
 
-                <View className="w-px h-10 bg-border opacity-40" />
+                <View className="w-px h-10 bg-border" />
 
                 <View className="items-center">
                     <Text className="text-text font-black text-3xl tabular-nums leading-none">

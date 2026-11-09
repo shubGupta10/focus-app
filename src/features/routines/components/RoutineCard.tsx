@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAppStore } from "@/store/useAppStore";
@@ -46,10 +47,11 @@ export function RoutineCardInner({
     };
 
     return (
-        <Pressable
+        <AnimatedPressable
             onPress={onPress}
-            className={`bg-surfaceElevated rounded-[24px] p-5 mb-3 ${isEnabled ? "" : "opacity-55"
-                } active:opacity-80 border border-border`}
+            scaleTo={0.98}
+            hapticMode="light"
+            className={`bg-surfaceElevated rounded-[24px] p-5 mb-3 ${isEnabled ? "" : "opacity-55"} border border-border`}
             style={{
                 elevation: isEnabled ? 2 : 0,
                 shadowColor: "#000",
@@ -66,8 +68,8 @@ export function RoutineCardInner({
                         {routine.name}
                     </Text>
                     {Boolean(routine.is_strict) && (
-                        <View className="bg-accent/15 px-2 py-0.5 rounded-md">
-                            <Text className="text-accent text-[10px] font-bold uppercase tracking-wider">
+                        <View className="bg-accent px-2 py-0.5 rounded-md">
+                            <Text className="text-accentForeground text-[10px] font-bold uppercase tracking-wider">
                                 Strict
                             </Text>
                         </View>
@@ -126,8 +128,8 @@ export function RoutineCardInner({
                 >
                     <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
                 </Pressable>
-            </View >
-        </Pressable >
+            </View>
+        </AnimatedPressable>
     );
 }
 

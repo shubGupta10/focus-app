@@ -51,7 +51,7 @@ export function SettingsSessionCard() {
                                 onPress={() => handleTimerSelect(mins)}
                                 className={`flex-1 items-center justify-center py-3 rounded-xl ${isSelected ? 'bg-accent' : 'bg-transparent'}`}
                             >
-                                <Text className={`font-bold ${isSelected ? 'text-white' : 'text-textSecondary'}`}>
+                                <Text className={`font-bold ${isSelected ? 'text-accentForeground' : 'text-textSecondary'}`}>
                                     {mins} min
                                 </Text>
                             </Pressable>

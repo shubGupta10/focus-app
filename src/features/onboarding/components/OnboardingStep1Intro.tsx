@@ -21,7 +21,7 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
 
                 <View className="space-y-6">
                     <View className="flex-row items-start mb-6">
-                        <View className="w-10 h-10 rounded-xl bg-accent/10 items-center justify-center mr-4 mt-0.5">
+                        <View className="w-10 h-10 rounded-xl bg-accentMuted items-center justify-center mr-4 mt-0.5">
                             <Ionicons name="hourglass-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">
@@ -33,7 +33,7 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
                     </View>
 
                     <View className="flex-row items-start mb-6">
-                        <View className="w-10 h-10 rounded-xl bg-accent/10 items-center justify-center mr-4 mt-0.5">
+                        <View className="w-10 h-10 rounded-xl bg-accentMuted items-center justify-center mr-4 mt-0.5">
                             <Ionicons name="shield-checkmark-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">
@@ -45,7 +45,7 @@ export function OnboardingStep1Intro({ onNext }: OnboardingStep1IntroProps) {
                     </View>
 
                     <View className="flex-row items-start">
-                        <View className="w-10 h-10 rounded-xl bg-accent/10 items-center justify-center mr-4 mt-0.5">
+                        <View className="w-10 h-10 rounded-xl bg-accentMuted items-center justify-center mr-4 mt-0.5">
                             <Ionicons name="finger-print-outline" size={22} color={colors.accent} />
                         </View>
                         <View className="flex-1">

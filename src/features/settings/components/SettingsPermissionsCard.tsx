@@ -44,7 +44,7 @@ export function SettingsPermissionsCard({
             >
                 <View className="flex-row items-center justify-between mb-3">
                     <Text className="text-text font-bold text-[16px]">System Permissions</Text>
-                    <View className={`px-3 py-1.5 rounded-full ${allPermissionsGranted ? 'bg-success/10' : 'bg-warning/10'}`}>
+                    <View className={`px-3 py-1.5 rounded-full ${allPermissionsGranted ? 'bg-successMuted' : 'bg-warningMuted'}`}>
                         <Text className={`text-[11px] font-bold tracking-widest uppercase ${allPermissionsGranted ? 'text-success' : 'text-warning'}`}>
                             {allPermissionsGranted ? "All Active" : "Setup Needed"}
                         </Text>
@@ -57,7 +57,7 @@ export function SettingsPermissionsCard({
 
                 <Pressable
                     onPress={() => setVisible(true)}
-                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
+                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end"
                 >
                     <Text className="text-accentForeground font-bold text-[14px] tracking-wide">
                         {allPermissionsGranted ? "Review Permissions" : "Grant Permissions"}

@@ -4,7 +4,8 @@ import { RoutineEmptyState } from "../../features/routines/components/RoutineEmp
 import { RoutineEditorModal } from "../../features/routines/components/modals/RoutineEditorModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoutinesController } from "../../features/routines/hooks/useRoutinesController";
@@ -43,19 +44,22 @@ export default function RoutinesTab() {
                     </Text>
                 </View>
 
-                <Pressable
+                <AnimatedPressable
                     onPress={() => handleOpenCreate()}
-                    className={`w-10 h-10 rounded-full bg-accent items-center justify-center active:opacity-80 ${engine.isSessionActive ? 'opacity-50' : ''} `}
+                    hapticMode="light"
+                    scaleTo={0.88}
+                    disabled={engine.isSessionActive}
+                    className={`w-10 h-10 rounded-full bg-accent items-center justify-center ${engine.isSessionActive ? 'opacity-50' : ''}`}
                     accessibilityRole="button"
                     accessibilityLabel="Create new routine"
                 >
                     <Ionicons name="add" size={24} color={colors.accentForeground} />
-                </Pressable>
+                </AnimatedPressable>
             </View>
 
             {engine.isSessionActive && (
                 <View className="px-6 mb-4 mt-2">
-                    <View className="bg-warningMuted border border-warning/50 rounded-[24px] p-5 flex-row items-center">
+                    <View className="bg-warningMuted border border-warning rounded-[24px] p-5 flex-row items-center">
                         <Ionicons name="lock-closed" size={20} color={colors.warning} style={{ marginRight: 16 }} />
                         <Text className="text-warning font-bold text-sm flex-1">
                             {engine.isStrictSession ? "Routines are locked during a strict session" : "End your current session to modify routines"}

@@ -1,4 +1,3 @@
-import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { ThemeColors, useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -21,11 +20,17 @@ function TabIcon({
 }) {
     return (
         <View className="items-center justify-center">
-            <View className={`w-14 h-8 rounded-full items-center justify-center ${focused ? 'bg-accent/10' : 'bg-transparent'}`}>
+            <View
+                className="w-16 h-8 items-center justify-center"
+                style={{
+                    backgroundColor: focused ? colors.accent : "transparent",
+                    borderRadius: 16,
+                }}
+            >
                 <Ionicons
                     name={focused ? name : outlineName}
                     size={22}
-                    color={focused ? colors.accent : colors.textSecondary}
+                    color={focused ? colors.accentForeground : colors.textSecondary}
                 />
             </View>
             {badgeCount !== undefined && badgeCount > 0 && (
@@ -43,7 +48,7 @@ function TabIcon({
 
 export default function TabLayout() {
     const engine = useFocusEngine(true);
-    const { colors } = useTheme();
+    const { colors, isDarkMode } = useTheme();
     const insets = useSafeAreaInsets();
 
     return (
@@ -52,21 +57,11 @@ export default function TabLayout() {
             detachInactiveScreens={false}
             screenOptions={{
                 headerShown: false,
+                animation: "fade",
                 tabBarHideOnKeyboard: true,
                 sceneStyle: {
                     backgroundColor: colors.background,
                 },
-                tabBarButton: (props) => (
-                    <AnimatedPressable
-                        {...props}
-                        hapticMode="light"
-                        scaleTo={0.85}
-                        style={[
-                            { flex: 1 },
-                            props.style
-                        ]}
-                    />
-                ),
                 tabBarStyle: {
                     position: "absolute",
                     bottom: insets.bottom + 16,
@@ -80,21 +75,20 @@ export default function TabLayout() {
                     height: 72,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    elevation: 8,
+                    elevation: isDarkMode ? 2 : 8,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 14,
-
+                    shadowOffset: { width: 0, height: isDarkMode ? 3 : 6 },
+                    shadowOpacity: isDarkMode ? 0.25 : 0.08,
+                    shadowRadius: isDarkMode ? 8 : 14,
                 },
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {
                     fontSize: 10,
-                    fontWeight: "600",
+                    fontWeight: "700",
                     letterSpacing: 0.2,
                     marginTop: 4,
                 },
-                tabBarActiveTintColor: colors.accent,
+                tabBarActiveTintColor: colors.text,
                 tabBarInactiveTintColor: colors.textSecondary,
                 tabBarItemStyle: {
                     alignItems: "center",

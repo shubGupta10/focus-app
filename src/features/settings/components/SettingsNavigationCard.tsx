@@ -26,7 +26,7 @@ export function SettingsNavigationCard() {
                 </View>
                 <Pressable
                     onPress={() => router.push("/onboarding")}
-                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end shadow-sm"
+                    className="bg-accent py-3 px-6 rounded-full items-center justify-center active:opacity-80 self-end"
                 >
                     <Text className="text-accentForeground font-bold text-[14px] tracking-wide">
                         Revisit Guide

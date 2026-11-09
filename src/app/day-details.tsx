@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useDayDetails } from "@/features/stats/hooks/useDayDetails";
 import { formatExactTime, getTodayDateString, secondsToHoursAndMinutes } from "@/utils/timeUtils";
@@ -39,15 +40,17 @@ export default function DayDetailsScreen() {
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
             {/* Header */}
             <View className="flex-row items-center px-6 pt-5 pb-3">
-                <Pressable
+                <AnimatedPressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center active:opacity-70 mr-4 border border-border shadow-sm"
+                    scaleTo={0.88}
+                    hapticMode="light"
+                    className="w-10 h-10 rounded-full bg-surfaceElevated items-center justify-center mr-4 border border-border shadow-sm"
                     style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
                     <Ionicons name="arrow-back" size={20} color={colors.text} />
-                </Pressable>
+                </AnimatedPressable>
 
                 <View className="flex-1">
                     <Text className="text-text font-black text-2xl tracking-tight" numberOfLines={1}>

@@ -1,8 +1,9 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { RoutineInput } from "@/types/routine";
 import { formatRoutineDays, formatTime12Hour } from "@/utils/routineScheduler";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 export type StarterTemplate = RoutineInput & {
     icon: keyof typeof Ionicons.glyphMap;
@@ -55,9 +56,11 @@ export function RoutineEmptyState({
                     Recurring focus blocks start automatically and guard your selected apps on cue.
                 </Text>
 
-                <Pressable
+                <AnimatedPressable
                     onPress={onCreateCustom}
-                    className="mt-6 flex-row items-center bg-accent px-7 py-3.5 rounded-full active:opacity-85"
+                    hapticMode="medium"
+                    scaleTo={0.92}
+                    className="mt-6 flex-row items-center bg-accent px-7 py-3.5 rounded-full"
                     accessibilityRole="button"
                     accessibilityLabel="Create Custom Routine"
                 >
@@ -65,7 +68,7 @@ export function RoutineEmptyState({
                     <Text className="text-accentForeground font-bold text-sm">
                         Create Routine
                     </Text>
-                </Pressable>
+                </AnimatedPressable>
             </View>
 
             <View className="mt-4 mb-1">
@@ -76,10 +79,19 @@ export function RoutineEmptyState({
 
             <View className="space-y-3">
                 {STARTER_TEMPLATES.map((template) => (
-                    <Pressable
+                    <AnimatedPressable
                         key={template.name}
                         onPress={() => onSelectTemplate(template)}
-                        className="bg-surfaceElevated rounded-[24px] p-5 mb-3 active:opacity-80 border border-border shadow-sm"
+                        hapticMode="light"
+                        scaleTo={0.98}
+                        className="bg-surfaceElevated rounded-[24px] p-5 mb-3 border border-border"
+                        style={{
+                            elevation: 2,
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.06,
+                            shadowRadius: 10,
+                        }}
                         accessibilityRole="button"
                         accessibilityLabel={`Use template ${template.name}`}
                     >
@@ -98,13 +110,13 @@ export function RoutineEmptyState({
                                 </View>
                             </View>
 
-                            <View className="bg-accent/15 px-3.5 py-1.5 rounded-full">
-                                <Text className="text-accent font-bold text-xs">
+                            <View className="bg-accent px-3.5 py-1.5 rounded-full">
+                                <Text className="text-accentForeground font-bold text-xs">
                                     Use
                                 </Text>
                             </View>
                         </View>
-                    </Pressable>
+                    </AnimatedPressable>
                 ))}
             </View>
         </ScrollView>

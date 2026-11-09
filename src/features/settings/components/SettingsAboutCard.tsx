@@ -57,10 +57,10 @@ export function SettingsAboutCard() {
             >
                 <Pressable
                     onPress={() => router.push("/updates")}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface dark:active:bg-surface"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="cloud-download" size={16} color="#3b82f6" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">
@@ -72,10 +72,10 @@ export function SettingsAboutCard() {
 
                 <Pressable
                     onPress={handleFeedback}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#f43f5e]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="chatbubble-ellipses" size={16} color="#f43f5e" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">Send Feedback</Text>
@@ -85,10 +85,10 @@ export function SettingsAboutCard() {
 
                 <Pressable
                     onPress={handleContactSupport}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#3b82f6]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="mail" size={16} color="#3b82f6" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">Contact Support</Text>
@@ -98,10 +98,10 @@ export function SettingsAboutCard() {
 
                 <Pressable
                     onPress={handlePrivacyPolicy}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#10b981]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="shield-checkmark" size={16} color="#10b981" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">Privacy Policy</Text>
@@ -111,10 +111,10 @@ export function SettingsAboutCard() {
 
                 <Pressable
                     onPress={handleTransparency}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#f43f5e]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="eye" size={16} color="#f43f5e" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">Transparency</Text>
@@ -124,10 +124,10 @@ export function SettingsAboutCard() {
 
                 <Pressable
                     onPress={handleWebsite}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-black/5 dark:active:bg-white/5"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-surface"
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full bg-[#8b5cf6]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="globe" size={16} color="#8b5cf6" />
                         </View>
                         <Text className="text-text font-bold text-[16px]">Website</Text>
@@ -137,7 +137,7 @@ export function SettingsAboutCard() {
 
                 <View className="flex-row items-center justify-between px-5 py-4">
                     <View className="flex-row items-center flex-1 mr-3">
-                        <View className="w-8 h-8 rounded-full bg-[#10b981]/10 items-center justify-center mr-4">
+                        <View className="w-8 h-8 rounded-full bg-surface items-center justify-center mr-4">
                             <Ionicons name="analytics" size={16} color="#10b981" />
                         </View>
                         <View className="flex-1">

@@ -34,7 +34,7 @@ export default function OnboardingScreen() {
                             className={`h-1.5 rounded-full ${s === step
                                 ? "w-8 bg-accent"
                                 : s < step
-                                    ? "w-4 bg-accent/40"
+                                    ? "w-4 bg-accentMuted"
                                     : "w-4 bg-surface border border-border"
                                 }`}
                         />

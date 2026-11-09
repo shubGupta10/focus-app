@@ -167,11 +167,11 @@ export function WhatsNewModal({ visible, data, onClose }: WhatsNewModalProps) {
                         borderColor: colors.border,
                         height: modalHeight,
                         width: modalWidth,
-                        elevation: 12,
+                        elevation: 6,
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.2,
-                        shadowRadius: 20,
+                        shadowOpacity: 0.12,
+                        shadowRadius: 16,
                     }}
                     className="rounded-[32px] p-6 border flex-col"
                 >
@@ -200,17 +200,17 @@ export function WhatsNewModal({ visible, data, onClose }: WhatsNewModalProps) {
 
                     <View className="h-[1px] bg-border mt-3 mb-4" />
 
-                    {/* Action Button */}
+                    {/* M3 Filled Button */}
                     <AnimatedPressable
                         onPress={handleDismiss}
                         hapticMode="light"
                         scaleTo={0.97}
-                        className="w-full py-4 rounded-2xl items-center justify-center bg-accent"
+                        className="w-full py-4 rounded-full items-center justify-center bg-accent"
                         accessibilityRole="button"
                         accessibilityLabel="Got it"
                     >
                         <Text
-                            className="font-bold text-base tracking-wide"
+                            className="font-bold text-base tracking-wider uppercase"
                             style={{ color: colors.accentForeground }}
                         >
                             Got it

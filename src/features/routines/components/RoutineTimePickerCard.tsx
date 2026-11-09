@@ -1,7 +1,8 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { formatTime12Hour } from "@/utils/routineScheduler";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 interface RoutineTimePickerCardProps {
     startTime: string;
@@ -32,9 +33,11 @@ export function RoutineTimePickerCard({
             </View>
 
             <View className="flex-row items-center justify-between">
-                <Pressable
+                <AnimatedPressable
                     onPress={onSelectStartTime}
-                    className="flex-1 bg-surfaceElevated rounded-3xl p-5 mr-2 active:opacity-80"
+                    hapticMode="light"
+                    scaleTo={0.96}
+                    className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-5 mr-2"
                     accessibilityRole="button"
                     accessibilityLabel="Select start time"
                 >
@@ -45,11 +48,13 @@ export function RoutineTimePickerCard({
                         </Text>
                         <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                     </View>
-                </Pressable>
+                </AnimatedPressable>
 
-                <Pressable
+                <AnimatedPressable
                     onPress={onSelectEndTime}
-                    className="flex-1 bg-surfaceElevated rounded-3xl p-5 ml-2 active:opacity-80"
+                    hapticMode="light"
+                    scaleTo={0.96}
+                    className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-5 ml-2"
                     accessibilityRole="button"
                     accessibilityLabel="Select end time"
                 >
@@ -60,7 +65,7 @@ export function RoutineTimePickerCard({
                         </Text>
                         <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                     </View>
-                </Pressable>
+                </AnimatedPressable>
             </View>
         </View>
     );

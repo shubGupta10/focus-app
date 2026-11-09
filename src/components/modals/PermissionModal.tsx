@@ -1,7 +1,8 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { cssInterop } from "nativewind";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 import FocusBlocker from "../../../modules/focus-blocker/src/FocusBlockerModule";
 import { useTheme } from "../../contexts/ThemeContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -43,11 +44,13 @@ export function PermissionRow({
     const { colors } = useTheme();
 
     return (
-        <TouchableOpacity
-            className={`p-4 rounded-2xl flex-row justify-between items-center ${isGranted ? 'bg-successMuted' : 'bg-surfaceElevated'
+        <AnimatedPressable
+            className={`p-4 rounded-2xl flex-row justify-between items-center ${isGranted ? 'bg-successMuted border border-transparent' : 'bg-surfaceElevated border border-border'
                 }`}
             onPress={isGranted ? undefined : onRequest}
             disabled={isGranted}
+            scaleTo={0.98}
+            hapticMode="light"
             accessibilityRole={isGranted ? "text" : "button"}
             accessibilityLabel={accessibilityLabel}
             accessibilityHint={isGranted ? "Already granted" : accessibilityHint}
@@ -67,7 +70,7 @@ export function PermissionRow({
             ) : (
                 <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
             )}
-        </TouchableOpacity>
+        </AnimatedPressable>
     );
 }
 
@@ -102,18 +105,29 @@ export function PermissionModal({
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surfaceElevated w-full max-w-sm rounded-3xl p-6">
+                <View
+                    className="bg-surfaceElevated border border-border w-full max-w-sm rounded-[28px] p-6"
+                    style={{
+                        elevation: 6,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 16,
+                    }}
+                >
                     <View className="flex-row justify-between items-center mb-3">
                         <Text className="text-text text-xl font-black tracking-tight">Permissions Required</Text>
-                        <TouchableOpacity
+                        <AnimatedPressable
                             className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             onPress={onClose}
-                            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                            scaleTo={0.88}
+                            hapticMode="light"
+                            hitSlop={12}
                             accessibilityRole="button"
                             accessibilityLabel="Close permissions modal"
                         >
                             <Ionicons name="close" size={20} color={colors.textSecondary} />
-                        </TouchableOpacity>
+                        </AnimatedPressable>
                     </View>
                     <Text className="text-textSecondary text-sm leading-5 mb-5 font-medium">
                         Lockout needs a few permissions to block distractions and keep the timer running smoothly.
@@ -154,14 +168,17 @@ export function PermissionModal({
                         />
                     </View>
 
-                    <TouchableOpacity
-                        className="mt-5 bg-accent py-3.5 rounded-xl items-center active:opacity-80"
+                    {/* M3 Filled Button (Primary Emphasis) */}
+                    <AnimatedPressable
+                        className="mt-6 w-full bg-accent py-4 rounded-full items-center justify-center"
                         onPress={onClose}
+                        scaleTo={0.97}
+                        hapticMode="light"
                         accessibilityRole="button"
                         accessibilityLabel="Done and return"
                     >
-                        <Text className="text-accentForeground font-black text-sm uppercase">Done</Text>
-                    </TouchableOpacity>
+                        <Text className="text-accentForeground font-bold text-sm tracking-wider uppercase">Done</Text>
+                    </AnimatedPressable>
                 </View>
             </BlurView>
         </Modal>

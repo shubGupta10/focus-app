@@ -540,6 +540,12 @@ class FocusBlockerModule : Module() {
                     "accent" to toHex(android.R.color.system_accent1_500),
                     "accentMuted" to toHex(android.R.color.system_accent1_100),
 
+                    "lightAccent" to toHex(android.R.color.system_accent1_600, android.R.color.system_accent1_500),
+                    "lightAccentMuted" to toHex(android.R.color.system_accent1_100),
+
+                    "darkAccent" to toHex(android.R.color.system_accent1_200, android.R.color.system_accent1_300),
+                    "darkAccentMuted" to toHex(android.R.color.system_accent1_800, android.R.color.system_accent1_700),
+
                     "lightBackground" to toHex(android.R.color.system_neutral1_50),
                     "lightSurface" to toHex(android.R.color.system_neutral1_100),
                     "lightSurfaceElevated" to toHex(android.R.color.system_neutral1_10, android.R.color.system_neutral1_50),

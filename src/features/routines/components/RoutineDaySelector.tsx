@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
+import { Text, View } from "react-native";
 
 const DAYS = [
     { label: "Mo", value: 1 },
@@ -28,11 +29,16 @@ export function RoutineDaySelector({
                 {DAYS.map((day) => {
                     const isSelected = selectedDays.has(day.value);
                     return (
-                        <Pressable
+                        <AnimatedPressable
                             key={day.value}
                             onPress={() => onToggleDay(day.value)}
+                            hapticMode="light"
+                            scaleTo={0.88}
                             className={`w-11 h-11 rounded-full items-center justify-center ${isSelected ? "bg-accent" : "bg-surface"
-                                } active:opacity-80`}
+                                }`}
+                            accessibilityRole="checkbox"
+                            accessibilityState={{ checked: isSelected }}
+                            accessibilityLabel={`${day.label}, ${isSelected ? "active" : "inactive"}`}
                         >
                             <Text
                                 className={`font-black text-sm ${isSelected ? "text-accentForeground" : "text-textSecondary"
@@ -40,8 +46,8 @@ export function RoutineDaySelector({
                             >
                                 {day.label}
                             </Text>
-                        </Pressable>
-                    );9
+                        </AnimatedPressable>
+                    );
                 })}
             </View>
         </View>

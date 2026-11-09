@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ShopAnimationCard } from "@/features/shop/components/ShopAnimationCard";
@@ -74,15 +75,17 @@ export default function ShopScreen() {
 
 
             <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
-                <Pressable
+                <AnimatedPressable
                     onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    hapticMode="light"
+                    scaleTo={0.88}
+                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm"
                     style={{ elevation: 1 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back"
                 >
                     <Ionicons name="arrow-back" size={20} color={colors.text} />
-                </Pressable>
+                </AnimatedPressable>
                 <View className="flex-row items-center gap-5">
                     <View className="flex-row items-center bg-surfaceElevated border border-border px-3.5 py-1.5 rounded-full shadow-sm"
                         style={{ elevation: 2 }}
@@ -146,7 +149,7 @@ export default function ShopScreen() {
                                                 style={[{ backgroundColor: swatchColor, borderColor: isEquipped ? colors.accent : undefined }, !isOwned ? { opacity: 0.9 } : undefined]}
                                             >
                                                 {!isOwned && (
-                                                    <View className="absolute -top-1 -right-2 bg-surface px-2 py-1 rounded-full border border-border flex-row items-center shadow-sm">
+                                                    <View className="absolute -top-1 -right-2 bg-surface px-2 py-1 rounded-full border border-border flex-row items-center">
                                                         <Text style={{ fontSize: 10, marginRight: 4 }}>🪙</Text>
                                                         <Text className="text-text font-bold text-[10px]">{item.cost}</Text>
                                                     </View>

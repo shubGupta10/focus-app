@@ -31,7 +31,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
 
     return (
         <View
-            className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surfaceElevated rounded-[32px] overflow-hidden`}
+            className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surfaceElevated border border-border rounded-[32px] overflow-hidden`}
         >
             <View className="w-full aspect-square bg-background items-center justify-center overflow-hidden">
                 <View style={{ transform: [{ scale: 0.85 }] }}>
@@ -64,13 +64,20 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
                         onPress={onAction}
                         hapticMode="light"
                         disabled={isProcessing || isEquipped}
-                        className={`px-6 py-3 rounded-full items-center justify-center flex-row ${isEquipped ? 'bg-accent/10 opacity-50' : isOwned ? 'bg-surfaceElevated border border-border' : ''}`}
-                        style={!isOwned && !isEquipped ? { backgroundColor: colors.accent } : undefined}
+                        className={`px-6 py-3 rounded-full items-center justify-center flex-row ${
+                            isEquipped
+                                ? 'bg-accent'
+                                : isOwned
+                                ? 'bg-surfaceElevated border border-border'
+                                : 'bg-accent'
+                        }`}
+                        accessibilityRole="button"
+                        accessibilityLabel={isOwned ? (isEquipped ? 'Active item' : 'Equip item') : 'Unlock item'}
                     >
                         {isProcessing ? (
-                            <GlobalLoader color={isOwned ? colors.text : "#fff"} size="small" />
+                            <GlobalLoader color={isOwned && !isEquipped ? colors.text : colors.accentForeground} size="small" />
                         ) : (
-                            <Text className={`font-bold ${!isOwned && !isEquipped ? 'text-accentForeground' : isEquipped ? 'text-accent' : 'text-text'}`}>
+                            <Text className={`font-bold ${!isOwned || isEquipped ? 'text-accentForeground' : 'text-text'}`}>
                                 {isOwned ? (isEquipped ? 'Active' : 'Equip') : 'Unlock'}
                             </Text>
                         )}

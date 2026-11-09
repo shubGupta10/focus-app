@@ -56,7 +56,10 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                     backgroundColor: colors.scrim,
                 }}
             >
-                <View className="bg-surfaceElevated rounded-t-3xl p-6" style={[{ paddingBottom: Math.max(insets.bottom + 12, 24) }, activeStyle]}>
+                <View className="bg-surfaceElevated rounded-t-[32px] border-t border-border px-6 pt-3" style={[{ paddingBottom: Math.max(insets.bottom + 12, 24) }, activeStyle]}>
+                    {/* M3 Bottom Sheet Drag Handle */}
+                    <View className="w-10 h-1 bg-border rounded-full self-center mb-5" />
+
                     <View className="flex-row justify-between items-center mb-6">
                         <View className="flex-row items-center gap-3">
                             <Text className="text-text text-xl font-black tracking-tight">Start a Session</Text>
@@ -66,15 +69,17 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                             />
                         </View>
 
-                        <Pressable
-                            className="w-10 h-10 rounded-full bg-surface items-center justify-center active:opacity-70"
+                        <AnimatedPressable
+                            className="w-10 h-10 rounded-full bg-surface items-center justify-center"
+                            hapticMode="light"
+                            scaleTo={0.88}
                             onPress={onClose}
                             hitSlop={12}
                             accessibilityRole="button"
                             accessibilityLabel="Close modal"
                         >
                             <Ionicons name="close" size={20} color={colors.textSecondary} />
-                        </Pressable>
+                        </AnimatedPressable>
                     </View>
 
 
@@ -206,6 +211,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         )}
                     </View>
 
+                    {/* M3 Filled Button */}
                     <AnimatedPressable
                         onPress={() => {
                             if (useAppStore.getState().hapticsEnabled) {
@@ -214,7 +220,8 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                             onStartSession(selectedMinutes, selectedMinutes === -1 ? false : isStrict);
                         }}
                         hapticMode="light"
-                        className="w-full bg-accent rounded-2xl p-4 items-center justify-center flex-row"
+                        scaleTo={0.97}
+                        className="w-full bg-accent rounded-full py-4 items-center justify-center flex-row"
                         accessibilityRole="button"
                         accessibilityLabel={
                             selectedMinutes === -1
@@ -230,7 +237,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                                 style={{ marginRight: 8 }}
                             />
                         )}
-                        <Text className="text-accentForeground font-black text-base uppercase">
+                        <Text className="text-accentForeground font-bold text-base uppercase tracking-wider">
                             {selectedMinutes === -1
                                 ? "Start stopwatch Session"
                                 : isStrict

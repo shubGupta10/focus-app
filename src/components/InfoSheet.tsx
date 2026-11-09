@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -36,19 +37,21 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
 
     return (
         <>
-            <Pressable
+            <AnimatedPressable
                 onPress={() => setIsVisible(true)}
-                className="w-8 h-8 rounded-full bg-surfaceElevated items-center justify-center border border-border active:opacity-70 shadow-sm"
+                hapticMode="light"
+                scaleTo={0.88}
+                className="w-8 h-8 rounded-full bg-surfaceElevated items-center justify-center border border-border shadow-sm"
                 style={{ elevation: 1 }}
                 accessibilityRole="button"
                 accessibilityLabel={`More information about ${title}`}
             >
                 <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
-            </Pressable>
+            </AnimatedPressable>
 
             <Modal transparent={true} visible={isVisible} animationType="none" onRequestClose={closeSheet}>
                 <View className="flex-1 justify-end">
-                    {/* Standard Scrim Backdrop */}
+
                     <Animated.View
                         style={{ opacity: fadeAnim, backgroundColor: colors.scrim }}
                         className="absolute inset-0"
@@ -56,7 +59,7 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
                         <Pressable className="flex-1" onPress={closeSheet} />
                     </Animated.View>
 
-                    {/* Bottom Sheet Card */}
+
                     <Animated.View
                         style={[
                             {
@@ -65,24 +68,26 @@ export function InfoSheet({ title, description, children }: InfoSheetProps) {
                             },
                             activeStyle
                         ]}
-                        className="bg-surfaceElevated rounded-t-[32px] border-t border-border p-6 shadow-2xl mt-24"
+                        className="bg-surfaceElevated rounded-t-[32px] border-t border-border px-6 pt-3 mt-24"
                     >
-                        {/* Drag / Pill Handle */}
-                        <View className="w-10 h-1 bg-border rounded-full self-center mb-6" />
+
+                        <View className="w-10 h-1 bg-border rounded-full self-center mb-5" />
 
                         <Text className="text-text font-black text-2xl mb-3 tracking-tight">{title}</Text>
                         <Text className="text-textSecondary text-sm leading-relaxed mb-6 font-medium">{description}</Text>
 
                         {children}
 
-                        <Pressable
+                        <AnimatedPressable
                             onPress={closeSheet}
-                            className="mt-2 bg-accent py-4 rounded-full items-center active:opacity-85"
+                            hapticMode="light"
+                            scaleTo={0.96}
+                            className="mt-2 bg-accent py-4 rounded-full items-center"
                             accessibilityRole="button"
                             accessibilityLabel="Dismiss sheet"
                         >
                             <Text className="text-accentForeground font-bold text-base uppercase tracking-wider">Got it</Text>
-                        </Pressable>
+                        </AnimatedPressable>
                     </Animated.View>
                 </View>
             </Modal>

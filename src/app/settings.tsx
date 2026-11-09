@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsAboutCard } from "@/features/settings/components/SettingsAboutCard";
 import { SettingNotificationCard } from "@/features/settings/components/SettingsNotificationsCard";
@@ -20,15 +21,17 @@ export default function SettingsTab() {
     return (
         <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-2">
-                <Pressable
+                <AnimatedPressable
                     onPress={() => router.back()}
-                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm"
+                    hapticMode="light"
+                    scaleTo={0.88}
+                    className="mr-4 w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm"
                     style={{ elevation: 2 }}
                     accessibilityRole="button"
                     accessibilityLabel="Go back to Home"
                 >
                     <Ionicons name="chevron-back" size={20} color={colors.text} />
-                </Pressable>
+                </AnimatedPressable>
                 <Text className="text-text text-3xl font-black tracking-tight leading-none">Settings</Text>
             </View>
 

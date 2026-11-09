@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { Material3Switch } from "@/components/Material3Switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Routine, RoutineInput } from "@/types/routine";
@@ -154,20 +155,33 @@ export function RoutineEditorModal({
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
             <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
-                    <Pressable onPress={onClose} hitSlop={10} className="w-9 h-9 rounded-full bg-surface items-center justify-center active:opacity-75">
+                    <AnimatedPressable
+                        onPress={onClose}
+                        hitSlop={10}
+                        scaleTo={0.88}
+                        hapticMode="light"
+                        className="w-10 h-10 rounded-full bg-surface items-center justify-center"
+                        accessibilityRole="button"
+                        accessibilityLabel="Close routine editor"
+                    >
                         <Ionicons name="close" size={20} color={colors.textSecondary} />
-                    </Pressable>
+                    </AnimatedPressable>
                     <Text className="text-text font-black text-lg">
                         {routineToEdit ? "Edit Routine" : "New Routine"}
                     </Text>
-                    <Pressable
+                    <AnimatedPressable
                         onPress={handleSave}
-                        className="bg-accent px-5 py-2 rounded-full active:opacity-85"
+                        scaleTo={0.92}
+                        hapticMode="light"
+                        className="bg-accent px-5 py-2 rounded-full"
+                        style={{ elevation: 1 }}
+                        accessibilityRole="button"
+                        accessibilityLabel="Save routine"
                     >
                         <Text className="text-accentForeground font-bold text-xs uppercase tracking-wider">
                             Save
                         </Text>
-                    </Pressable>
+                    </AnimatedPressable>
                 </View>
 
                 <ScrollView className="flex-1 px-6 pt-4" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
@@ -189,19 +203,37 @@ export function RoutineEditorModal({
                             }}
                             placeholder="e.g. Workday Focus"
                             placeholderTextColor={colors.textMuted}
-                            className="bg-surfaceElevated rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
+                            className="bg-surfaceElevated border border-border rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
                         />
 
+                        {/* M3 Preset Filter Chips */}
                         <View className="flex-row flex-wrap gap-2 px-1">
-                            {PRESET_NAMES.map((preset) => (
-                                <Pressable
-                                    key={preset}
-                                    onPress={() => setName(preset)}
-                                    className="bg-surfaceElevated px-3.5 py-2 rounded-full active:opacity-75"
-                                >
-                                    <Text className="text-textSecondary text-xs font-semibold">{preset}</Text>
-                                </Pressable>
-                            ))}
+                            {PRESET_NAMES.map((preset) => {
+                                const isSelected = name.trim() === preset;
+                                return (
+                                    <AnimatedPressable
+                                        key={preset}
+                                        onPress={() => setName(preset)}
+                                        scaleTo={0.94}
+                                        hapticMode="light"
+                                        className={`px-4 py-2 rounded-full ${isSelected
+                                                ? "bg-accent"
+                                                : "bg-surfaceElevated border border-border"
+                                            }`}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Set preset name to ${preset}`}
+                                    >
+                                        <Text
+                                            className={`text-xs ${isSelected
+                                                    ? "text-accentForeground font-bold"
+                                                    : "text-textSecondary font-semibold"
+                                                }`}
+                                        >
+                                            {preset}
+                                        </Text>
+                                    </AnimatedPressable>
+                                );
+                            })}
                         </View>
                     </View>
 
@@ -218,12 +250,21 @@ export function RoutineEditorModal({
                         onToggleDay={toggleDay}
                     />
 
-                    <View className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center justify-between mb-8">
+                    <View
+                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-8"
+                        style={{
+                            elevation: 2,
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.06,
+                            shadowRadius: 10,
+                        }}
+                    >
                         <View className="flex-1 pr-4">
                             <View className="flex-row items-center mb-1">
                                 <Text className="text-text font-bold text-base mr-2">Strict Mode</Text>
-                                <View className="bg-accent/15 px-2 py-0.5 rounded-md">
-                                    <Text className="text-accent text-[10px] font-bold uppercase">1.5x Coins</Text>
+                                <View className="bg-accent px-2 py-0.5 rounded-md">
+                                    <Text className="text-accentForeground text-[10px] font-bold uppercase">1.5x Coins</Text>
                                 </View>
                             </View>
                             <Text className="text-textSecondary text-xs leading-4">
@@ -233,12 +274,21 @@ export function RoutineEditorModal({
                         <Material3Switch value={isStrict} onValueChange={setIsStrict} />
                     </View>
 
-                    <Pressable
+                    <AnimatedPressable
                         onPress={() => setIsAppSelectionVisible(true)}
-                        className="bg-surfaceElevated rounded-3xl p-5 flex-row items-center justify-between mb-3 active:opacity-75"
+                        scaleTo={0.98}
+                        hapticMode="light"
+                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-3"
+                        style={{
+                            elevation: 2,
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.06,
+                            shadowRadius: 10,
+                        }}
                     >
                         <View className="flex-row items-center flex-1">
-                            <View className="w-10 h-10 rounded-full bg-accent/20 items-center justify-center mr-3">
+                            <View className="w-10 h-10 rounded-full bg-accentMuted items-center justify-center mr-3">
                                 <Ionicons name="apps" size={20} color={colors.accent} />
                             </View>
 
@@ -254,7 +304,7 @@ export function RoutineEditorModal({
                             </View>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-                    </Pressable>
+                    </AnimatedPressable>
                 </ScrollView>
             </SafeAreaView>
             <RoutineAppSelectionModal

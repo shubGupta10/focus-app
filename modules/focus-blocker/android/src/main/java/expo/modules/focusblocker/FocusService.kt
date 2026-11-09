@@ -474,7 +474,7 @@ class FocusService : Service() {
             }
 
             val dynamicAccent = if (isDynamicColorSupported) {
-                try { getColor(android.R.color.system_accent1_500) } catch (e: Exception) { Color.parseColor("#3B82F6") }
+                try { getColor(android.R.color.system_accent1_200) } catch (e: Exception) { Color.parseColor("#3B82F6") }
             } else {
                 Color.parseColor("#3B82F6")
             }

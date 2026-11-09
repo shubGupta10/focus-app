@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { AppList } from "@/features/blocklist/components/AppList";
 import { BlocklistSearchHeader } from "@/features/blocklist/components/BlocklistSearchHeader";
@@ -71,22 +72,35 @@ export function RoutineAppSelectionModal({
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
             <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
-                    <Pressable onPress={onClose} hitSlop={10} className="w-9 h-9 rounded-full bg-surface items-center justify-center active:opacity-75">
+                    <AnimatedPressable
+                        onPress={onClose}
+                        hitSlop={10}
+                        scaleTo={0.88}
+                        hapticMode="light"
+                        className="w-10 h-10 rounded-full bg-surface items-center justify-center"
+                        accessibilityRole="button"
+                        accessibilityLabel="Close app selection"
+                    >
                         <Ionicons name="close" size={20} color={colors.textSecondary} />
-                    </Pressable>
+                    </AnimatedPressable>
 
                     <Text className="text-text font-black text-lg">
                         Select Apps
                     </Text>
-                    <Pressable onPress={() => onSave(selectedApps)}
-                        className="bg-accent px-5 py-2 rounded-full active:opacity-85"
+                    {/* M3 Filled Button Pill */}
+                    <AnimatedPressable
+                        onPress={() => onSave(selectedApps)}
+                        scaleTo={0.92}
+                        hapticMode="light"
+                        className="bg-accent px-5 py-2 rounded-full"
+                        style={{ elevation: 1 }}
                         accessibilityRole="button"
                         accessibilityLabel="Save app selections"
                     >
                         <Text className="text-accentForeground font-bold text-xs uppercase tracking-wider">
                             Save
                         </Text>
-                    </Pressable>
+                    </AnimatedPressable>
                 </View>
 
                 <View className="px-6 pb-2">

@@ -1,3 +1,4 @@
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { PermissionModal } from "@/components/modals/PermissionModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ActiveSessionUI } from "@/features/session/components/ActiveSessionUI";
@@ -104,9 +105,11 @@ export default function Index() {
 
                     <View className="flex-row items-center">
 
-                        <Pressable
+                        <AnimatedPressable
                             onPress={() => router.push("/notifications")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
+                            hapticMode="light"
+                            scaleTo={0.88}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Notifications"
@@ -120,27 +123,31 @@ export default function Index() {
                                     </Text>
                                 </View>
                             )}
-                        </Pressable>
+                        </AnimatedPressable>
 
-                        <Pressable
+                        <AnimatedPressable
                             onPress={() => router.push("/shop")}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
+                            hapticMode="light"
+                            scaleTo={0.88}
+                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Shop"
                         >
                             <Ionicons name="cart-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
-                        </Pressable>
+                        </AnimatedPressable>
 
-                        <Pressable
+                        <AnimatedPressable
                             onPress={() => router.push("/settings")}
-                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated border border-border items-center justify-center active:opacity-70 shadow-sm`}
+                            hapticMode="light"
+                            scaleTo={0.88}
+                            className={`${isSmallDevice ? "w-9 h-9" : "w-10 h-10"} rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
                             accessibilityLabel="Open Settings"
                         >
                             <Ionicons name="settings-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
-                        </Pressable>
+                        </AnimatedPressable>
                     </View>
                 </Animated.View>
             )}
@@ -156,7 +163,7 @@ export default function Index() {
 
                         {(!hasSelectedApps || !hasAllPermissions) ? (
                             <View className={`items-center ${isSmallDevice ? "mt-1" : "mt-2"}`}>
-                                <Pressable
+                                <AnimatedPressable
                                     onPress={() => {
                                         if (!hasSelectedApps) {
                                             router.push("/(tabs)/apps");
@@ -164,7 +171,9 @@ export default function Index() {
                                             setShowPermission(true);
                                         }
                                     }}
-                                    className={`flex-row items-center bg-surfaceElevated border border-border px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full active:opacity-75 shadow-sm`}
+                                    hapticMode="light"
+                                    scaleTo={0.96}
+                                    className={`flex-row items-center bg-surfaceElevated border border-border px-5 ${isSmallDevice ? "py-2.5 mt-1" : "py-3 mt-3"} rounded-full shadow-sm`}
                                     style={{
                                         elevation: 3,
                                         shadowColor: "#000",
@@ -183,7 +192,7 @@ export default function Index() {
                                         {!hasSelectedApps ? "1. Choose apps to guard" : "2. Enable permissions"}
                                     </Text>
                                     <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-                                </Pressable>
+                                </AnimatedPressable>
                             </View>
                         ) : (
                             <View className={`items-center ${isSmallDevice ? "mt-2 mb-1" : "mt-6 mb-2"}`}>
@@ -204,9 +213,11 @@ export default function Index() {
                         </View>
 
                         <View className="w-full mt-auto" style={{ marginBottom: isSmallDevice ? 94 : 116 }}>
-                            <Pressable
+                            <AnimatedPressable
                                 onPress={() => router.push("/(tabs)/apps")}
-                                className={`self-center bg-surfaceElevated border border-border rounded-full px-5 ${isSmallDevice ? "py-2.5" : "py-3"} flex-row items-center justify-center active:opacity-70 shadow-sm`}
+                                hapticMode="light"
+                                scaleTo={0.96}
+                                className={`self-center bg-surfaceElevated border border-border rounded-full px-5 ${isSmallDevice ? "py-2.5" : "py-3"} flex-row items-center justify-center shadow-sm`}
                                 style={{
                                     elevation: 2,
                                     shadowColor: "#000",
@@ -220,7 +231,7 @@ export default function Index() {
                                     {engine.selectedApps.length} {engine.selectedApps.length === 1 ? "app blocked" : "apps blocked"}
                                 </Text>
                                 <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} style={{ marginLeft: 6, marginTop: 1 }} />
-                            </Pressable>
+                            </AnimatedPressable>
                         </View>
                     </Animated.View>
                 ) : (

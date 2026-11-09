@@ -32,7 +32,16 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
             <View style={{ backgroundColor: colors.scrim }} className="absolute inset-0" />
 
             <View className="flex-1 justify-center items-center px-6">
-                <View className="w-full max-w-sm bg-surfaceElevated rounded-[32px] p-8 shadow-xl items-center">
+                <View
+                    className="w-full max-w-sm bg-surfaceElevated border border-border rounded-[28px] p-8 items-center"
+                    style={{
+                        elevation: 6,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 16,
+                    }}
+                >
 
                     <View className="w-20 h-20 rounded-[24px] items-center justify-center mb-6 bg-surface">
                         <Text className="text-5xl">{isSuccess ? "🎉" : "🔔"}</Text>
@@ -68,14 +77,16 @@ export function SessionResultModal({ visible, onClose, result }: SessionResultMo
                         </View>
                     )}
 
+                    {/* M3 Filled Button */}
                     <AnimatedPressable
                         onPress={onClose}
                         hapticMode="light"
-                        className="w-full rounded-2xl p-4 items-center justify-center bg-accent mt-4"
+                        scaleTo={0.97}
+                        className="w-full rounded-full py-4 items-center justify-center bg-accent mt-4"
                         accessibilityRole="button"
                         accessibilityLabel={isSuccess ? "Continue" : "Dismiss"}
                     >
-                        <Text className="font-black text-base uppercase text-accentForeground">
+                        <Text className="font-bold text-base uppercase tracking-wider text-accentForeground">
                             {isSuccess ? "CONTINUE" : "DISMISS"}
                         </Text>
                     </AnimatedPressable>
