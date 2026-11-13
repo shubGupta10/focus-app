@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { addNotification } from "./useNotifications";
+import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 export type AppNotification = {
     id: string;
@@ -82,6 +83,11 @@ export function useAutoUpdateCheck() {
                         const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
                         const downloadUrl = apkAsset?.browser_download_url || "https://github.com/shubGupta10/focus-app/releases/latest";
 
+                        const updateTitle = `Full update available (v${latest})`;
+                        const updateDesc =
+                            data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
+                            "A new update is ready for you with fixes and improvements.";
+
                         await addNotification(db, {
                             id: `update_${latest}`,
                             type: "update",
@@ -94,6 +100,16 @@ export function useAutoUpdateCheck() {
                             action_url: "/updates",
                         })
 
+                        const notifiedKey = `notified_system_update_${latest}`;
+                        const alreadyNotified = await AsyncStorage.getItem(notifiedKey);
+                        if (!alreadyNotified) {
+                            FocusBlocker.sendNotification(
+                                updateTitle,
+                                updateDesc,
+                                "lockout://updates"
+                            );
+                            await AsyncStorage.setItem(notifiedKey, "true");
+                        }
                     }
                 }
 

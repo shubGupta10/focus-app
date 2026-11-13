@@ -16,7 +16,7 @@ export default function DataManagement() {
     } = useDataManagementController();
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-3">
                 <Pressable
                     onPress={() => router.back()}

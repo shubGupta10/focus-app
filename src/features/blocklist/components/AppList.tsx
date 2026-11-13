@@ -72,7 +72,7 @@ export function AppList({
             data={filteredApps}
             keyExtractor={(app) => app.packageName}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 100 }}
+            contentContainerStyle={{ paddingBottom: 24 }}
             renderItem={({ item: app }) => (
                 <AppListItem
                     app={app}

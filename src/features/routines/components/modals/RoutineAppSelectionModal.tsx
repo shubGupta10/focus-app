@@ -70,7 +70,7 @@ export function RoutineAppSelectionModal({
 
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-            <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+            <SafeAreaView className="flex-1 bg-surfaceElevated" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
                     <AnimatedPressable
                         onPress={onClose}

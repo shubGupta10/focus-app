@@ -81,7 +81,7 @@ export declare class FocusBlockerModule {
   ): void;
   cancelRoutineAlarm(routineId: number): void;
   showTimePicker(initialHour: number, initialMinute: number, is24Hour?: boolean): Promise<TimePickerResult>;
-  sendNotification(title: string, message: string): void;
+  sendNotification(title: string, message: string, route?: string): void;
   isDynamicColorSupported(): boolean;
   getDynamicColors(): DynamicPalette | null;
 }

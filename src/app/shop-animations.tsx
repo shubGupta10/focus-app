@@ -24,7 +24,7 @@ export default function ShopAnimationsScreen() {
     const allAnimations = catalog.filter(item => item.type === "animation");
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <StatusBar style={isDarkMode ? "light" : 'dark'} />
 
             <View className="flex-row items-center justify-between px-6 py-4">

@@ -25,7 +25,7 @@ export default function OnboardingScreen() {
     } = useOnboardingController();
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={["top", "bottom"]}>
             <View className="px-6 pt-4 pb-2 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
                     {[1, 2, 3].map((s) => (

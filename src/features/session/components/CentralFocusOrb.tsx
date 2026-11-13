@@ -347,13 +347,13 @@ export function CentralFocusOrb({
                             shadowOpacity: 0.35,
                             shadowRadius: 20,
                             borderWidth: 1.5,
-                            borderColor: "rgba(255, 255, 255, 0.22)",
+                            borderColor: colors.border,
                         }}
                         accessibilityRole="button"
                         accessibilityLabel="Start focus session"
                         accessibilityHint="Double tap to configure and begin a focus session"
                     >
-                        <View className="w-40 h-40 rounded-full items-center justify-center border border-white/10">
+                        <View className="w-40 h-40 rounded-full items-center justify-center">
                             <Ionicons
                                 name="play"
                                 size={48}

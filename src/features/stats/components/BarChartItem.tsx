@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
+import { memo, useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
-export function BarChartItem({
+export const BarChartItem = memo(function BarChartItem({
     day,
     focusSeconds,
     maxSeconds,
     isToday,
+    isSelected = false,
     primaryColor,
     onPress,
 }: {
@@ -14,67 +17,88 @@ export function BarChartItem({
     focusSeconds: number;
     maxSeconds: number;
     isToday: boolean;
+    isSelected?: boolean;
     primaryColor: string;
     onPress?: () => void;
 }) {
+    const { colors } = useTheme();
     const heightAnim = useSharedValue(0);
 
     useEffect(() => {
-        const targetHeight = maxSeconds > 0 ? (focusSeconds / maxSeconds) * 100 : 0;
+        let targetHeight = 0;
+        if (maxSeconds > 0 && focusSeconds > 0) {
+            const ratio = Math.min(focusSeconds / maxSeconds, 1);
+            targetHeight = Math.max(Math.sqrt(ratio) * 100, 10);
+        }
         heightAnim.value = withSpring(targetHeight, { damping: 16, stiffness: 120 });
     }, [focusSeconds, maxSeconds]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         height: `${heightAnim.value}%`,
-        backgroundColor: primaryColor,
-    }));
-
-    const textAnimatedStyle = useAnimatedStyle(() => ({
-        bottom: `${heightAnim.value}%`,
     }));
 
     const minutes = Math.round(focusSeconds / 60);
 
+    const handlePress = () => {
+        if (onPress) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+            onPress();
+        }
+    };
+
     return (
         <Pressable
-            onPress={onPress}
+            onPress={handlePress}
             disabled={!onPress}
-            className="items-center justify-end flex-1 mx-1 active:opacity-70"
-            accessible={true}
+            className="items-center flex-1 mx-0.5 active:opacity-60"
+            accessibilityRole="button"
             accessibilityLabel={`${day}: ${minutes} minutes of focus`}
-            accessibilityRole={onPress ? "button" : "text"}
+            accessibilityHint="Tap to view details for this day"
         >
-            <View className="h-28 w-full items-center justify-end">
-                {/* Background Track / Capsule */}
-                <View
-                    className="w-full max-w-[20px] h-full rounded-full bg-surface absolute bottom-0"
-                    style={{ opacity: 0.55 }}
-                />
-
-                <Animated.View
-                    className="w-full max-w-[20px] rounded-full absolute bottom-0"
-                    style={[
-                        animatedStyle,
-                        { opacity: isToday ? 1 : 0.65 }
-                    ]}
-                />
-
-                {minutes > 0 && (
-                    <Animated.Text
-                        style={[textAnimatedStyle, { paddingBottom: 6 }]}
-                        className={`absolute text-[11px] font-medium ${isToday ? "text-accent" : "text-textSecondary"}`}
+            <View className="h-5 items-center justify-center mb-2">
+                {minutes > 0 ? (
+                    <Text
+                        className="text-[11px] font-bold text-textSecondary"
                         numberOfLines={1}
                     >
                         {minutes >= 60 ? `${Math.floor(minutes / 60)}h` : `${minutes}m`}
-                    </Animated.Text>
-                )}
+                    </Text>
+                ) : null}
+            </View>
+
+            <View
+                style={{
+                    width: 30,
+                    height: 124,
+                    borderRadius: 9999,
+                    backgroundColor: colors.surface,
+                    overflow: "hidden",
+                    position: "relative",
+                    justifyContent: "flex-end",
+                }}
+            >
+                <Animated.View
+                    style={[
+                        {
+                            width: "100%",
+                            position: "absolute",
+                            bottom: 0,
+                            borderRadius: 9999,
+                            backgroundColor: primaryColor,
+                        },
+                        animatedStyle,
+                    ]}
+                />
             </View>
 
             <Text
-                className={`text-[11px] mt-2.5 font-medium ${isToday ? "text-text font-semibold" : "text-textSecondary"}`}
+                className={`text-xs mt-3 ${isToday
+                    ? "text-accent font-black"
+                    : "text-textSecondary font-medium"
+                    }`}
             >
                 {day}
             </Text>
         </Pressable>
     );
-}
+});

@@ -83,14 +83,14 @@ export default function Index() {
     const todayTimeString = todayStats.today_focus_seconds === 0 ? "0h" : (todayHours > 0 ? `${todayHours}h ${todayMinutes}m` : `${todayMinutes}m`);
 
     if (isCheckingOnboarding) {
-        return <SafeAreaView className="flex-1 bg-surface" style={activeStyle} />
+        return <SafeAreaView className="flex-1 bg-background" style={activeStyle} />
     }
 
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={['top', 'left', 'right']}>
 
 
             {!engine.isSessionActive && (
@@ -212,7 +212,7 @@ export default function Index() {
                             )}
                         </View>
 
-                        <View className="w-full mt-auto" style={{ marginBottom: isSmallDevice ? 94 : 116 }}>
+                        <View className="w-full mt-auto" style={{ marginBottom: isSmallDevice ? 16 : 24 }}>
                             <AnimatedPressable
                                 onPress={() => router.push("/(tabs)/apps")}
                                 hapticMode="light"

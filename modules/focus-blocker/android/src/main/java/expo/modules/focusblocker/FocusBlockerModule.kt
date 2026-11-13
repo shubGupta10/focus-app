@@ -16,6 +16,7 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.os.Build
 import android.util.Log
+import androidx.core.graphics.ColorUtils
 
 
 class FocusBlockerModule : Module() {
@@ -478,16 +479,33 @@ class FocusBlockerModule : Module() {
             promise.resolve(null)
         }
 
-        Function("sendNotification") { title: String, message: String ->
+        Function("sendNotification") { title: String, message: String, deepLink: String? ->
             val context = appContext.reactContext ?: return@Function
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
-            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-            intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val uri = if (!deepLink.isNullOrBlank()) {
+                if (deepLink.startsWith("/")) {
+                    android.net.Uri.parse("lockout://" + deepLink.removePrefix("/"))
+                } else {
+                    android.net.Uri.parse(deepLink)
+                }
+            } else null
+
+            val intent = if (uri != null) {
+                Intent(Intent.ACTION_VIEW, uri).apply {
+                    setPackage(context.packageName)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+            } else {
+                context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            } ?: return@Function
+
             val pendingIntent = PendingIntent.getActivity(
                 context,
-                0,
+                (System.currentTimeMillis() % Int.MAX_VALUE).toInt(),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -522,43 +540,54 @@ class FocusBlockerModule : Module() {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@Function null
 
             try {
-                fun toHex(resId: Int, fallbackResId: Int? = null): String {
-                    return try {
-                        val color = context.getColor(resId)
-                        String.format("#%06X", 0xFFFFFF and color)
-                    } catch (e: Exception) {
-                        if (fallbackResId != null) {
-                            val color = context.getColor(fallbackResId)
-                            String.format("#%06X", 0xFFFFFF and color)
-                        } else {
-                            "#000000"
-                        }
-                    }
+                fun hex(resId: Int): String =
+                    String.format("#%06X", 0xFFFFFF and context.getColor(resId))
+
+                fun blend(fromRes: Int, toRes: Int, ratio: Float): String {
+                    val c = ColorUtils.blendARGB(context.getColor(fromRes), context.getColor(toRes), ratio)
+                    return String.format("#%06X", 0xFFFFFF and c)
                 }
 
+                val hasM3Surfaces = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+
+                val lightBackground = if (hasM3Surfaces) hex(android.R.color.system_surface_dim_light)
+                else blend(android.R.color.system_neutral1_100, android.R.color.system_neutral1_200, 0.3f)
+                val lightSurface = if (hasM3Surfaces) hex(android.R.color.system_surface_container_high_light)
+                else blend(android.R.color.system_neutral1_50, android.R.color.system_neutral1_100, 0.6f)
+                val lightSurfaceElevated = if (hasM3Surfaces) hex(android.R.color.system_surface_container_lowest_light)
+                else hex(android.R.color.system_neutral1_0)
+
+                val darkBackground = if (hasM3Surfaces) hex(android.R.color.system_surface_dark)
+                else blend(android.R.color.system_neutral1_1000, android.R.color.system_neutral1_900, 0.6f)
+                val darkSurface = if (hasM3Surfaces) hex(android.R.color.system_surface_container_dark)
+                else blend(android.R.color.system_neutral1_900, android.R.color.system_neutral1_800, 0.2f)
+                val darkSurfaceElevated = if (hasM3Surfaces) hex(android.R.color.system_surface_container_high_dark)
+                else blend(android.R.color.system_neutral1_900, android.R.color.system_neutral1_800, 0.7f)
+
                 return@Function mapOf(
-                    "accent" to toHex(android.R.color.system_accent1_600, android.R.color.system_accent1_500),
-                    "accentMuted" to toHex(android.R.color.system_accent1_100),
+                    "accent" to hex(android.R.color.system_accent1_700),
+                    "accentMuted" to hex(android.R.color.system_accent1_100),
 
-                    "lightAccent" to toHex(android.R.color.system_accent1_600, android.R.color.system_accent1_500),
-                    "lightAccentMuted" to toHex(android.R.color.system_accent1_100),
+                    "lightAccent" to hex(android.R.color.system_accent1_700),
+                    "lightAccentMuted" to hex(android.R.color.system_accent1_100),
 
-                    "darkAccent" to toHex(android.R.color.system_accent1_200, android.R.color.system_accent1_300),
-                    "darkAccentMuted" to toHex(android.R.color.system_accent1_800, android.R.color.system_accent1_700),
+                    "darkAccent" to hex(android.R.color.system_accent1_200),
+                    "darkAccentMuted" to hex(android.R.color.system_accent1_700),
 
-                    "lightBackground" to toHex(android.R.color.system_neutral1_50),
-                    "lightSurface" to toHex(android.R.color.system_neutral1_100, android.R.color.system_neutral1_50),
-                    "lightSurfaceElevated" to toHex(android.R.color.system_neutral1_10, android.R.color.system_neutral1_50),
-                    "lightBorder" to toHex(android.R.color.system_neutral2_200),
+                    "lightBackground" to lightBackground,
+                    "lightSurface" to lightSurface,
+                    "lightSurfaceElevated" to lightSurfaceElevated,
+                    "lightBorder" to hex(android.R.color.system_neutral2_200),
 
-                    "darkBackground" to toHex(android.R.color.system_neutral1_900),
-                    "darkSurface" to toHex(android.R.color.system_neutral1_900),
-                    "darkSurfaceElevated" to toHex(android.R.color.system_neutral1_800),
-                    "darkBorder" to toHex(android.R.color.system_neutral2_700)
+                    "darkBackground" to darkBackground,
+                    "darkSurface" to darkSurface,
+                    "darkSurfaceElevated" to darkSurfaceElevated,
+                    "darkBorder" to hex(android.R.color.system_neutral2_700)
                 )
             } catch (e: Exception) {
                 return@Function null
             }
         }
+
     }
 }

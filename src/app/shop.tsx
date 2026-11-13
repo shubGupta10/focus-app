@@ -70,7 +70,7 @@ export default function ShopScreen() {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <StatusBar style={isDarkMode ? "light" : 'dark'} />
 
 

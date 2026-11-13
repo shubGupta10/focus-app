@@ -156,7 +156,7 @@ export default function TimerSelectionModal({ visible, onClose, onStartSession }
                         }`}>
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1 mr-3">
-                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'bg-surfaceElevated'
+                                <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${isStrict && selectedMinutes !== -1 ? 'bg-accentMuted' : 'border border-border'
                                     }`}>
                                     <Ionicons
                                         name={isStrict && selectedMinutes !== -1 ? "shield-checkmark" : "shield-outline"}

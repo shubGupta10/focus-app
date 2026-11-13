@@ -1,78 +1,59 @@
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
-import { BlockedAttemptItem, getRecentBlockedAttempts } from "../features/stats/db/statsRepository";
+import {
+    BlockedAttemptItem,
+    DailyAnalytics,
+    DayBlockedApp,
+    getRecentBlockedAttempts,
+    getTodayBlockedAppsGrouped,
+    getTodayBlockedAttempts,
+    getTodayBlockedCount,
+    getWeeklyAnalytics,
+    WeeklyAnalyticsResult
+} from "../features/stats/db/statsRepository";
 
-export interface DailyAnalytics {
-    dayOfWeek: string;
-    focusSeconds: number;
-    blockedCount: number;
-    dateStr: string;
-}
+export { DailyAnalytics };
 
-export function useAnalytics() {
+export function useAnalytics(weekOffset: number = 0) {
     const db = useSQLiteContext();
-    const [weeklyData, setWeeklyData] = useState<DailyAnalytics[]>([]);
-    const [totalBlockedThisWeek, setTotalBlockedThisWeek] = useState(0);
+    const [analytics, setAnalytics] = useState<WeeklyAnalyticsResult>({
+        weeklyData: [],
+        totalWeeklyFocusSeconds: 0,
+        totalBlockedThisWeek: 0,
+        mostBlockedThisWeek: [],
+    });
     const [totalBlockedAllTime, setTotalBlockedAllTime] = useState(0);
     const [recentBlockedAttempts, setRecentBlockedAttempts] = useState<BlockedAttemptItem[]>([]);
+    const [todayBlockedAttempts, setTodayBlockedAttempts] = useState<BlockedAttemptItem[]>([]);
+    const [todayBlockedApps, setTodayBlockedApps] = useState<DayBlockedApp[]>([]);
+    const [todayBlockedCount, setTodayBlockedCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     const refreshAnalytics = useCallback(async () => {
+        setIsLoading(true);
         try {
-            const days: DailyAnalytics[] = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const [weeklyResult, recentAttempts, allTimeBlocked, todayAttempts, todayCount, todayApps] = await Promise.all([
+                getWeeklyAnalytics(db, weekOffset),
+                getRecentBlockedAttempts(db, 5),
+                db.getFirstAsync<{ count: number }>(`SELECT COUNT(id) as count FROM blocked_attempts`),
+                getTodayBlockedAttempts(db, 10),
+                getTodayBlockedCount(db),
+                getTodayBlockedAppsGrouped(db, 5),
+            ]);
 
-            let totalBlocked = 0;
-
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(today);
-                d.setDate(d.getDate() - i);
-
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
-
-                const dayOfWeek = d.toLocaleDateString('en-US', { weekday: 'short' });
-
-                const sessionRows = await db.getAllAsync<{ duration_seconds: number }>(`SELECT duration_seconds FROM sessions WHERE session_date = ?`, [dateStr]);
-
-                const focusSeconds = sessionRows.reduce((acc, row) => acc + row.duration_seconds, 0);
-
-                const startOfDayMillis = d.getTime();
-                const endOfDayMillis = startOfDayMillis + 86400000 - 1;
-
-                const blockedResult = await db.getFirstAsync<{ count: number }>(
-                    `SELECT COUNT(id) as count FROM blocked_attempts WHERE timestamp >= ? AND timestamp <= ?`,
-                    [startOfDayMillis, endOfDayMillis]
-                );
-
-                const blockedCount = blockedResult?.count || 0;
-                totalBlocked += blockedCount;
-
-                days.push({
-                    dayOfWeek,
-                    dateStr,
-                    focusSeconds,
-                    blockedCount
-                });
-            }
-
-            const allTimeBlockedResult = await db.getFirstAsync<{ count: number }>(
-                `SELECT COUNT(id) as count FROM blocked_attempts`
-            );
-
-            const recentAttempts = await getRecentBlockedAttempts(db, 5);
-
-            setWeeklyData(days);
-            setTotalBlockedThisWeek(totalBlocked);
-            setTotalBlockedAllTime(allTimeBlockedResult?.count || 0);
+            setAnalytics(weeklyResult);
             setRecentBlockedAttempts(recentAttempts);
+            setTotalBlockedAllTime(allTimeBlocked?.count || 0);
+            setTodayBlockedAttempts(todayAttempts);
+            setTodayBlockedCount(todayCount);
+            setTodayBlockedApps(todayApps);
         } catch (error) {
             console.error("Failed to load analytics", error);
+        } finally {
+            setIsLoading(false);
         }
-    }, [db]);
+    }, [db, weekOffset]);
 
     useFocusEffect(
         useCallback(() => {
@@ -81,10 +62,16 @@ export function useAnalytics() {
     );
 
     return {
-        weeklyData,
-        totalBlockedThisWeek,
+        weeklyData: analytics.weeklyData,
+        totalWeeklyFocusSeconds: analytics.totalWeeklyFocusSeconds,
+        totalBlockedThisWeek: analytics.totalBlockedThisWeek,
+        mostBlockedThisWeek: analytics.mostBlockedThisWeek,
         totalBlockedAllTime,
         recentBlockedAttempts,
-        refreshAnalytics
+        todayBlockedAttempts,
+        todayBlockedApps,
+        todayBlockedCount,
+        refreshAnalytics,
+        isLoading,
     };
 }

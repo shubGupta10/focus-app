@@ -7,6 +7,34 @@ import { StatusBar } from "expo-status-bar";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import FocusBlocker, { DynamicPalette } from "../../modules/focus-blocker/src/FocusBlockerModule";
 
+import {
+    DynamicColor,
+    Hct,
+    MaterialDynamicColors,
+    SchemeTonalSpot,
+    argbFromHex,
+    hexFromArgb,
+} from "@material/material-color-utilities";
+
+function buildLayersFromScheme(seedHex: string, isDark: boolean) {
+    const scheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(seedHex)), isDark, 0.0);
+    const hex = (role: DynamicColor) => hexFromArgb(role.getArgb(scheme));
+
+    return isDark
+        ? {
+            background: hex(MaterialDynamicColors.surface),
+            surface: hex(MaterialDynamicColors.surfaceContainer),
+            surfaceElevated: hex(MaterialDynamicColors.surfaceContainerHigh),
+            border: hex(MaterialDynamicColors.outlineVariant),
+        }
+        : {
+            background: hex(MaterialDynamicColors.surfaceDim),
+            surface: hex(MaterialDynamicColors.surfaceContainerHigh),
+            surfaceElevated: hex(MaterialDynamicColors.surfaceContainerLowest),
+            border: hex(MaterialDynamicColors.outlineVariant),
+        };
+}
+
 function getWCAGRelativeLuminance(hex: string) {
     const c = hex.startsWith('#') ? hex.substring(1) : hex;
     const rgb = parseInt(c, 16);
@@ -123,14 +151,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     let colors: ThemeColors = baseTheme;
 
     if (useDynamicTheme && dynamicPalette) {
-        const dynamicBg = isDarkMode ? dynamicPalette.darkBackground : dynamicPalette.lightBackground;
-        const dynamicSurface = isDarkMode
-            ? dynamicPalette.darkSurface
-            : (dynamicPalette.lightSurface ?? Colors.light.surface);
-        const dynamicElevated = isDarkMode
-            ? (dynamicPalette.darkSurfaceElevated ?? Colors.dark.surfaceElevated)
-            : (dynamicPalette.lightSurfaceElevated ?? Colors.light.surfaceElevated);
-        const dynamicBorder = isDarkMode ? dynamicPalette.darkBorder : dynamicPalette.lightBorder;
         const dynamicAccent = isDarkMode
             ? (dynamicPalette.darkAccent ?? dynamicPalette.accent)
             : (dynamicPalette.lightAccent ?? dynamicPalette.accent);
@@ -140,10 +160,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         colors = {
             ...colors,
-            background: dynamicBg,
-            surface: dynamicSurface,
-            surfaceElevated: dynamicElevated,
-            border: dynamicBorder,
+            ...buildLayersFromScheme(dynamicAccent, isDarkMode),
             accent: dynamicAccent,
             accentMuted: dynamicAccentMuted,
         };
@@ -166,12 +183,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const accentLuminance = getWCAGRelativeLuminance(colors.accent);
     const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
-    const darkLuminance = getWCAGRelativeLuminance('#1C1618');
+    const darkLuminance = getWCAGRelativeLuminance('#0E141B');
 
     const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
     const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
 
-    const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#1C1618';
+    const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#0E141B';
 
     colors = {
         ...colors,

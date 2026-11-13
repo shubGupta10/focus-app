@@ -35,8 +35,8 @@ export default function NotificationScreen() {
             case "milestone":
                 return {
                     name: "flame-outline" as const,
-                    color: colors.warning,
-                    bg: colors.warningMuted,
+                    color: colors.accent,
+                    bg: colors.accentMuted,
                 };
             case "session":
                 return {
@@ -133,7 +133,7 @@ export default function NotificationScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle} edges={["top", "bottom"]}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={["top", "bottom"]}>
             <StatusBar style={isDarkMode ? "light" : "dark"} />
 
             <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
@@ -172,7 +172,7 @@ export default function NotificationScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 {notifications.length === 0 ? (
-                    <View className="flex-1 items-center justify-center py-20 opacity-70">
+                    <View className="flex-1 items-center justify-center py-20">
                         <View className="w-16 h-16 rounded-full bg-surfaceElevated items-center justify-center mb-4">
                             <Ionicons
                                 name="notifications-off-outline"

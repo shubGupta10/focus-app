@@ -173,6 +173,51 @@ export async function getRecentBlockedAttempts(db: SQLiteDatabase, limit: number
     return results || [];
 }
 
+export async function getTodayBlockedAttempts(db: SQLiteDatabase, limit: number = 10): Promise<BlockedAttemptItem[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startMillis = today.getTime();
+
+    const results = await db.getAllAsync<BlockedAttemptItem>(
+        `SELECT id, package_name, timestamp 
+         FROM blocked_attempts 
+         WHERE timestamp >= ?
+         ORDER BY timestamp DESC 
+         LIMIT ?`,
+        [startMillis, limit]
+    );
+    return results || [];
+}
+
+export async function getTodayBlockedCount(db: SQLiteDatabase): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startMillis = today.getTime();
+
+    const result = await db.getFirstAsync<{ count: number }>(
+        `SELECT COUNT(id) as count FROM blocked_attempts WHERE timestamp >= ?`,
+        [startMillis]
+    );
+    return result?.count || 0;
+}
+
+export async function getTodayBlockedAppsGrouped(db: SQLiteDatabase, limit: number = 5): Promise<DayBlockedApp[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startMillis = today.getTime();
+
+    const results = await db.getAllAsync<DayBlockedApp>(
+        `SELECT package_name, COUNT(id) as count 
+         FROM blocked_attempts 
+         WHERE timestamp >= ?
+         GROUP BY package_name 
+         ORDER BY count DESC 
+         LIMIT ?`,
+        [startMillis, limit]
+    );
+    return results || [];
+}
+
 export async function getTodaySessionList(db: SQLiteDatabase): Promise<SessionHistoryItem[]> {
     const today = getTodayDateString();
 
@@ -215,4 +260,107 @@ export async function getDayDetails(db: SQLiteDatabase, dateStr: string): Promis
         sessions: sessions || [],
         blockedApps: blockedApps || [],
     }
+}
+
+export interface DailyAnalytics {
+    dayOfWeek: string;
+    focusSeconds: number;
+    blockedCount: number;
+    dateStr: string;
+}
+
+export interface WeeklyAnalyticsResult {
+    weeklyData: DailyAnalytics[];
+    totalWeeklyFocusSeconds: number;
+    totalBlockedThisWeek: number;
+    mostBlockedThisWeek: DayBlockedApp[];
+}
+
+export async function getWeeklyAnalytics(
+    db: SQLiteDatabase,
+    weekOffset: number = 0
+): Promise<WeeklyAnalyticsResult> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 6 + (weekOffset * 7));
+
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + (weekOffset * 7));
+
+    const formatDate = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const startDateStr = formatDate(startDate);
+    const endDateStr = formatDate(endDate);
+    const startMillis = startDate.getTime();
+    const endMillis = endDate.getTime() + 86400000 - 1;
+
+    const [sessionRows, blockedRows, topBlockedApps] = await Promise.all([
+        db.getAllAsync<{ session_date: string; total_seconds: number }>(
+            `SELECT session_date, SUM(duration_seconds) as total_seconds
+             FROM sessions
+             WHERE session_date BETWEEN ? AND ? AND is_completed = 1
+             GROUP BY session_date`,
+            [startDateStr, endDateStr]
+        ),
+        db.getAllAsync<{ dateStr: string; count: number }>(
+            `SELECT date(timestamp / 1000, 'unixepoch', 'localtime') as dateStr, COUNT(id) as count
+             FROM blocked_attempts
+             WHERE timestamp BETWEEN ? AND ?
+             GROUP BY dateStr`,
+            [startMillis, endMillis]
+        ),
+        db.getAllAsync<DayBlockedApp>(
+            `SELECT package_name, COUNT(id) as count
+             FROM blocked_attempts
+             WHERE timestamp BETWEEN ? AND ?
+             GROUP BY package_name
+             ORDER BY count DESC
+             LIMIT 4`,
+            [startMillis, endMillis]
+        ),
+    ]);
+
+    const focusMap = new Map<string, number>();
+    sessionRows.forEach(r => focusMap.set(r.session_date, r.total_seconds || 0));
+
+    const blockedMap = new Map<string, number>();
+    blockedRows.forEach(r => blockedMap.set(r.dateStr, r.count || 0));
+
+    const weeklyData: DailyAnalytics[] = [];
+    let totalWeeklyFocusSeconds = 0;
+    let totalBlockedThisWeek = 0;
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const dateStr = formatDate(d);
+        const dayOfWeek = d.toLocaleDateString("en-US", { weekday: "short" });
+
+        const focusSeconds = focusMap.get(dateStr) || 0;
+        const blockedCount = blockedMap.get(dateStr) || 0;
+
+        totalWeeklyFocusSeconds += focusSeconds;
+        totalBlockedThisWeek += blockedCount;
+
+        weeklyData.push({
+            dayOfWeek,
+            dateStr,
+            focusSeconds,
+            blockedCount,
+        });
+    }
+
+    return {
+        weeklyData,
+        totalWeeklyFocusSeconds,
+        totalBlockedThisWeek,
+        mostBlockedThisWeek: topBlockedApps || [],
+    };
 }

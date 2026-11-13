@@ -20,7 +20,7 @@ export default function AppsTab() {
     } = useBlocklistController();
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={['top', 'left', 'right']}>
 
             <View className="flex-row justify-between items-center px-6 pt-5 pb-4">
                 <Text className="text-text font-black text-3xl tracking-tight">Global Blocklist</Text>

@@ -27,7 +27,7 @@ export default function RoutinesTab() {
     } = useRoutinesController();
 
     return (
-        <SafeAreaView className="flex-1 bg-surface" style={activeStyle}>
+        <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={['top', 'left', 'right']}>
             <View className="flex-row items-center justify-between px-6 pt-5 pb-2">
                 <View className="flex-1">
                     <View className="flex-row items-center gap-3">
@@ -43,18 +43,6 @@ export default function RoutinesTab() {
                             : `${routines.filter((r) => r.is_enabled).length} of ${routines.length} active`}
                     </Text>
                 </View>
-
-                <AnimatedPressable
-                    onPress={() => handleOpenCreate()}
-                    hapticMode="light"
-                    scaleTo={0.88}
-                    disabled={engine.isSessionActive}
-                    className={`w-10 h-10 rounded-full bg-accent items-center justify-center ${engine.isSessionActive ? 'opacity-50' : ''}`}
-                    accessibilityRole="button"
-                    accessibilityLabel="Create new routine"
-                >
-                    <Ionicons name="add" size={24} color={colors.accentForeground} />
-                </AnimatedPressable>
             </View>
 
             {engine.isSessionActive && (
@@ -82,7 +70,7 @@ export default function RoutinesTab() {
                     data={routines}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 130 }}
+                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 96 }}
                     ListHeaderComponent={
                         <Text className="text-accent font-bold text-sm tracking-widest uppercase mb-3 ml-2">
                             Your Schedules
@@ -98,6 +86,27 @@ export default function RoutinesTab() {
                     )}
                 />
             )}
+
+            <View className="absolute bottom-6 right-6">
+                <AnimatedPressable
+                    onPress={() => handleOpenCreate()}
+                    hapticMode="medium"
+                    scaleTo={0.92}
+                    disabled={engine.isSessionActive}
+                    className={`w-14 h-14 rounded-2xl bg-accent items-center justify-center shadow-lg ${engine.isSessionActive ? 'opacity-50' : ''}`}
+                    style={{
+                        elevation: 4,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 8,
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Create new routine"
+                >
+                    <Ionicons name="add" size={28} color={colors.accentForeground} />
+                </AnimatedPressable>
+            </View>
 
             <RoutineEditorModal
                 visible={isModalVisible}

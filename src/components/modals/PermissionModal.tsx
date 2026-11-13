@@ -45,7 +45,7 @@ export function PermissionRow({
 
     return (
         <AnimatedPressable
-            className={`p-4 rounded-2xl flex-row justify-between items-center ${isGranted ? 'bg-successMuted border border-transparent' : 'bg-surfaceElevated border border-border'
+            className={`p-4 rounded-2xl flex-row justify-between items-center ${isGranted ? 'bg-successMuted border border-transparent' : 'bg-surface border border-border'
                 }`}
             onPress={isGranted ? undefined : onRequest}
             disabled={isGranted}

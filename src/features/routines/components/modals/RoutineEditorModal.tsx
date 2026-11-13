@@ -153,7 +153,7 @@ export function RoutineEditorModal({
 
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-            <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
+            <SafeAreaView className="flex-1 bg-surfaceElevated" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
                     <AnimatedPressable
                         onPress={onClose}
@@ -203,7 +203,7 @@ export function RoutineEditorModal({
                             }}
                             placeholder="e.g. Workday Focus"
                             placeholderTextColor={colors.textMuted}
-                            className="bg-surfaceElevated border border-border rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
+                            className="bg-surface border border-border rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
                         />
 
                         {/* M3 Preset Filter Chips */}
@@ -251,7 +251,7 @@ export function RoutineEditorModal({
                     />
 
                     <View
-                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-8"
+                        className="bg-surface border border-border rounded-3xl p-5 flex-row items-center justify-between mb-8"
                         style={{
                             elevation: 2,
                             shadowColor: "#000",
@@ -278,7 +278,7 @@ export function RoutineEditorModal({
                         onPress={() => setIsAppSelectionVisible(true)}
                         scaleTo={0.98}
                         hapticMode="light"
-                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-3"
+                        className="bg-surface border border-border rounded-3xl p-5 flex-row items-center justify-between mb-3"
                         style={{
                             elevation: 2,
                             shadowColor: "#000",

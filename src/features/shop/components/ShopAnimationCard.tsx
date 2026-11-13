@@ -33,7 +33,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
         <View
             className={`${fullWidth ? 'w-full' : 'w-[300px]'} bg-surfaceElevated border border-border rounded-[32px] overflow-hidden`}
         >
-            <View className="w-full aspect-square bg-background items-center justify-center overflow-hidden">
+            <View className="w-full aspect-square bg-surface items-center justify-center overflow-hidden">
                 <View style={{ transform: [{ scale: 0.85 }] }}>
                     {(() => {
                         const Preview = getOrbBackground(item.themeValue);
@@ -68,7 +68,7 @@ export function ShopAnimationCard({ item, isOwned, isEquipped, isProcessing, isA
                             isEquipped
                                 ? 'bg-accent'
                                 : isOwned
-                                ? 'bg-surfaceElevated border border-border'
+                                ? 'bg-surface border border-border'
                                 : 'bg-accent'
                         }`}
                         accessibilityRole="button"

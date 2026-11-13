@@ -158,7 +158,7 @@ export function SettingsAboutCard() {
             </View>
 
             <View className="items-center mt-6">
-                <Text className="text-textSecondary text-[11px] font-medium tracking-widest uppercase opacity-60">
+                <Text className="text-textMuted text-[11px] font-medium tracking-widest uppercase">
                     Lockout v{Constants.expoConfig?.version ?? '1.0.0'}
                 </Text>
             </View>

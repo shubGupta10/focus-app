@@ -40,13 +40,13 @@ export function OnboardingStep2Apps({
                     Select the apps that pull you away during work or study. You can change these anytime.
                 </Text>
 
-                <View className="flex-row items-center bg-surface border border-border rounded-full px-4 py-2 mb-3">
+                <View className="flex-row items-center bg-surfaceElevated border border-border rounded-full px-4 py-2 mb-3">
                     <Ionicons name="search" size={20} color={colors.textSecondary} />
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder="Search apps..."
-                        placeholderTextColor={colors.textSecondary}
+                        placeholderTextColor={colors.textMuted}
                         className="flex-1 text-text ml-2 text-[15px] py-1.5 font-medium"
                     />
                     {searchQuery.length > 0 && (

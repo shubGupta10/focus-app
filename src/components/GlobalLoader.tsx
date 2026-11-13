@@ -86,7 +86,7 @@ export function GlobalLoader({ color, size = 'medium', fullScreen = false }: Glo
 
     if (fullScreen) {
         return (
-            <View className="flex-1 items-center justify-center bg-surface">
+            <View className="flex-1 items-center justify-center bg-background">
                 {LoaderContent}
             </View>
         );
