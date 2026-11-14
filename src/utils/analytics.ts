@@ -13,7 +13,7 @@ export type AnalyticsEvents = {
   session_completed: { duration_minutes: number; is_strict?: boolean; coins_earned?: number };
   session_cancelled: { elapsed_minutes: number; target_minutes?: number; is_strict?: boolean; reason?: string };
 
-  routine_created: { days_count?: number; is_strict?: boolean; };
+  routine_created: { days_count?: number; is_strict?: boolean; has_repeat?: boolean; };
   routine_toggled: { is_enabled: boolean };
 
   theme_purchased: { item_id: string; item_type: "theme" | "animation"; cost: number };

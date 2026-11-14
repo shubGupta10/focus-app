@@ -5,7 +5,7 @@ import { OrbBackgroundProps } from "./OrbBackgroundProps";
 
 export function ZenRipplesBackground({ isActive, colorAccent }: OrbBackgroundProps) {
     const anims = useRef([...Array(5)].map(() => new Animated.Value(0))).current;
-    const timeouts = useRef<NodeJS.Timeout[]>([]);
+    const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     useEffect(() => {
         timeouts.current.forEach(clearTimeout);
