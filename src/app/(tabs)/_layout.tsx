@@ -57,7 +57,7 @@ export default function TabLayout() {
             detachInactiveScreens={false}
             screenOptions={{
                 headerShown: false,
-                animation: "fade",
+                animation: "none",
                 tabBarHideOnKeyboard: true,
                 sceneStyle: {
                     backgroundColor: colors.background,

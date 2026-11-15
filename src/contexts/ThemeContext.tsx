@@ -4,34 +4,32 @@ import { useSettings } from "@/hooks/useSettings";
 import { vars } from "nativewind";
 import { AppState, useColorScheme as useRNColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import FocusBlocker, { DynamicPalette } from "../../modules/focus-blocker/src/FocusBlockerModule";
 
 import {
-    DynamicColor,
-    Hct,
-    MaterialDynamicColors,
-    SchemeTonalSpot,
     argbFromHex,
     hexFromArgb,
+    themeFromSourceColor,
 } from "@material/material-color-utilities";
 
 function buildLayersFromScheme(seedHex: string, isDark: boolean) {
-    const scheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(seedHex)), isDark, 0.0);
-    const hex = (role: DynamicColor) => hexFromArgb(role.getArgb(scheme));
+    const theme = themeFromSourceColor(argbFromHex(seedHex));
+    const scheme = isDark ? theme.schemes.dark : theme.schemes.light;
 
     return isDark
         ? {
-            background: hex(MaterialDynamicColors.surface),
-            surface: hex(MaterialDynamicColors.surfaceContainer),
-            surfaceElevated: hex(MaterialDynamicColors.surfaceContainerHigh),
-            border: hex(MaterialDynamicColors.outlineVariant),
+            background: hexFromArgb(scheme.background),
+            surface: hexFromArgb(theme.palettes.neutralVariant.tone(12)),
+            surfaceElevated: hexFromArgb(theme.palettes.neutralVariant.tone(16)),
+            border: hexFromArgb(scheme.outlineVariant),
         }
         : {
-            background: hex(MaterialDynamicColors.surfaceDim),
-            surface: hex(MaterialDynamicColors.surfaceContainerHigh),
-            surfaceElevated: hex(MaterialDynamicColors.surfaceContainerLowest),
-            border: hex(MaterialDynamicColors.outlineVariant),
+            background: hexFromArgb(scheme.background),
+            surface: hexFromArgb(scheme.surface),
+            surfaceElevated: hexFromArgb(scheme.surfaceVariant),
+            border: hexFromArgb(scheme.outlineVariant),
         };
 }
 
@@ -222,6 +220,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         trackInactive: colors.border,
         thumbInactive: colors.textSecondary,
     };
+
+    useEffect(() => {
+        SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+    }, [colors.background]);
 
     return (
         <ThemeContext.Provider

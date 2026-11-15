@@ -5,7 +5,7 @@ import { migrateDbIfNeeded } from "@/store/database";
 import { Inter_400Regular, Inter_900Black } from "@expo-google-fonts/inter";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
@@ -34,42 +34,49 @@ SplashScreen.preventAutoHideAsync();
 
 
 function RootNavigator() {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+
+  const navTheme = {
+    ...(isDarkMode ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDarkMode ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card: colors.surfaceElevated,
+      border: colors.border,
+      text: colors.text,
+    },
+  };
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: "default",
-        contentStyle: {
-          backgroundColor: colors.background,
-        },
-      }}
-    >
-      <Stack.Screen name="(tabs)" />
-
-      <Stack.Screen name="onboarding" />
-
-      <Stack.Screen
-        name="shop"
-        options={{
-          presentation: "modal",
+    <NavThemeProvider value={navTheme}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "default",
+          contentStyle: {
+            backgroundColor: colors.background,
+          },
         }}
-      />
-
-      <Stack.Screen
-        name="settings"
-        options={{
-          presentation: "modal",
-        }}
-      />
-
-      <Stack.Screen name="day-details" />
-
-      <Stack.Screen name="notifications" />
-
-      <Stack.Screen name="shop-animations" />
-    </Stack>
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen
+          name="shop"
+          options={{
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen name="day-details" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="shop-animations" />
+      </Stack>
+    </NavThemeProvider>
   );
 }
 

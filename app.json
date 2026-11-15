@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lockout",
     "slug": "lockout",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -13,11 +13,13 @@
     "android": {
       "allowBackup": false,
       "adaptiveIcon": {
-        "backgroundColor": "#161517",
-        "foregroundImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundImage": "./assets/images/adaptive-icon-background.png",
+        "monochromeImage": "./assets/images/monochrome-icon.png",
+        "backgroundColor": "#161517"
       },
       "package": "com.shubham720.lockout",
-      "versionCode": 22,
+      "versionCode": 23,
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",

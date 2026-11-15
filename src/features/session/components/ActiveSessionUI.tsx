@@ -7,6 +7,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { formatTimerDisplay } from "@/utils/timeUtils";
 import { useAppStore } from "@/store/useAppStore";
+import { BlockedAppsModal } from "./modals/BlockedAppsModal";
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 
 interface ActiveSessionUIProps {
     onStopPress: () => void;
@@ -30,6 +32,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     const [earnedCoins, setEarnedCoins] = useState(0);
     const { colors } = useTheme();
     const reducedMotion = useDynamicReducedMotion();
+    const [isBlockedAppsModalVisible, setIsBlockedAppsModalVisible] = useState(false);
 
     useEffect(() => {
         if (!startTime) return;
@@ -115,14 +118,20 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                         </View>
                     )}
 
-                    <View className={`flex-row items-center bg-surfaceElevated ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
+                    <AnimatedPressable
+                        onPress={() => setIsBlockedAppsModalVisible(true)}
+                        hapticMode="light"
+                        scaleTo={0.92}
+                        className={`flex-row items-center bg-surfaceElevated ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full border border-border`}
+                    >
                         <Ionicons name="apps-outline" size={isSmallDevice ? 14 : 16} color={colors.textSecondary} style={{ marginRight: 6 }} />
                         <Text className={`text-textSecondary ${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold`}>
                             {blockedAppsCount && blockedAppsCount > 0
                                 ? `${blockedAppsCount} ${blockedAppsCount === 1 ? "App" : "Apps"} Blocked`
                                 : "No Apps Blocked"}
                         </Text>
-                    </View>
+                        <Ionicons name="chevron-forward" size={12} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+                    </AnimatedPressable>
                 </View>
 
                 <Text className={`text-text ${isSmallDevice ? "text-2xl" : "text-4xl"} font-black tracking-tight text-center mb-1`}>
@@ -168,20 +177,26 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                             <>
                                 <Ionicons name="alert-circle-outline" size={isSmallDevice ? 14 : 16} color={colors.warning} style={{ marginRight: 6 }} />
                                 <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-medium text-center`}>
-                                    {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold orb to skip
+                                    {(skipsRemaining ?? 1)} emergency {(skipsRemaining ?? 1) === 1 ? 'skip' : 'skips'} left · Hold timer to skip
                                 </Text>
                             </>
                         ) : (
                             <>
                                 <Ionicons name="finger-print-outline" size={isSmallDevice ? 14 : 16} color={colors.textSecondary} style={{ marginRight: 6 }} />
                                 <Text className={`text-textSecondary ${isSmallDevice ? "text-xs" : "text-sm"} font-medium text-center`}>
-                                    Press and hold orb to end session
+                                    Press and hold timer to end session
                                 </Text>
                             </>
                         )}
                     </View>
                 </Animated.View>
             </View>
+
+            <BlockedAppsModal
+                visible={isBlockedAppsModalVisible}
+                onClose={() => setIsBlockedAppsModalVisible(false)}
+                isStrict={isStrict}
+            />
         </View>
     );
 }
