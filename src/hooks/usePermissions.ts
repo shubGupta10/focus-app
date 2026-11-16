@@ -67,6 +67,7 @@ export function usePermissions() {
         const sub = AppState.addEventListener("change", (state) => {
             if (state === "active") {
                 checkPermissions();
+                setTimeout(checkPermissions, 250);
             }
         });
         return () => sub.remove();

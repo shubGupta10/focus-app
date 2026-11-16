@@ -2,7 +2,7 @@ import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { analytics } from "@/utils/analytics";
 
 export function useOnboardingController() {
@@ -17,6 +17,12 @@ export function useOnboardingController() {
     useEffect(() => {
         analytics.track("onboarding_step_viewed", { step })
     }, [step]);
+
+    useEffect(() => {
+        if (engine.installedApps.length === 0) {
+            engine.loadApps();
+        }
+    }, [engine.installedApps.length, engine.loadApps]);
 
     useEffect(() => {
         if (engine.selectedApps.length > 0 && selectedSet.size === 0) {
@@ -35,34 +41,29 @@ export function useOnboardingController() {
         );
     }, [engine.installedApps, searchQuery]);
 
-    const toggleAppSelection = (packageName: string) => {
-        const next = new Set(selectedSet);
-        if (next.has(packageName)) {
-            next.delete(packageName);
-        } else {
-            next.add(packageName);
-        }
-        setSelectedSet(next);
-    };
+    const toggleAppSelection = useCallback((packageName: string) => {
+        setSelectedSet((prev) => {
+            const next = new Set(prev);
+            if (next.has(packageName)) {
+                next.delete(packageName);
+            } else {
+                next.add(packageName);
+            }
+            return next;
+        });
+    }, []);
 
     const handleSaveAppsAndContinue = async () => {
         const toSave = Array.from(selectedSet);
-        for (const app of engine.selectedApps) {
-            if (!selectedSet.has(app)) {
-                await engine.toggleApp(app);
-            }
-        }
-        for (const app of toSave) {
-            if (!engine.selectedApps.includes(app)) {
-                await engine.toggleApp(app);
-            }
-        }
+        await engine.setSelectedApps(toSave);
         setStep(3);
     };
 
     const handleCompleteOnboarding = async () => {
+        const toSave = Array.from(selectedSet);
+        await engine.setSelectedApps(toSave);
         analytics.track("onboarding_completed", {
-            selected_apps_count: engine.selectedApps.length,
+            selected_apps_count: toSave.length,
         });
 
         await setSetting("has_completed_onboarding", "true");

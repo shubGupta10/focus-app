@@ -72,6 +72,7 @@ export function OnboardingStep2Apps({
                 ) : (
                     <FlashList
                         data={filteredApps}
+                        extraData={selectedSet}
                         keyExtractor={(item) => item.packageName}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 16 }}

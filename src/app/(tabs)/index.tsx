@@ -8,10 +8,10 @@ import { SessionResultModal } from "@/features/session/components/modals/Session
 import TimerSelectionModal from "@/features/session/components/modals/TimerSelectionModal";
 import { useSettings } from "@/hooks/useSettings";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useNavigation } from "expo-router";
 
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSessionController } from "../../features/session/hooks/useSessionController";
@@ -28,9 +28,10 @@ export default function Index() {
     const { getSetting } = useSettings();
     const { activeStyle, colors } = useTheme();
     const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-    const { hasUnread, unreadCount } = useNotification();
+    const { unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
     const { whatsNew, dismissWhatsNew } = useAutoUpdateCheck();
+    const navigation = useNavigation();
 
     const {
         engine,
@@ -53,6 +54,12 @@ export default function Index() {
     } = useSessionController();
 
     useEffect(() => {
+        navigation.setOptions({
+            tabBarStyle: isTimerModalVisible ? { display: "none" } : undefined,
+        });
+    }, [isTimerModalVisible, navigation]);
+
+    useEffect(() => {
         getSetting("haptics_enabled").then((val) => {
             if (val !== null) useAppStore.getState().setHapticsEnabled(val === "true");
         });
@@ -62,11 +69,11 @@ export default function Index() {
             if (completed !== "true") {
                 router.replace("/onboarding");
             } else {
-                setIsCheckingOnboarding(false)
+                setIsCheckingOnboarding(false);
             }
         };
         checkFirstRun();
-    }, [])
+    }, []);
 
     useFocusEffect(
         useCallback(() => {
@@ -76,14 +83,14 @@ export default function Index() {
                 engine.refreshSessionState();
             });
             return () => cancelAnimationFrame(frameId);
-        }, [])
+        }, [engine])
     );
 
     const { hours: todayHours, minutes: todayMinutes } = secondsToHoursAndMinutes(todayStats.today_focus_seconds);
     const todayTimeString = todayStats.today_focus_seconds === 0 ? "0h" : (todayHours > 0 ? `${todayHours}h ${todayMinutes}m` : `${todayMinutes}m`);
 
     if (isCheckingOnboarding) {
-        return <SafeAreaView className="flex-1 bg-background" style={activeStyle} />
+        return <SafeAreaView className="flex-1 bg-background" style={activeStyle} />;
     }
 
     const hour = new Date().getHours();
@@ -91,8 +98,6 @@ export default function Index() {
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={['top', 'left', 'right']}>
-
-
             {!engine.isSessionActive && (
                 <Animated.View
                     entering={reducedMotion ? undefined : FadeIn.duration(300)}
@@ -104,7 +109,6 @@ export default function Index() {
                     </View>
 
                     <View className="flex-row items-center">
-
                         <AnimatedPressable
                             onPress={() => router.push("/notifications")}
                             hapticMode="light"
@@ -158,9 +162,8 @@ export default function Index() {
                         key="idle-ui"
                         entering={reducedMotion ? undefined : FadeIn.duration(300)}
                         exiting={reducedMotion ? undefined : FadeOut.duration(200)}
-                        className={`absolute inset-0 flex-1 items-center justify-between px-6 ${isSmallDevice ? "py-2" : "py-4"} w-full`}
+                        className={`absolute inset-0 flex-1 items-center px-6 ${isSmallDevice ? "py-2" : "py-4"} w-full`}
                     >
-
                         {(!hasSelectedApps || !hasAllPermissions) ? (
                             <View className={`items-center ${isSmallDevice ? "mt-1" : "mt-2"}`}>
                                 <AnimatedPressable
@@ -203,7 +206,7 @@ export default function Index() {
                             </View>
                         )}
 
-                        <View className="items-center justify-center my-auto">
+                        <View className="flex-1 items-center justify-center">
                             <CentralFocusOrb isActive={false} onStartPress={handleFocusPress} />
                             {(!hasSelectedApps || !hasAllPermissions) && (
                                 <Text className={`text-textSecondary text-xs font-medium text-center ${isSmallDevice ? "mt-3" : "mt-6"}`}>

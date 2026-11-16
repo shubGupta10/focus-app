@@ -307,20 +307,37 @@ export function useFocusEngine(isRoot: boolean = false) {
         };
     }, [isRoot]);
 
+    const setSelectedApps = async (apps: string[]) => {
+        try {
+            await db.withTransactionAsync(async () => {
+                await db.runAsync("DELETE FROM selected_apps");
+                for (const pkg of apps) {
+                    await db.runAsync("INSERT INTO selected_apps (package_name) VALUES (?)", [pkg]);
+                }
+            });
+            setEngineState({ selectedApps: apps });
+            FocusBlocker.updateGlobalBlocklist(apps);
+            notifyEngineListeners();
+        } catch (error) {
+            console.error("Error setting selected apps in DB:", error);
+        }
+    };
+
     const toggleApp = async (packageName: string) => {
         try {
-            if (selectedApps.includes(packageName)) {
+            const currentSelected = useAppStore.getState().selectedApps;
+            if (currentSelected.includes(packageName)) {
                 await db.runAsync("DELETE FROM selected_apps WHERE package_name = $packageName", {
                     $packageName: packageName
                 });
-                const newApps = selectedApps.filter(p => p !== packageName);
+                const newApps = currentSelected.filter(p => p !== packageName);
                 setEngineState({ selectedApps: newApps });
                 FocusBlocker.updateGlobalBlocklist(newApps);
             } else {
                 await db.runAsync("INSERT INTO selected_apps (package_name) VALUES ($packageName)", {
                     $packageName: packageName
                 });
-                const newApps = [...selectedApps, packageName];
+                const newApps = [...currentSelected, packageName];
                 setEngineState({ selectedApps: newApps });
                 FocusBlocker.updateGlobalBlocklist(newApps);
             }
@@ -356,7 +373,9 @@ export function useFocusEngine(isRoot: boolean = false) {
         hasBattery,
         checkPermissions,
         toggleApp,
+        loadApps,
         loadSelectedApps,
+        setSelectedApps,
         startSession,
         stopSession,
         startBreak,

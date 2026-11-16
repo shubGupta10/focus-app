@@ -64,6 +64,9 @@ export function AppListItemInner({ app, isSelected, onToggle, disabled }: AppLis
 
 export const AppListItem = memo(AppListItemInner, (prev, next) => {
     return (
-        prev.isSelected === next.isSelected && prev.disabled === next.disabled && prev.app.packageName === next.app.packageName
-    )
-})
+        prev.isSelected === next.isSelected &&
+        prev.disabled === next.disabled &&
+        prev.app.packageName === next.app.packageName &&
+        prev.onToggle === next.onToggle
+    );
+});
