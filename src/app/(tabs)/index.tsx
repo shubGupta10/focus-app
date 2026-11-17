@@ -8,7 +8,7 @@ import { SessionResultModal } from "@/features/session/components/modals/Session
 import TimerSelectionModal from "@/features/session/components/modals/TimerSelectionModal";
 import { useSettings } from "@/hooks/useSettings";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useFocusEffect, useNavigation } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 import { useCallback, useEffect, useState } from "react";
 import { Text, View, useWindowDimensions } from "react-native";
@@ -31,7 +31,6 @@ export default function Index() {
     const { unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
     const { whatsNew, dismissWhatsNew } = useAutoUpdateCheck();
-    const navigation = useNavigation();
 
     const {
         engine,
@@ -52,12 +51,6 @@ export default function Index() {
         resetCountdownText,
         todayStats
     } = useSessionController();
-
-    useEffect(() => {
-        navigation.setOptions({
-            tabBarStyle: isTimerModalVisible ? { display: "none" } : undefined,
-        });
-    }, [isTimerModalVisible, navigation]);
 
     useEffect(() => {
         getSetting("haptics_enabled").then((val) => {
