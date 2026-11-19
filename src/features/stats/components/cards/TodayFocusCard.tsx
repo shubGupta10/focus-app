@@ -2,6 +2,7 @@ import { InfoSheet } from "@/components/InfoSheet";
 import { useUserStats } from "@/hooks/useUserStats";
 import { secondsToHoursAndMinutes } from "@/utils/timeUtils";
 import { Text, View } from "react-native";
+import { formatCoinBalance } from "../../utils/stats_utils";
 
 export function TodayFocusCard() {
     const { todayStats, stats } = useUserStats();
@@ -76,14 +77,16 @@ export function TodayFocusCard() {
 
             <View className="flex-row items-center justify-between px-1">
                 <View className="items-center flex-1">
-                    <Text className="text-accent font-black text-3xl tabular-nums leading-none">
-                        {stats.total_coins.toLocaleString()}
-                    </Text>
+                    <View className="flex-row items-center justify-center">
+                        <Text style={{ fontSize: 18, marginRight: 5 }}>🪙</Text>
+                        <Text className="text-accent font-black text-3xl tabular-nums leading-none" numberOfLines={1} adjustsFontSizeToFit>
+                            {formatCoinBalance(stats.total_coins)}
+                        </Text>
+                    </View>
                     <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2">
                         coin balance
                     </Text>
                 </View>
-
                 <View className="w-px h-8 bg-border" />
 
                 <View className="items-center flex-1">

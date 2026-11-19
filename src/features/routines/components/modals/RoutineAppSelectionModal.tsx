@@ -70,14 +70,14 @@ export function RoutineAppSelectionModal({
 
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-            <SafeAreaView className="flex-1 bg-surfaceElevated" style={activeStyle}>
+            <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
                     <AnimatedPressable
                         onPress={onClose}
                         hitSlop={10}
                         scaleTo={0.88}
                         hapticMode="light"
-                        className="w-10 h-10 rounded-full bg-surface items-center justify-center"
+                        className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center"
                         accessibilityRole="button"
                         accessibilityLabel="Close app selection"
                     >
@@ -87,7 +87,6 @@ export function RoutineAppSelectionModal({
                     <Text className="text-text font-black text-lg">
                         Select Apps
                     </Text>
-                    {/* M3 Filled Button Pill */}
                     <AnimatedPressable
                         onPress={() => onSave(selectedApps)}
                         scaleTo={0.92}

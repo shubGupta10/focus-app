@@ -74,7 +74,6 @@ function RootNavigator() {
         />
         <Stack.Screen name="day-details" />
         <Stack.Screen name="notifications" />
-        <Stack.Screen name="shop-animations" />
       </Stack>
     </NavThemeProvider>
   );

@@ -34,7 +34,7 @@ export function RoutineDaySelector({
                             onPress={() => onToggleDay(day.value)}
                             hapticMode="light"
                             scaleTo={0.88}
-                            className={`w-11 h-11 rounded-full items-center justify-center ${isSelected ? "bg-accent" : "bg-surface"
+                            className={`w-11 h-11 rounded-full items-center justify-center ${isSelected ? "bg-accent" : "bg-surfaceElevated border border-border"
                                 }`}
                             accessibilityRole="checkbox"
                             accessibilityState={{ checked: isSelected }}

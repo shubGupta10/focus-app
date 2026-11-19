@@ -153,14 +153,14 @@ export function RoutineEditorModal({
 
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-            <SafeAreaView className="flex-1 bg-surfaceElevated" style={activeStyle}>
+            <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
                 <View className="flex-row items-center justify-between px-6 pt-5 pb-4">
                     <AnimatedPressable
                         onPress={onClose}
                         hitSlop={10}
                         scaleTo={0.88}
                         hapticMode="light"
-                        className="w-10 h-10 rounded-full bg-surface items-center justify-center"
+                        className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center"
                         accessibilityRole="button"
                         accessibilityLabel="Close routine editor"
                     >
@@ -203,10 +203,9 @@ export function RoutineEditorModal({
                             }}
                             placeholder="e.g. Workday Focus"
                             placeholderTextColor={colors.textMuted}
-                            className="bg-surface border border-border rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
+                            className="bg-surfaceElevated border border-border rounded-2xl px-5 py-4 text-text font-bold text-base mb-3"
                         />
 
-                        {/* M3 Preset Filter Chips */}
                         <View className="flex-row flex-wrap gap-2 px-1">
                             {PRESET_NAMES.map((preset) => {
                                 const isSelected = name.trim() === preset;
@@ -251,7 +250,7 @@ export function RoutineEditorModal({
                     />
 
                     <View
-                        className="bg-surface border border-border rounded-3xl p-5 flex-row items-center justify-between mb-8"
+                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-8"
                         style={{
                             elevation: 2,
                             shadowColor: "#000",
@@ -278,7 +277,7 @@ export function RoutineEditorModal({
                         onPress={() => setIsAppSelectionVisible(true)}
                         scaleTo={0.98}
                         hapticMode="light"
-                        className="bg-surface border border-border rounded-3xl p-5 flex-row items-center justify-between mb-3"
+                        className="bg-surfaceElevated border border-border rounded-3xl p-5 flex-row items-center justify-between mb-3"
                         style={{
                             elevation: 2,
                             shadowColor: "#000",

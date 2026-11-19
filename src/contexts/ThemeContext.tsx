@@ -20,15 +20,15 @@ function buildLayersFromScheme(seedHex: string, isDark: boolean) {
 
     return isDark
         ? {
-            background: hexFromArgb(scheme.background),
-            surface: hexFromArgb(theme.palettes.neutralVariant.tone(12)),
-            surfaceElevated: hexFromArgb(theme.palettes.neutralVariant.tone(16)),
+            background: hexFromArgb(theme.palettes.neutralVariant.tone(10)),
+            surface: hexFromArgb(theme.palettes.neutralVariant.tone(14)),
+            surfaceElevated: hexFromArgb(theme.palettes.neutralVariant.tone(20)),
             border: hexFromArgb(scheme.outlineVariant),
         }
         : {
-            background: hexFromArgb(scheme.background),
-            surface: hexFromArgb(scheme.surface),
-            surfaceElevated: hexFromArgb(scheme.surfaceVariant),
+            background: hexFromArgb(theme.palettes.neutralVariant.tone(94)),
+            surface: hexFromArgb(theme.palettes.neutralVariant.tone(90)),
+            surfaceElevated: hexFromArgb(theme.palettes.neutralVariant.tone(98)),
             border: hexFromArgb(scheme.outlineVariant),
         };
 }

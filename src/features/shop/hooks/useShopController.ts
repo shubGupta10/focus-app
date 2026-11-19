@@ -5,9 +5,12 @@ import { getPurchasedItems, purchasedItem } from "@/features/shop/db/shopReposit
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 import { SHOP_CATALOG, ShopItem } from "../data/shopCatalog";
 import { analytics } from "@/utils/analytics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAppStore } from "@/store/useAppStore";
+import * as Haptics from "expo-haptics";
 
 export function useShopController() {
     const db = useSQLiteContext();
@@ -37,11 +40,10 @@ export function useShopController() {
 
     useFocusEffect(
         useCallback(() => {
-            // db.runAsync("UPDATE user_stats SET total_coins = 1000 WHERE id = 1");
             loadShopData();
             refreshStats();
-        }, [loadShopData, refreshStats, db])
-    )
+        }, [loadShopData, refreshStats])
+    );
 
 
     const handleBuyItem = async (item: ShopItem) => {
@@ -95,10 +97,35 @@ export function useShopController() {
         analytics.track("theme_equipped", {
             item_id: item.id,
             item_type: item.type,
-        })
+        });
+    };
 
-    }
+    const handleSecretBoost = async () => {
+        try {
+            const hasClaimed = await AsyncStorage.getItem("userSecret");
+            if (hasClaimed) {
+                if (Platform.OS === "android") {
+                    ToastAndroid.show("Secret bonus already claimed!", ToastAndroid.SHORT);
+                } else {
+                    Alert.alert("Secret Bonus", "Secret bonus already claimed!");
+                }
+                return;
+            }
 
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+            await db.runAsync("UPDATE user_stats SET total_coins = total_coins + 10000 WHERE id = 1");
+            useAppStore.getState().updateStatsLocally(10000, 0, 0);
+            await refreshStats();
+            await AsyncStorage.setItem("userSecret", "true");
+            if (Platform.OS === "android") {
+                ToastAndroid.show("10,000 Coins Added!", ToastAndroid.SHORT);
+            } else {
+                Alert.alert("Secret Unlocked", "10,000 Coins Added!");
+            }
+        } catch (e) {
+            console.error("Failed to add coins:", e);
+        }
+    };
 
     return {
         catalog: SHOP_CATALOG,
@@ -108,6 +135,7 @@ export function useShopController() {
         totalCoins: stats.total_coins,
         isProcessing,
         handleBuyItem,
-        handleEquipItem
-    }
+        handleEquipItem,
+        handleSecretBoost,
+    };
 }

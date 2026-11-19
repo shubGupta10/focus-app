@@ -20,6 +20,10 @@ interface CentralFocusOrbProps {
     theme?: 'classic' | 'solar';
     onStartPress?: () => void;
     onStopPress?: () => void;
+    animationOverride?: string;
+    sizeOverride?: number;
+    previewOnly?: boolean;
+    disabled?: boolean;
 }
 
 export function CentralFocusOrb({
@@ -34,11 +38,16 @@ export function CentralFocusOrb({
     theme = 'solar',
     onStartPress,
     onStopPress,
+    animationOverride,
+    sizeOverride,
+    previewOnly = false,
+    disabled = false,
 }: CentralFocusOrbProps) {
     const { colors } = useTheme();
     const { getSetting } = useSettings();
     const [orbTheme, setOrbTheme] = useState("theme_default");
     const [orbAnimation, setOrbAnimation] = useState<string | null>(null);
+    const activeAnimationKey = animationOverride || orbAnimation;
     const holdProgress = useRef(new Animated.Value(0)).current;
     const holdTimeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const latestOnStopPress = useRef(onStopPress);
@@ -72,8 +81,7 @@ export function CentralFocusOrb({
     const innerRadius = 126;
 
     useEffect(() => {
-
-        if (!isActive) {
+        if (!isActive || previewOnly) {
             breathAnim.setValue(1);
             return;
         }
@@ -177,17 +185,21 @@ export function CentralFocusOrb({
     const coreRadius = 96;
     const { width, height } = useWindowDimensions();
     const isSmallDevice = width < 380 || height < 740;
-    const scale = isSmallDevice ? Math.min(0.82, Math.max(0.72, (width - 48) / 340)) : 1;
-    const containerSize = Math.round(340 * scale);
+    const scale = sizeOverride
+        ? sizeOverride / 340
+        : isSmallDevice
+            ? Math.min(0.82, Math.max(0.72, (width - 48) / 340))
+            : 1;
+    const containerSize = sizeOverride ?? Math.round(340 * scale);
 
     return (
         <View style={{ width: containerSize, height: containerSize }} className="items-center justify-center">
             <View style={{ width: 340, height: 340, transform: [{ scale }] }} className="items-center justify-center">
 
                 <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                    {orbAnimation && (() => {
+                    {activeAnimationKey && (() => {
                         const OrbBg = getOrbBackground(
-                            orbAnimation.replace("animation_", "")
+                            activeAnimationKey.replace("animation_", "")
                         );
                         return (
                             <OrbBg
@@ -204,7 +216,7 @@ export function CentralFocusOrb({
                     })()}
                 </View>
 
-                {isActive && (
+                {!previewOnly && isActive && (
                     <View className="absolute inset-0 items-center justify-center pointer-events-none">
                         <Svg width="340" height="340" viewBox="0 0 340 340">
                             <AnimatedCircle
@@ -226,7 +238,7 @@ export function CentralFocusOrb({
                     </View>
                 )}
 
-                {isActive ? (
+                {!previewOnly && isActive ? (
                     <View className="items-center justify-center">
                         <Animated.View
                             style={{
@@ -333,7 +345,9 @@ export function CentralFocusOrb({
                     </View>
                 ) : (
                     <Pressable
+                        disabled={disabled}
                         onPress={() => {
+                            if (disabled) return;
                             if (useAppStore.getState().hapticsEnabled) {
                                 try { Vibration.vibrate(12); } catch { }
                             }

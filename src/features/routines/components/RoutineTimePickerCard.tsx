@@ -38,6 +38,13 @@ export function RoutineTimePickerCard({
                     hapticMode="light"
                     scaleTo={0.96}
                     className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-5 mr-2"
+                    style={{
+                        elevation: 2,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 10,
+                    }}
                     accessibilityRole="button"
                     accessibilityLabel="Select start time"
                 >
@@ -55,6 +62,13 @@ export function RoutineTimePickerCard({
                     hapticMode="light"
                     scaleTo={0.96}
                     className="flex-1 bg-surfaceElevated border border-border rounded-3xl p-5 ml-2"
+                    style={{
+                        elevation: 2,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 10,
+                    }}
                     accessibilityRole="button"
                     accessibilityLabel="Select end time"
                 >

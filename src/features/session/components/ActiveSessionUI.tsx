@@ -9,6 +9,9 @@ import { formatTimerDisplay } from "@/utils/timeUtils";
 import { useAppStore } from "@/store/useAppStore";
 import { BlockedAppsModal } from "./modals/BlockedAppsModal";
 import { AnimatedPressable } from "@/components/AnimatedPressable";
+import { useFocusEngine } from "@/hooks/useFocusEngine";
+import { TakeBreakModal } from "./modals/TakeBreakModal";
+import FocusBlocker from "../../../../modules/focus-blocker/src/FocusBlockerModule";
 
 interface ActiveSessionUIProps {
     onStopPress: () => void;
@@ -33,6 +36,9 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     const { colors } = useTheme();
     const reducedMotion = useDynamicReducedMotion();
     const [isBlockedAppsModalVisible, setIsBlockedAppsModalVisible] = useState(false);
+    const { startBreak, endBreak, breaksRemaining } = useFocusEngine();
+    const [isBreakModalVisible, setIsBreakModalVisible] = useState(false);
+    const availableBreaks = FocusBlocker.getAvailableBreaks?.() ?? [];
 
     useEffect(() => {
         if (!startTime) return;
@@ -108,7 +114,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     return (
         <View className={`flex-1 items-center justify-between px-6 ${isSmallDevice ? "py-4" : "py-10"} w-full max-w-md mx-auto`}>
             <Animated.View entering={reducedMotion ? undefined : FadeInDown.duration(400).delay(150)} className={`items-center w-full ${isSmallDevice ? "pt-2" : "pt-6"}`}>
-                <View className={`flex-row items-center justify-center gap-3 ${isSmallDevice ? "mb-3" : "mb-6"}`}>
+                <View className={`flex-row items-center justify-center gap-2.5 ${isSmallDevice ? "mb-3" : "mb-6"}`}>
                     {isStrict && (
                         <View className={`flex-row items-center bg-accent ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full`}>
                             <Ionicons name="shield-checkmark" size={isSmallDevice ? 14 : 16} color={colors.accentForeground} style={{ marginRight: 6 }} />
@@ -116,6 +122,39 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                                 Strict Mode
                             </Text>
                         </View>
+                    )}
+
+                    {!isStrict && (isBreakActive || availableBreaks.length > 0) && (
+                        <AnimatedPressable
+                            onPress={() => {
+                                if (isBreakActive) {
+                                    endBreak();
+                                } else {
+                                    setIsBreakModalVisible(true);
+                                }
+                            }}
+                            hapticMode="light"
+                            scaleTo={0.92}
+                            className={`flex-row items-center ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full border ${isBreakActive
+                                ? "bg-accent border-accent"
+                                : "bg-surfaceElevated border-border"
+                                }`}
+                        >
+                            <Ionicons
+                                name={isBreakActive ? "play" : "cafe-outline"}
+                                size={isSmallDevice ? 14 : 16}
+                                color={isBreakActive ? colors.accentForeground : colors.textSecondary}
+                                style={{ marginRight: 6 }}
+                            />
+                            <Text
+                                className={`${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold ${isBreakActive
+                                    ? "text-accentForeground"
+                                    : "text-textSecondary"
+                                    }`}
+                            >
+                                {isBreakActive ? "Resume" : "Take a Break"}
+                            </Text>
+                        </AnimatedPressable>
                     )}
 
                     <AnimatedPressable
@@ -196,6 +235,13 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                 visible={isBlockedAppsModalVisible}
                 onClose={() => setIsBlockedAppsModalVisible(false)}
                 isStrict={isStrict}
+            />
+
+            <TakeBreakModal
+                visible={isBreakModalVisible}
+                onClose={() => setIsBreakModalVisible(false)}
+                onStartBreak={(duration) => startBreak(duration)}
+                availablePresets={availableBreaks}
             />
         </View>
     );

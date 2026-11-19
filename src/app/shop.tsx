@@ -1,223 +1,155 @@
-import { AnimatedPressable } from "@/components/AnimatedPressable";
-import { useAppStore } from "@/store/useAppStore";
-import { useTheme } from "@/contexts/ThemeContext";
-import { ShopAnimationCard } from "@/features/shop/components/ShopAnimationCard";
-import { useShopController } from "@/features/shop/hooks/useShopController";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { useEffect, useState, useRef } from "react";
-import { FlatList, Pressable, ScrollView, Text, ToastAndroid, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useSQLiteContext } from "expo-sqlite";
 import { GlobalLoader } from "@/components/GlobalLoader";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { InfoSheet } from "@/components/InfoSheet";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ShopActionBar } from "@/features/shop/components/ShopActionBar";
+import { ShopHeroPreview } from "@/features/shop/components/ShopHeroPreview";
+import { ShopStyleTile } from "@/features/shop/components/ShopStyleTile";
+import { useShopController } from "@/features/shop/hooks/useShopController";
+import { router, useFocusEffect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, Text, View } from "react-native";
 
 export default function ShopScreen() {
     const { activeStyle, colors, isDarkMode } = useTheme();
-    const [isReady, setIsReady] = useState(false);
-    const [visibleAnimationId, setVisibleAnimationId] = useState<string | null>(null);
+    const [isFocused, setIsFocused] = useState(true);
+    const flatListRef = useRef<FlatList>(null);
+    const initialScrolledRef = useRef(false);
 
-    const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-        if (viewableItems.length > 0) {
-            setVisibleAnimationId(viewableItems[0].item.id);
-        }
-    }).current;
-
-    const viewabilityConfig = useRef({
-        itemVisiblePercentThreshold: 50
-    }).current;
+    useFocusEffect(
+        useCallback(() => {
+            setIsFocused(true);
+            return () => setIsFocused(false);
+        }, [])
+    );
 
     const {
         catalog,
         purchasedItems,
-        equippedTheme,
         equippedAnimation,
         totalCoins,
         isProcessing,
         handleBuyItem,
-        handleEquipItem
+        handleEquipItem,
+        handleSecretBoost,
     } = useShopController();
 
-    const db = useSQLiteContext();
-    const themes = catalog.filter(item => item.type === "theme");
-    const animations = catalog.filter(item => item.type === "animation");
+    const allAnimations = useMemo(
+        () => catalog.filter((item) => item.type === "animation"),
+        [catalog]
+    );
 
-    const handleSecretBoost = async () => {
-        try {
-            const hasClaimed = await AsyncStorage.getItem("userSecret");
-            if (hasClaimed) {
-                ToastAndroid.show("Secret bonus already claimed!", ToastAndroid.SHORT);
-                return;
-            }
-
-            await db.runAsync("UPDATE user_stats SET total_coins = total_coins + 10000 WHERE id = 1");
-            useAppStore.getState().updateStatsLocally(10000, 0, 0);
-            await AsyncStorage.setItem("userSecret", "true");
-            ToastAndroid.show("10,000 Coins Added!", ToastAndroid.SHORT);
-        } catch (e) {
-            console.error("Failed to add coins:", e);
-        }
-    };
+    const [selectedId, setSelectedId] = useState<string>(equippedAnimation);
 
     useEffect(() => {
-        const handle = requestIdleCallback(() => {
-            setIsReady(true);
-        });
-        return () => cancelIdleCallback(handle);
-    }, []);
+        if (equippedAnimation) {
+            setSelectedId(equippedAnimation);
+        }
+    }, [equippedAnimation]);
+
+    useEffect(() => {
+        if (initialScrolledRef.current || !equippedAnimation) return;
+        const index = allAnimations.findIndex((item) => item.id === equippedAnimation);
+        if (index >= 6 && flatListRef.current) {
+            initialScrolledRef.current = true;
+            const timer = setTimeout(() => {
+                try {
+                    flatListRef.current?.scrollToOffset({
+                        offset: Math.floor(index / 3) * 140,
+                        animated: true,
+                    });
+                } catch { }
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [equippedAnimation, allAnimations]);
+
+    const selectedStyle = useMemo(
+        () => allAnimations.find((item) => item.id === selectedId) || allAnimations[0],
+        [allAnimations, selectedId]
+    );
+
+    const isSelectedEquipped = equippedAnimation === selectedStyle?.id;
+    const isSelectedOwned = selectedStyle ? purchasedItems.has(selectedStyle.id) : false;
+    const canAffordSelected = selectedStyle ? totalCoins >= selectedStyle.cost : false;
+
+    if (allAnimations.length === 0) {
+        return (
+            <View
+                className="flex-1 bg-background items-center justify-center"
+                style={activeStyle}
+            >
+                <GlobalLoader size="large" color={colors.accent} />
+            </View>
+        );
+    }
 
     return (
-        <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
-            <StatusBar style={isDarkMode ? "light" : 'dark'} />
+        <View className="flex-1 bg-background" style={activeStyle}>
+            <StatusBar style={isDarkMode ? "light" : "dark"} />
 
+            <ShopHeroPreview
+                selectedStyle={selectedStyle}
+                totalCoins={totalCoins}
+                isFocused={isFocused}
+                onBack={() => router.back()}
+                onSecretBoost={handleSecretBoost}
+            />
 
-            <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
-                <AnimatedPressable
-                    onPress={() => router.back()}
-                    hapticMode="light"
-                    scaleTo={0.88}
-                    className="w-10 h-10 rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm"
-                    style={{ elevation: 1 }}
-                    accessibilityRole="button"
-                    accessibilityLabel="Go back"
-                >
-                    <Ionicons name="arrow-back" size={20} color={colors.text} />
-                </AnimatedPressable>
-                <View className="flex-row items-center gap-5">
-                    <View className="flex-row items-center bg-surfaceElevated border border-border px-3.5 py-1.5 rounded-full shadow-sm"
-                        style={{ elevation: 2 }}
-                    >
-                        <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
-                        <Text className="text-text font-bold text-base">{totalCoins}</Text>
-                    </View>
+            <View
+                className="flex-1 rounded-t-[28px] border-t border-border overflow-hidden"
+                style={{ backgroundColor: colors.surface }}
+            >
+                <View className="flex-row items-center justify-between px-6 pt-3.5 pb-2">
+                    <Text className="text-textMuted text-[11px] font-bold uppercase tracking-[0.08em]">
+                        ANIMATION STYLES
+                    </Text>
+                    <Text className="text-textMuted text-[12px] font-medium">
+                        {allAnimations.length} styles
+                    </Text>
                 </View>
+
+                <FlatList
+                    ref={flatListRef}
+                    data={allAnimations}
+                    keyExtractor={(item) => item.id}
+                    numColumns={3}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingHorizontal: 16,
+                        paddingTop: 4,
+                        paddingBottom: 20,
+                        gap: 10,
+                    }}
+                    columnWrapperStyle={{ gap: 10 }}
+                    onScrollToIndexFailed={(info) => {
+                        flatListRef.current?.scrollToOffset({
+                            offset: Math.floor(info.index / 3) * 140,
+                            animated: true,
+                        });
+                    }}
+                    renderItem={({ item }) => (
+                        <ShopStyleTile
+                            item={item}
+                            isSelected={selectedId === item.id}
+                            isEquipped={equippedAnimation === item.id}
+                            isOwned={purchasedItems.has(item.id)}
+                            canAfford={totalCoins >= item.cost}
+                            onSelect={(selected) => setSelectedId(selected.id)}
+                        />
+                    )}
+                />
             </View>
 
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-
-                <View className="flex-1">
-
-                    <View className="px-6 mt-2 mb-8">
-                        <View className="flex-row items-center justify-between mb-2">
-                            <Pressable onLongPress={handleSecretBoost}>
-                                <Text className="text-text font-black text-4xl tracking-tighter">SHOP</Text>
-                            </Pressable>
-                            <InfoSheet
-                                title="Welcome to the Shop"
-                                description={"This is where you are rewarded for staying off your phone.\n\nHow it works:\n1. You get 1 coin for every minute you stay focused.\n2. You can spend your coins here to buy new colors and styles.\n3. If you quit a session early, you do not get any coins!"}
-                            />
-                        </View>
-                        <Text className="text-textSecondary text-base leading-relaxed">
-                            Spend your focus coins to personalise your experience.
-                        </Text>
-                    </View>
-
-                    <View className="mb-10">
-                        <View className="px-6 mb-3">
-                            <Text className="text-accent font-bold text-sm tracking-widest uppercase ml-2">Colour Palette</Text>
-                        </View>
-
-                        <FlatList
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingHorizontal: 24 }}
-                            data={themes}
-                            keyExtractor={item => item.id}
-                            ItemSeparatorComponent={() => <View className="w-4" />}
-                            renderItem={({ item, index }) => {
-                                const isOwned = purchasedItems.has(item.id);
-                                const isEquipped = equippedTheme === item.id;
-                                const swatchColor = item.hexColor || colors.surfaceElevated;
-
-                                return (
-                                    <Animated.View
-                                        entering={FadeInDown.delay(index * 100).duration(400)}
-                                    >
-                                        <Pressable
-                                            disabled={isProcessing}
-                                            onPress={() => {
-                                                if (!isOwned) handleBuyItem(item);
-                                                else if (!isEquipped) handleEquipItem(item.id);
-                                            }}
-                                            className="items-center w-24"
-                                        >
-                                            <View
-                                                className={`w-20 h-20 rounded-full items-center justify-center mb-3 ${isEquipped ? 'border-[4px]' : 'border border-border'}`}
-                                                style={[{ backgroundColor: swatchColor, borderColor: isEquipped ? colors.accent : undefined }, !isOwned ? { opacity: 0.9 } : undefined]}
-                                            >
-                                                {!isOwned && (
-                                                    <View className="absolute -top-1 -right-2 bg-surface px-2 py-1 rounded-full border border-border flex-row items-center">
-                                                        <Text style={{ fontSize: 10, marginRight: 4 }}>🪙</Text>
-                                                        <Text className="text-text font-bold text-[10px]">{item.cost}</Text>
-                                                    </View>
-                                                )}
-                                                {isEquipped && <Ionicons name="checkmark" size={32} color="#ffffff" style={{ opacity: 0.9 }} />}
-                                            </View>
-                                            <Text className="text-textSecondary text-sm font-medium text-center leading-tight" numberOfLines={2}>
-                                                {item.name}
-                                            </Text>
-                                        </Pressable>
-                                    </Animated.View>
-                                )
-                            }}
-                        />
-                    </View>
-
-                    <View className="mb-4">
-                        <View className="px-6 mb-3 flex-row items-center justify-between">
-                            <Text className="text-accent font-bold text-sm tracking-widest uppercase ml-2">Animation Style</Text>
-                            <Pressable onPress={() => router.push("/shop-animations")} className="active:opacity-70">
-                                <Text className="text-accent font-medium text-sm">View All</Text>
-                            </Pressable>
-                        </View>
-
-                        {!isReady ? (
-                            <View className="h-[340px] items-center justify-center">
-                                <GlobalLoader size="large" color={colors.accent} />
-                            </View>
-                        ) : (
-                            <FlatList
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ paddingHorizontal: 24 }}
-                                data={animations.slice(0, 5)}
-                                keyExtractor={item => item.id}
-                                ItemSeparatorComponent={() => <View className="w-6" />}
-                                snapToInterval={324}
-                                decelerationRate="fast"
-                                onViewableItemsChanged={onViewableItemsChanged}
-                                viewabilityConfig={viewabilityConfig}
-                                renderItem={({ item, index }) => {
-                                    const isOwned = purchasedItems.has(item.id);
-                                    const isEquipped = equippedAnimation === item.id;
-
-                                    return (
-                                        <Animated.View
-                                            entering={FadeInDown.delay(index * 100).duration(400)}
-                                        >
-                                            <ShopAnimationCard
-                                                item={item}
-                                                isOwned={isOwned}
-                                                isEquipped={isEquipped}
-                                                isProcessing={isProcessing}
-                                                isActive={visibleAnimationId ? visibleAnimationId === item.id : index === 0}
-                                                onAction={() => {
-                                                    if (!isOwned) handleBuyItem(item);
-                                                    else if (!isEquipped) handleEquipItem(item.id);
-                                                }}
-                                            />
-                                        </Animated.View>
-                                    );
-                                }}
-                            />
-                        )}
-                    </View>
-
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+            <ShopActionBar
+                selectedStyle={selectedStyle}
+                totalCoins={totalCoins}
+                isSelectedEquipped={isSelectedEquipped}
+                isSelectedOwned={isSelectedOwned}
+                canAffordSelected={canAffordSelected}
+                isProcessing={isProcessing}
+                onEquip={handleEquipItem}
+                onBuy={handleBuyItem}
+            />
+        </View>
     );
 }

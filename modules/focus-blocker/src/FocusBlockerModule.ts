@@ -62,6 +62,7 @@ export declare class FocusBlockerModule {
   getActiveSession(): ActiveSessionInfo;
   startBreak(durationMinutes: number): void;
   endBreak(): void;
+  getAvailableBreaks(): number[];
   getPendingCompletedSession(): Promise<CompletedSessionInfo>;
   clearCompletedSession(): Promise<void>;
   claimCompletedSession(): Promise<CompletedSessionInfo>;

@@ -270,6 +270,36 @@ class FocusBlockerModule : Module() {
             FocusService.instance?.sendBreakEndedNotification()
         }
 
+        Function("getAvailableBreaks") {
+            if (!FocusService.isServiceActive || FocusService.isStrictActive || FocusService.breaksRemaining <= 0 || FocusService.breakEndTime > System.currentTimeMillis()) {
+                return@Function emptyList<Int>()
+            }
+            val endTime = FocusService.activeEndTime
+            val startTime = FocusService.activeStartTime
+            val now = System.currentTimeMillis()
+            val remainingMs = if (endTime > 0) endTime - now else -1L
+
+            if (endTime != -1L && remainingMs < 5 * 60 * 1000L) {
+                return@Function emptyList<Int>()
+            }
+
+            val totalSessionMinutes = if (endTime > 0 && startTime > 0) {
+                ((endTime - startTime - FocusService.totalBreakMs) + 30000) / 60000
+            } else {
+                999L
+            }
+
+            val durations = listOf(5, 10, 20, 30)
+            return@Function durations.filter { mins ->
+                if (endTime == -1L) return@filter true
+
+                val isUnderSessionCap = mins <= (totalSessionMinutes - 10)
+                val hasEnoughTimeRemaining = remainingMs >= (mins * 60 * 1000L)
+
+                isUnderSessionCap && hasEnoughTimeRemaining
+            }
+        }
+
         Function("updateGlobalBlocklist") { apps: List<String> ->
             val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
             if (context != null) {
@@ -495,7 +525,8 @@ class FocusBlockerModule : Module() {
             val intent = if (uri != null) {
                 Intent(Intent.ACTION_VIEW, uri).apply {
                     setPackage(context.packageName)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    flags =
+                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
             } else {
                 context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {

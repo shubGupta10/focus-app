@@ -21,6 +21,7 @@ import { useDynamicReducedMotion } from "@/hooks/useDynamicReducedMotion";
 import { useNotification } from "@/hooks/useNotifications";
 import { useAppStore } from "@/store/useAppStore";
 import { WhatsNewModal } from "@/components/modals/WhatsNewModal";
+import { formatCoinBalance } from "@/features/stats/utils/stats_utils";
 
 export default function Index() {
     const { width, height } = useWindowDimensions();
@@ -31,6 +32,7 @@ export default function Index() {
     const { unreadCount } = useNotification();
     const reducedMotion = useDynamicReducedMotion();
     const { whatsNew, dismissWhatsNew } = useAutoUpdateCheck();
+    const totalCoins = useAppStore((state) => state.stats.total_coins);
 
     const {
         engine,
@@ -126,12 +128,15 @@ export default function Index() {
                             onPress={() => router.push("/shop")}
                             hapticMode="light"
                             scaleTo={0.88}
-                            className={`${isSmallDevice ? "w-9 h-9 mr-2" : "w-10 h-10 mr-3"} rounded-full bg-surfaceElevated border border-border items-center justify-center shadow-sm`}
+                            className={`flex-row items-center bg-surfaceElevated border border-border px-3.5 py-1.5 rounded-full shadow-sm ${
+                                isSmallDevice ? "mr-2" : "mr-3"
+                            }`}
                             style={{ elevation: 2 }}
                             accessibilityRole="button"
-                            accessibilityLabel="Open Shop"
+                            accessibilityLabel={`Shop, balance ${formatCoinBalance(totalCoins)} coins`}
                         >
-                            <Ionicons name="cart-outline" size={isSmallDevice ? 18 : 20} color={colors.textSecondary} />
+                            <Text style={{ fontSize: 16, marginRight: 6 }}>🪙</Text>
+                            <Text className="text-text font-bold text-base">{formatCoinBalance(totalCoins)}</Text>
                         </AnimatedPressable>
 
                         <AnimatedPressable

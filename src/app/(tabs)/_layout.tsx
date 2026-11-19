@@ -2,7 +2,7 @@ import { ThemeColors, useTheme } from "@/contexts/ThemeContext";
 import { useFocusEngine } from "@/hooks/useFocusEngine";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TabIcon({
@@ -38,7 +38,7 @@ function TabIcon({
                     className="absolute top-0 right-3 w-2.5 h-2.5 rounded-full border-[1.5px]"
                     style={{
                         backgroundColor: colors.warning,
-                        borderColor: colors.surfaceElevated,
+                        borderColor: colors.surface,
                     }}
                 />
             )}
@@ -63,15 +63,16 @@ export default function TabLayout() {
                     backgroundColor: colors.background,
                 },
                 tabBarStyle: {
-                    backgroundColor: colors.surfaceElevated,
-                    borderTopWidth: 0,
+                    backgroundColor: colors.surface,
+                    borderTopWidth: 1,
+                    borderTopColor: colors.border,
                     height: 80 + insets.bottom,
                     paddingTop: 10,
                     paddingBottom: insets.bottom > 0 ? insets.bottom + 6 : 10,
-                    elevation: 3,
+                    elevation: 8,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: -2 },
-                    shadowOpacity: isDarkMode ? 0.25 : 0.04,
+                    shadowOffset: { width: 0, height: -3 },
+                    shadowOpacity: isDarkMode ? 0.35 : 0.08,
                     shadowRadius: 6,
                 },
                 tabBarShowLabel: true,
