@@ -15,8 +15,8 @@ interface TakeBreakModelProps {
 
 export function TakeBreakModal({ visible, onClose, onStartBreak, availablePresets }: TakeBreakModelProps) {
     const { colors, isDarkMode, activeStyle } = useTheme();
-    const presets = availablePresets && availablePresets.length > 0 ? availablePresets : [5];
-    const [selectedMinutes, setSelectedMinutes] = useState(presets[0]);
+    const presets = availablePresets && availablePresets.length > 0 ? availablePresets : [];
+    const [selectedMinutes, setSelectedMinutes] = useState(presets[0] ?? 5);
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
@@ -25,12 +25,12 @@ export function TakeBreakModal({ visible, onClose, onStartBreak, availablePreset
         }
     }, [visible, availablePresets]);
 
-    if (!visible) return null;
+    if (!visible || presets.length === 0) return null;
 
     const handleConfirm = () => {
         onStartBreak(selectedMinutes);
         onClose();
-    }
+    };
 
 
     return (

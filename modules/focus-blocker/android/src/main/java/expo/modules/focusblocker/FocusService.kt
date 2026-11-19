@@ -285,7 +285,7 @@ class FocusService : Service() {
                     wasBreakActive = true
                 }
 
-                if (endTime == -1L && currentLoopTime - activeStartTime >= 24 * 60 * 60 * 1000L) {
+                if (activeEndTime == -1L && currentLoopTime - activeStartTime >= 24 * 60 * 60 * 1000L) {
                     Log.d("FocusBlocker", "Time expired! Auto-stopping service")
                     sendSessionEndNotification()
 
@@ -306,16 +306,16 @@ class FocusService : Service() {
                     LockoutNotificationListener.clearSessionState();
                     stopSelf()
                     break
-                } else if (endTime > 0 && currentLoopTime >= endTime) {
+                } else if (activeEndTime > 0 && currentLoopTime >= activeEndTime) {
                     Log.d("FocusBlocker", "Timer expired! Auto-stopping service")
                     sendSessionEndNotification()
 
-                    val durationSeconds = ((endTime - activeStartTime - totalBreakMs) / 1000L).coerceAtLeast(0L)
+                    val durationSeconds = ((activeEndTime - activeStartTime - totalBreakMs) / 1000L).coerceAtLeast(0L)
 
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
                         .putLong("completed_duration", durationSeconds)
-                        .putLong("completed_endTime", endTime)
+                        .putLong("completed_endTime", activeEndTime)
                         .putBoolean("completed_isStrict", isStrictActive)
                         .remove("activeStartTime")
                         .remove("activeEndTime")
@@ -398,8 +398,8 @@ class FocusService : Service() {
             }
         }
 
-        val timeMessage = if (endTime > 0) {
-            val diffMs = endTime - System.currentTimeMillis()
+        val timeMessage = if (activeEndTime > 0) {
+            val diffMs = activeEndTime - System.currentTimeMillis()
             val minutesLeft = (diffMs / 1000 / 60).coerceAtLeast(1)
             if (minutesLeft > 1) "$minutesLeft minutes remaining" else "Less than a minute remaining"
         } else {

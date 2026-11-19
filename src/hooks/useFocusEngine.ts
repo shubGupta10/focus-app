@@ -189,7 +189,7 @@ export function useFocusEngine(isRoot: boolean = false) {
                     ? nativeSession.totalBreakMs
                     : undefined;
 
-                if (storeState.isBreakActive !== isBreakActive || storeState.breakEndTime !== breakEndTime || storeState.breaksRemaining !== breaksRemaining || (nativeTotalBreakMs !== undefined && storeState.totalBreakMs < nativeTotalBreakMs)) {
+                if (storeState.isBreakActive !== isBreakActive || storeState.breakEndTime !== breakEndTime || storeState.breaksRemaining !== breaksRemaining || (nativeTotalBreakMs !== undefined && storeState.totalBreakMs !== nativeTotalBreakMs)) {
                     useAppStore.getState().setBreakState(isBreakActive, breakEndTime, breaksRemaining, nativeTotalBreakMs);
                 }
 
@@ -351,8 +351,24 @@ export function useFocusEngine(isRoot: boolean = false) {
         FocusBlocker.goHome();
     };
 
-    const startBreak = (durationMinutes: number) => {
+    const startBreak = async (durationMinutes: number) => {
         FocusBlocker.startBreak(durationMinutes);
+        const breakDurationMs = durationMinutes * 60 * 1000;
+        const breakEndTime = Date.now() + breakDurationMs;
+        useAppStore.getState().setBreakState(true, breakEndTime, 0);
+
+        try {
+            const stored = await AsyncStorage.getItem('active_session');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (parsed.endTime !== -1) {
+                    parsed.endTime += breakDurationMs;
+                    await AsyncStorage.setItem('active_session', JSON.stringify(parsed));
+                }
+            }
+        } catch (e) {
+        }
+
         notifyEngineListeners();
     };
 

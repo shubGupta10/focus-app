@@ -95,19 +95,12 @@ export const useAppStore = create<AppState>((set) => ({
         const now = Date.now();
         let newBreakStartTime = state.breakStartTime;
         let newBreakDurationMs = state.breakDurationMs;
-        let newTotalBreakMs = (totalBreakMs !== undefined && totalBreakMs > state.totalBreakMs)
-            ? totalBreakMs
-            : state.totalBreakMs;
+        let newTotalBreakMs = totalBreakMs !== undefined ? totalBreakMs : state.totalBreakMs;
 
         if (!state.isBreakActive && isBreakActive) {
             newBreakStartTime = now;
             newBreakDurationMs = breakEndTime ? Math.max(0, breakEndTime - now) : null;
         } else if (state.isBreakActive && !isBreakActive) {
-            if (state.breakStartTime) {
-                const effectiveBreakEnd = state.breakEndTime ? Math.min(now, state.breakEndTime) : now;
-                const elapsed = Math.max(0, effectiveBreakEnd - state.breakStartTime);
-                newTotalBreakMs = Math.max(newTotalBreakMs, state.totalBreakMs + elapsed);
-            }
             newBreakStartTime = null;
             newBreakDurationMs = null;
         }

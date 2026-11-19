@@ -36,7 +36,7 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
     const { colors } = useTheme();
     const reducedMotion = useDynamicReducedMotion();
     const [isBlockedAppsModalVisible, setIsBlockedAppsModalVisible] = useState(false);
-    const { startBreak, endBreak, breaksRemaining } = useFocusEngine();
+    const { startBreak, breaksRemaining } = useFocusEngine();
     const [isBreakModalVisible, setIsBreakModalVisible] = useState(false);
     const availableBreaks = FocusBlocker.getAvailableBreaks?.() ?? [];
 
@@ -56,32 +56,30 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     const breakDiff = Math.max(0, Math.floor((breakEndTime - now) / 1000));
                     setBreakTimeLeft(formatTimerDisplay(breakDiff));
                 } else {
-                    useAppStore.getState().setBreakState(false, null, useAppStore.getState().breaksRemaining);
+                    useAppStore.getState().setBreakState(false, null, 0);
                 }
             }
 
             const store = useAppStore.getState();
-            let focusElapsedMs: number;
-            if (isBreakActive) {
-                const breakStart = store.breakStartTime ?? (breakEndTime && store.breakDurationMs ? breakEndTime - store.breakDurationMs : now);
-                focusElapsedMs = Math.max(0, breakStart - startTime - store.totalBreakMs);
-            } else {
-                focusElapsedMs = Math.max(0, now - startTime - store.totalBreakMs);
-            }
-
-            const elapsedFocusSeconds = Math.floor(focusElapsedMs / 1000);
-            const baseCoins = Math.floor(elapsedFocusSeconds / 60);
-            setEarnedCoins(isStrict ? Math.floor(baseCoins * 1.5) : baseCoins);
 
             if (infinite) {
-                setTimeLeft(formatTimerDisplay(elapsedFocusSeconds));
+                const currentBreakElapsed = isBreakActive && store.breakStartTime
+                    ? Math.max(0, now - store.breakStartTime)
+                    : 0;
+                const focusElapsedMs = Math.max(0, now - startTime - store.totalBreakMs - currentBreakElapsed);
+                const elapsedFocusSeconds = Math.floor(focusElapsedMs / 1000);
+                const baseCoins = Math.floor(elapsedFocusSeconds / 60);
+                setEarnedCoins(isStrict ? Math.floor(baseCoins * 1.5) : baseCoins);
 
+                setTimeLeft(formatTimerDisplay(elapsedFocusSeconds));
                 setSessionProgress(1);
                 const msInMinute = focusElapsedMs % 60000;
                 setMinuteProgress(msInMinute / 60000);
             } else if (endTime && endTime > 0) {
-                const totalDuration = endTime - startTime;
-                const remainingFocusMs = Math.max(0, totalDuration - focusElapsedMs);
+                const remainingFocusMs = isBreakActive && breakEndTime
+                    ? Math.max(0, endTime - breakEndTime)
+                    : Math.max(0, endTime - now);
+
                 if (remainingFocusMs <= 0) {
                     setTimeLeft("0m 00s");
                     setSessionProgress(0);
@@ -93,11 +91,17 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                     }
                     return;
                 }
-                const totalSeconds = Math.floor(remainingFocusMs / 1000);
 
+                const totalDuration = Math.max(1, (endTime - startTime) - store.totalBreakMs);
+                const focusElapsedMs = Math.max(0, totalDuration - remainingFocusMs);
+                const elapsedFocusSeconds = Math.floor(focusElapsedMs / 1000);
+                const baseCoins = Math.floor(elapsedFocusSeconds / 60);
+                setEarnedCoins(isStrict ? Math.floor(baseCoins * 1.5) : baseCoins);
+
+                const totalSeconds = Math.floor(remainingFocusMs / 1000);
                 setTimeLeft(formatTimerDisplay(totalSeconds));
 
-                setSessionProgress(totalDuration > 0 ? Math.max(0, Math.min(1, remainingFocusMs / totalDuration)) : 0);
+                setSessionProgress(Math.max(0, Math.min(1, remainingFocusMs / totalDuration)));
 
                 const msInMinute = remainingFocusMs % 60000;
                 const minProg = msInMinute === 0 && remainingFocusMs > 0 ? 1 : msInMinute / 60000;
@@ -124,35 +128,41 @@ export function ActiveSessionUI({ onStopPress, startTime, endTime, blockedAppsCo
                         </View>
                     )}
 
-                    {!isStrict && (isBreakActive || availableBreaks.length > 0) && (
-                        <AnimatedPressable
-                            onPress={() => {
-                                if (isBreakActive) {
-                                    endBreak();
-                                } else {
-                                    setIsBreakModalVisible(true);
-                                }
-                            }}
-                            hapticMode="light"
-                            scaleTo={0.92}
-                            className={`flex-row items-center ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full border ${isBreakActive
-                                ? "bg-accent border-accent"
-                                : "bg-surfaceElevated border-border"
-                                }`}
+                    {isBreakActive && (
+                        <View
+                            className={`flex-row items-center ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full bg-surfaceElevated border border-border`}
                         >
                             <Ionicons
-                                name={isBreakActive ? "play" : "cafe-outline"}
+                                name="cafe-outline"
                                 size={isSmallDevice ? 14 : 16}
-                                color={isBreakActive ? colors.accentForeground : colors.textSecondary}
+                                color={colors.textSecondary}
                                 style={{ marginRight: 6 }}
                             />
                             <Text
-                                className={`${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold ${isBreakActive
-                                    ? "text-accentForeground"
-                                    : "text-textSecondary"
-                                    }`}
+                                className={`${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold text-textSecondary`}
                             >
-                                {isBreakActive ? "Resume" : "Take a Break"}
+                                Taking a Break
+                            </Text>
+                        </View>
+                    )}
+
+                    {!isStrict && !isBreakActive && breaksRemaining > 0 && availableBreaks.length > 0 && (
+                        <AnimatedPressable
+                            onPress={() => setIsBreakModalVisible(true)}
+                            hapticMode="light"
+                            scaleTo={0.92}
+                            className={`flex-row items-center ${isSmallDevice ? "px-3 py-1.5" : "px-4 py-2"} rounded-full bg-surfaceElevated border border-border`}
+                        >
+                            <Ionicons
+                                name="cafe-outline"
+                                size={isSmallDevice ? 14 : 16}
+                                color={colors.textSecondary}
+                                style={{ marginRight: 6 }}
+                            />
+                            <Text
+                                className={`${isSmallDevice ? "text-[11px]" : "text-[13px]"} font-bold text-textSecondary`}
+                            >
+                                Take a Break
                             </Text>
                         </AnimatedPressable>
                     )}

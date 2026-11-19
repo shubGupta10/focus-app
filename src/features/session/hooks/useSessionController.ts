@@ -74,10 +74,10 @@ export function useSessionController() {
                 engine.sessionEndTime > 0
             ) {
                 const store = useAppStore.getState();
-                const effectiveEndTime = engine.sessionEndTime + store.totalBreakMs;
+                const effectiveEndTime = engine.sessionEndTime;
                 if (Date.now() >= effectiveEndTime) {
-                    const totalTargetSeconds = getDurationSeconds(engine.sessionStartTime, engine.sessionEndTime);
-                    durationSeconds = totalTargetSeconds;
+                    const pureFocusSeconds = Math.max(0, Math.floor(((engine.sessionEndTime - engine.sessionStartTime) - store.totalBreakMs) / 1000));
+                    durationSeconds = pureFocusSeconds;
                     wasStrict = engine.isStrictSession;
                     endTimeMs = effectiveEndTime;
                 }
@@ -182,7 +182,7 @@ export function useSessionController() {
     }, []);
 
     useEffect(() => {
-        const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime + useAppStore.getState().totalBreakMs : null;
+        const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime : null;
         if (!engine.isSessionActive && engine.sessionStartTime && effectiveEndTime && Date.now() >= effectiveEndTime) {
             handleCompleteSession();
         }
@@ -200,7 +200,7 @@ export function useSessionController() {
                 let durationSeconds: number;
                 if (store.isBreakActive) {
                     const breakStart = store.breakStartTime ?? (store.breakEndTime && store.breakDurationMs ? store.breakEndTime - store.breakDurationMs : now);
-                    durationSeconds = Math.max(0, Math.floor((breakStart - engine.sessionStartTime - store.totalBreakMs) / 1000));
+                    durationSeconds = Math.max(0, Math.floor((breakStart - engine.sessionStartTime) / 1000));
                 } else {
                     durationSeconds = Math.max(0, Math.floor((now - engine.sessionStartTime - store.totalBreakMs) / 1000));
                 }

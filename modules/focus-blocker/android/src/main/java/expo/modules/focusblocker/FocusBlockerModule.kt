@@ -222,7 +222,7 @@ class FocusBlockerModule : Module() {
                 if (FocusService.activeEndTime != -1L && (FocusService.activeEndTime - now) < breakMs) {
                     return@Function
                 }
-                FocusService.breaksRemaining = (FocusService.breaksRemaining - 1).coerceAtLeast(0)
+                FocusService.breaksRemaining = 0
                 FocusService.breakEndTime = now + breakMs
                 FocusService.ignoreBlockingUntil = FocusService.breakEndTime
                 FocusService.totalBreakMs += breakMs
@@ -233,7 +233,7 @@ class FocusBlockerModule : Module() {
                     val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
                         .putLong("breakEndTime", FocusService.breakEndTime)
-                        .putInt("breaksRemaining", FocusService.breaksRemaining)
+                        .putInt("breaksRemaining", 0)
                         .putLong("totalBreakMs", FocusService.totalBreakMs)
                         .putLong("activeEndTime", FocusService.activeEndTime)
                         .apply()
