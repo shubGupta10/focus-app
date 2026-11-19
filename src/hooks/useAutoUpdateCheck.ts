@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { addNotification } from "./useNotifications";
 import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
+import { isNewerVersion } from "@/utils/versionUtils";
 
 export type AppNotification = {
     id: string;
@@ -65,39 +66,37 @@ export async function checkForUpdates(
         const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
         const data = await response.json();
 
-        if (data.tag_name) {
-            const latest = data.tag_name.replace("v", "");
-            if (latest !== currentVersion) {
-                const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
-                const downloadUrl = apkAsset?.browser_download_url || "https://github.com/shubGupta10/focus-app/releases/latest";
+        if (data.tag_name && isNewerVersion(data.tag_name, currentVersion)) {
+            const latest = data.tag_name.replace(/^v/i, "");
+            const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
+            const downloadUrl = apkAsset?.browser_download_url || "https://github.com/shubGupta10/focus-app/releases/latest";
 
-                const updateTitle = `Full update available (v${latest})`;
-                const updateDesc =
+            const updateTitle = `Full update available (v${latest})`;
+            const updateDesc =
+                data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
+                "A new update is ready for you with fixes and improvements.";
+
+            await addNotification(db, {
+                id: `update_${latest}`,
+                type: "update",
+                title: `Full update available (v${latest})`,
+                description:
                     data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
-                    "A new update is ready for you with fixes and improvements.";
+                    "A new update is ready for you with fixes and improvements.",
+                timestamp: Date.now(),
+                action_label: "View update",
+                action_url: "/updates",
+            });
 
-                await addNotification(db, {
-                    id: `update_${latest}`,
-                    type: "update",
-                    title: `Full update available (v${latest})`,
-                    description:
-                        data.body?.slice(0, 120)?.replace(/[#*`]/g, "")?.trim() ||
-                        "A new update is ready for you with fixes and improvements.",
-                    timestamp: Date.now(),
-                    action_label: "View update",
-                    action_url: "/updates",
-                });
-
-                const notifiedKey = `notified_system_update_${latest}`;
-                const alreadyNotified = await AsyncStorage.getItem(notifiedKey);
-                if (!alreadyNotified) {
-                    FocusBlocker.sendNotification(
-                        updateTitle,
-                        updateDesc,
-                        "lockout://updates"
-                    );
-                    await AsyncStorage.setItem(notifiedKey, "true");
-                }
+            const notifiedKey = `notified_system_update_${latest}`;
+            const alreadyNotified = await AsyncStorage.getItem(notifiedKey);
+            if (!alreadyNotified) {
+                FocusBlocker.sendNotification(
+                    updateTitle,
+                    updateDesc,
+                    "lockout://updates"
+                );
+                await AsyncStorage.setItem(notifiedKey, "true");
             }
         }
     } catch (error) {

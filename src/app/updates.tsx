@@ -7,90 +7,76 @@ import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View, ToastAndroid } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { isNewerVersion } from "@/utils/versionUtils";
 
 export default function UpdatesScreen() {
     const { activeStyle, colors } = useTheme();
     const { isChecking, checkForUpdates } = useAppUpdate();
-    const [isCheckingBackground, setIsCheckingBackground] = useState(true);
     const [hasOTAUpdateAvailable, setHasOTAUpdateAvailable] = useState(false);
     const [hasFullUpdateAvailable, setHasFullUpdateAvailable] = useState(false);
-
+    const [latestVersionTag, setLatestVersionTag] = useState<string | null>(null);
     const [isFetchingRelease, setIsFetchingRelease] = useState(false);
+    const currentVersion = Constants.expoConfig?.version ?? "1.0.0";
 
     const checkOTAUpdateAvailable = async () => {
-        if (__DEV__) return;
+        if (__DEV__ || !Updates.isEnabled) return;
         try {
             const checkUpdate = await Updates.checkForUpdateAsync();
-            if (checkUpdate.isAvailable) {
-                setHasOTAUpdateAvailable(true);
-                ToastAndroid.show("A new OTA update is ready! Click the button to apply it.", ToastAndroid.LONG);
-            } else {
-                setHasOTAUpdateAvailable(false);
-            }
+            setHasOTAUpdateAvailable(Boolean(checkUpdate.isAvailable));
         } catch (error) {
-            console.error("Background OTA check failed:", error);
             setHasOTAUpdateAvailable(false);
         }
-    }
+    };
 
     const checkFullUpdateAvailable = async () => {
         try {
-            const currentVersion = Constants.expoConfig?.version;
             const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
+            if (!response.ok) {
+                setHasFullUpdateAvailable(false);
+                return;
+            }
             const data = await response.json();
-
-            if (data.tag_name && data.tag_name !== `v${currentVersion}`) {
+            if (data.tag_name && isNewerVersion(data.tag_name, currentVersion)) {
                 setHasFullUpdateAvailable(true);
-                ToastAndroid.show(`A full app update (${data.tag_name}) is available on GitHub!`, ToastAndroid.LONG);
+                setLatestVersionTag(data.tag_name);
             } else {
                 setHasFullUpdateAvailable(false);
             }
         } catch (error) {
-            console.error("Background Full update check failed:", error);
             setHasFullUpdateAvailable(false);
         }
-    }
+    };
 
     useEffect(() => {
-        const runChecks = async () => {
-            setIsCheckingBackground(true);
-            await Promise.all([
-                checkOTAUpdateAvailable(),
-                checkFullUpdateAvailable()
-            ]);
-            setIsCheckingBackground(false);
-        };
-        runChecks();
+        checkOTAUpdateAvailable();
+        checkFullUpdateAvailable();
     }, []);
 
     const handleFullUpdate = async () => {
+        if (isFetchingRelease) return;
         try {
             setIsFetchingRelease(true);
-            const currentVersion = Constants.expoConfig?.version!;
-
             const response = await fetch("https://api.github.com/repos/shubGupta10/focus-app/releases/latest");
+            if (!response.ok) {
+                Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
+                return;
+            }
             const data = await response.json();
+            const remoteTag = data.tag_name;
 
-            if (data.tag_name) {
-                const latestVersion = data.tag_name.replace("v", "");
-
-                if (latestVersion === currentVersion) {
-                    Alert.alert("Up to Date", "You already have the latest version installed!");
-                    return;
-                }
+            if (!remoteTag || !isNewerVersion(remoteTag, currentVersion)) {
+                Alert.alert("Up to Date", `You already have the latest version installed (v${currentVersion}).`);
+                return;
             }
 
             const apkAsset = data.assets?.find((asset: any) => asset.name.endsWith('.apk'));
-
             if (apkAsset && apkAsset.browser_download_url) {
-
                 Linking.openURL(apkAsset.browser_download_url);
             } else {
-
-                Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
+                Linking.openURL("https://github.com/shubGupta10/focus-app/releases/latest");
             }
         } catch (error) {
             Linking.openURL("https://github.com/shubGupta10/focus-app/releases");
@@ -98,6 +84,7 @@ export default function UpdatesScreen() {
             setIsFetchingRelease(false);
         }
     };
+
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle}>
             <View className="flex-row items-center px-6 pt-5 pb-3">
@@ -116,6 +103,16 @@ export default function UpdatesScreen() {
             </View>
 
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 40 }}>
+                <View className="flex-row items-center justify-between bg-surfaceElevated border border-border rounded-2xl px-4 py-3 mb-6">
+                    <View className="flex-row items-center">
+                        <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
+                        <Text className="text-textSecondary text-xs font-bold uppercase tracking-wider">Installed Version</Text>
+                    </View>
+                    <View className="bg-surface px-2.5 py-1 rounded-full border border-border">
+                        <Text className="text-text font-bold text-xs">v{currentVersion}</Text>
+                    </View>
+                </View>
+
                 <Text className="text-textSecondary text-sm leading-relaxed mb-6 font-medium">
                     Keep your app running smoothly with the latest features, improvements, and fixes.
                 </Text>
@@ -136,7 +133,7 @@ export default function UpdatesScreen() {
                         className="p-5 border-b border-border active:bg-surface"
                     >
                         <View className="flex-row items-center justify-between mb-1.5">
-                            <View className="flex-row items-center">
+                            <View className="flex-row items-center flex-1 mr-2">
                                 {isChecking ? (
                                     <View style={{ marginRight: 12 }}>
                                         <GlobalLoader color={colors.accent} size="small" />
@@ -153,7 +150,14 @@ export default function UpdatesScreen() {
                                     {isChecking ? "Checking for updates..." : "Quick Update"}
                                 </Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+                            <View className="flex-row items-center">
+                                {hasOTAUpdateAvailable && (
+                                    <View className="bg-accent px-2 py-0.5 rounded-full mr-2">
+                                        <Text className="text-accentForeground text-[10px] font-bold">Update Ready</Text>
+                                    </View>
+                                )}
+                                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+                            </View>
                         </View>
                         <Text className="text-textSecondary text-xs leading-relaxed ml-9">
                             Applies the latest interface improvements and fixes instantly without reinstalling.
@@ -166,7 +170,7 @@ export default function UpdatesScreen() {
                         className="p-5 active:bg-surface"
                     >
                         <View className="flex-row items-center justify-between mb-1.5">
-                            <View className="flex-row items-center">
+                            <View className="flex-row items-center flex-1 mr-2">
                                 {isFetchingRelease ? (
                                     <View style={{ marginRight: 12 }}>
                                         <GlobalLoader color={colors.accent} size="small" />
@@ -183,7 +187,14 @@ export default function UpdatesScreen() {
                                     {isFetchingRelease ? "Finding latest release..." : "Full App Release"}
                                 </Text>
                             </View>
-                            <Ionicons name="open-outline" size={18} color={colors.textSecondary} />
+                            <View className="flex-row items-center">
+                                {hasFullUpdateAvailable && latestVersionTag && (
+                                    <View className="bg-accent px-2 py-0.5 rounded-full mr-2">
+                                        <Text className="text-accentForeground text-[10px] font-bold">Update Available {latestVersionTag}</Text>
+                                    </View>
+                                )}
+                                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+                            </View>
                         </View>
                         <Text className="text-textSecondary text-xs leading-relaxed ml-9">
                             Download the newest standalone release directly from GitHub with all core system upgrades.

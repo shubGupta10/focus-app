@@ -7,7 +7,12 @@ export function useAppUpdate() {
 
     const checkForUpdates = async () => {
         if (__DEV__) {
-            Alert.alert("Development Mode", "OTA Updates are not available in development builds");
+            Alert.alert("Development Mode", "OTA Updates are not available in development builds.");
+            return;
+        }
+
+        if (!Updates.isEnabled) {
+            Alert.alert("OTA Unavailable", "Quick updates are not enabled for this build.");
             return;
         }
 
@@ -20,8 +25,8 @@ export function useAppUpdate() {
 
                 if (fetchUpdate.isNew) {
                     Alert.alert(
-                        "Update Downloaded", "A new version of the app has been downloaded. Restarted the app to apply the changes.",
-
+                        "Update Downloaded",
+                        "A new version of the app has been downloaded. Restart the app to apply the changes.",
                         [
                             {
                                 text: "Restart Later",
@@ -39,7 +44,7 @@ export function useAppUpdate() {
             }
         } catch (error) {
             console.error("Failed to check for updates:", error);
-            Alert.alert("Error", "Failed to check for updates. Please try again later.");
+            Alert.alert("Check Failed", "Could not check for OTA updates right now. Please check your internet connection.");
         } finally {
             setIsChecking(false);
         }
