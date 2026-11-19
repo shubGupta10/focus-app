@@ -193,7 +193,6 @@ export default function UpdatesScreen() {
                                         <Text className="text-accentForeground text-[10px] font-bold">Update Available {latestVersionTag}</Text>
                                     </View>
                                 )}
-                                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
                             </View>
                         </View>
                         <Text className="text-textSecondary text-xs leading-relaxed ml-9">
