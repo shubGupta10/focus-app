@@ -1,5 +1,5 @@
 export function formatCoinBalance(num: number): string {
-    if (num < 100000) {
+    if (num < 10000) {
         return num.toLocaleString();
     }
     return new Intl.NumberFormat("en", {

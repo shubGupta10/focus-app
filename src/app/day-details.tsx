@@ -82,15 +82,7 @@ export default function DayDetailsScreen() {
     const blockedApps = dayDetails?.blockedApps ?? [];
     const maxBlockedCount = Math.max(...blockedApps.map((a: any) => a.count), 1);
 
-    let startHour = 6;
-    let endHour = 22;
-    sessions.forEach((s) => {
-        const sDate = new Date(s.start_time);
-        const eDate = new Date(s.start_time + s.duration_seconds * 1000);
-        if (sDate.getHours() < startHour) startHour = Math.max(0, sDate.getHours() - 1);
-        if (eDate.getHours() >= endHour) endHour = Math.min(24, eDate.getHours() + 1);
-    });
-    const totalRangeMinutes = Math.max((endHour - startHour) * 60, 60);
+    const TOTAL_DAY_MINUTES = 1440;
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={["top", "bottom"]}>
@@ -189,14 +181,19 @@ export default function DayDetailsScreen() {
                 </View>
 
                 <View className="bg-surfaceElevated border border-border rounded-3xl p-5 mb-5 shadow-sm" style={{ elevation: 1 }}>
-                    <View className="h-14 bg-surface rounded-2xl overflow-hidden relative justify-center px-2">
+                    <View className="h-14 bg-surface rounded-2xl overflow-hidden relative justify-center">
+                        <View style={{ position: "absolute", left: "25%", top: 0, bottom: 0, width: 1, backgroundColor: colors.border, opacity: 0.4 }} />
+                        <View style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, backgroundColor: colors.border, opacity: 0.4 }} />
+                        <View style={{ position: "absolute", left: "75%", top: 0, bottom: 0, width: 1, backgroundColor: colors.border, opacity: 0.4 }} />
+
                         {sessions.map((s: any) => {
                             const sDate = new Date(s.start_time);
-                            const startMinsFromBase = (sDate.getHours() - startHour) * 60 + sDate.getMinutes();
-                            const durationMins = Math.max(s.duration_seconds / 60, 10);
+                            const startMins = sDate.getHours() * 60 + sDate.getMinutes();
+                            const durationMins = Math.max(s.duration_seconds / 60, 1);
 
-                            const leftPercent = Math.max(0, Math.min(100, (startMinsFromBase / totalRangeMinutes) * 100));
-                            const widthPercent = Math.max(4.5, Math.min(100 - leftPercent, (durationMins / totalRangeMinutes) * 100));
+                            const leftPercent = Math.max(0, Math.min(98, (startMins / TOTAL_DAY_MINUTES) * 100));
+                            const rawWidthPercent = (durationMins / TOTAL_DAY_MINUTES) * 100;
+                            const widthPercent = Math.max(2, Math.min(100 - leftPercent, rawWidthPercent));
 
                             return (
                                 <View
@@ -215,11 +212,12 @@ export default function DayDetailsScreen() {
                         })}
                     </View>
 
-                    <View className="flex-row justify-between px-2 mt-3">
-                        <Text className="text-textMuted text-xs font-semibold">8 AM</Text>
+                    <View className="flex-row justify-between px-1 mt-3">
+                        <Text className="text-textMuted text-xs font-semibold">12 AM</Text>
+                        <Text className="text-textMuted text-xs font-semibold">6 AM</Text>
                         <Text className="text-textMuted text-xs font-semibold">12 PM</Text>
-                        <Text className="text-textMuted text-xs font-semibold">4 PM</Text>
-                        <Text className="text-textMuted text-xs font-semibold">8 PM</Text>
+                        <Text className="text-textMuted text-xs font-semibold">6 PM</Text>
+                        <Text className="text-textMuted text-xs font-semibold">12 AM</Text>
                     </View>
                 </View>
 
