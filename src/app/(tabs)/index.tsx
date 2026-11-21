@@ -22,6 +22,8 @@ import { useNotification } from "@/hooks/useNotifications";
 import { useAppStore } from "@/store/useAppStore";
 import { WhatsNewModal } from "@/components/modals/WhatsNewModal";
 import { formatCoinBalance } from "@/features/stats/utils/stats_utils";
+import { useFeedbackTrigger } from "@/hooks/useFeedbackTrigger";
+import { FeedbackMilestoneModal } from "@/features/feedback/components/FeedbackMilestoneModal";
 
 export default function Index() {
     const { width, height } = useWindowDimensions();
@@ -33,6 +35,12 @@ export default function Index() {
     const reducedMotion = useDynamicReducedMotion();
     const { whatsNew, dismissWhatsNew } = useAutoUpdateCheck();
     const totalCoins = useAppStore((state) => state.stats.total_coins);
+    const {
+        isPromptVisible: isFeedbackPromptVisible,
+        completedSessionCount,
+        checkMilestone: checkFeedbackMilestone,
+        dismissPrompt: dismissFeedbackPrompt,
+    } = useFeedbackTrigger();
 
     const {
         engine,
@@ -270,7 +278,10 @@ export default function Index() {
 
             <SessionResultModal
                 visible={sessionResult !== null}
-                onClose={() => setSessionResult(null)}
+                onClose={() => {
+                    setSessionResult(null);
+                    checkFeedbackMilestone();
+                }}
                 result={sessionResult}
             />
 
@@ -286,6 +297,12 @@ export default function Index() {
                 visible={Boolean(whatsNew)}
                 data={whatsNew}
                 onClose={dismissWhatsNew}
+            />
+
+            <FeedbackMilestoneModal
+                visible={isFeedbackPromptVisible}
+                onClose={dismissFeedbackPrompt}
+                sessionCount={completedSessionCount}
             />
         </SafeAreaView>
     );

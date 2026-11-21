@@ -76,45 +76,51 @@ export function TodayFocusCard() {
             </View>
 
             <View className="flex-row items-center justify-between px-1">
-                <View className="items-center flex-1">
+                <View className="items-center flex-1 px-1.5">
                     <View className="flex-row items-center justify-center">
-                        <Text style={{ fontSize: 18, marginRight: 5 }}>🪙</Text>
-                        <Text className="text-accent font-black text-3xl tabular-nums leading-none" numberOfLines={1} adjustsFontSizeToFit>
+                        <Text style={{ fontSize: 16, marginRight: 4 }}>🪙</Text>
+                        <Text
+                            className="text-accent font-black text-2xl tracking-tight tabular-nums leading-none"
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.75}
+                        >
                             {formatCoinBalance(stats.total_coins)}
                         </Text>
                     </View>
-                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2">
+                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2 text-center" numberOfLines={1}>
                         coin balance
                     </Text>
                 </View>
+
                 <View className="w-px h-8 bg-border" />
 
-                <View className="items-center flex-1">
+                <View className="items-center flex-1 px-1.5">
                     <View className="flex-row items-baseline justify-center">
-                        <Text className="text-text font-black text-3xl tabular-nums leading-none">
+                        <Text className="text-text font-black text-2xl tracking-tight tabular-nums leading-none">
                             {stats.current_streak}
                         </Text>
                         <Text className="text-textSecondary font-semibold text-xs ml-1">
                             {stats.current_streak === 1 ? "day" : "days"}
                         </Text>
                     </View>
-                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2">
+                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2 text-center" numberOfLines={1}>
                         day streak
                     </Text>
                 </View>
 
                 <View className="w-px h-8 bg-border" />
 
-                <View className="items-center flex-1">
+                <View className="items-center flex-1 px-1.5">
                     <View className="flex-row items-baseline justify-center">
-                        <Text className="text-text font-black text-3xl tabular-nums leading-none">
+                        <Text className="text-text font-black text-2xl tracking-tight tabular-nums leading-none">
                             {stats.longest_streak}
                         </Text>
                         <Text className="text-textSecondary font-semibold text-xs ml-1">
                             {stats.longest_streak === 1 ? "day" : "days"}
                         </Text>
                     </View>
-                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2">
+                    <Text className="text-textSecondary font-bold text-[11px] uppercase tracking-wider mt-2 text-center" numberOfLines={1}>
                         best streak
                     </Text>
                 </View>

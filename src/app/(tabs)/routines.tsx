@@ -30,7 +30,7 @@ export default function RoutinesTab() {
         <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={['top', 'left', 'right']}>
             <View className="flex-row items-center justify-between px-6 pt-5 pb-2">
                 <View className="flex-1">
-                    <View className="flex-row items-center gap-3">
+                    <View className="flex-row justify-between items-center gap-3">
                         <Text className="text-text font-black text-3xl tracking-tight">Routines</Text>
                         <InfoSheet
                             title="How Routines Work"

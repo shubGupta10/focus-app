@@ -1,6 +1,5 @@
 import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { useTheme } from "@/contexts/ThemeContext";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View } from "react-native";
 
 interface SettingsDangerZoneCardProps {
@@ -8,6 +7,7 @@ interface SettingsDangerZoneCardProps {
 }
 
 export function SettingsDangerZoneCard({ resetAllData }: SettingsDangerZoneCardProps) {
+    const { isDarkMode } = useTheme();
 
     return (
         <View className="px-6 mb-6 mt-2">
@@ -31,7 +31,7 @@ export function SettingsDangerZoneCard({ resetAllData }: SettingsDangerZoneCardP
                         Delete all sessions, stats, coins, and cached data. This action cannot be undone.
                     </Text>
                 </View>
-                {/* M3 Destructive Filled Button */}
+
                 <AnimatedPressable
                     onPress={resetAllData}
                     scaleTo={0.94}
@@ -40,7 +40,10 @@ export function SettingsDangerZoneCard({ resetAllData }: SettingsDangerZoneCardP
                     accessibilityRole="button"
                     accessibilityLabel="Delete all data"
                 >
-                    <Text className="text-white font-bold text-[14px] tracking-wide">
+                    <Text
+                        className="font-bold text-[14px] tracking-wide"
+                        style={{ color: isDarkMode ? "#410002" : "#FFFFFF" }}
+                    >
                         Delete Data
                     </Text>
                 </AnimatedPressable>

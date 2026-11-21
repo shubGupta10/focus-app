@@ -24,7 +24,7 @@ export function SettingsAboutCard() {
     };
 
     const handleFeedback = () => {
-        Linking.openURL("https://lockout-website.vercel.app/feedback");
+        router.push("/feedback");
     };
 
     const handlePrivacyPolicy = () => {
@@ -154,7 +154,6 @@ export function SettingsAboutCard() {
                         onValueChange={handleToggleAnalytics}
                     />
                 </View>
-
             </View>
 
             <View className="items-center mt-6">
