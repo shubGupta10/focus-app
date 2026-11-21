@@ -11,8 +11,9 @@ import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
 import { Text, TextInput, Alert, useColorScheme } from "react-native";
 import "../global.css";
-import * as Updates from "expo-updates"
+import * as Updates from "expo-updates";
 import { initAnalytics, analytics } from "@/utils/analytics";
+import { ObserveRoot } from "expo-observe";
 
 initAnalytics();
 
@@ -148,4 +149,4 @@ function Layout() {
   );
 }
 
-export default Layout;
+export default ObserveRoot.wrap(Layout);

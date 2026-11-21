@@ -1,6 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext";
+import { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useObserve } from "expo-observe";
 import { useOnboardingController } from "../features/onboarding/hooks/useOnboardingController";
 import { OnboardingStep1Intro } from "../features/onboarding/components/OnboardingStep1Intro";
 import { OnboardingStep2Apps } from "../features/onboarding/components/OnboardingStep2Apps";
@@ -23,6 +25,11 @@ export default function OnboardingScreen() {
         hasNotification,
         requestNotification
     } = useOnboardingController();
+    const { markInteractive } = useObserve();
+
+    useEffect(() => {
+        markInteractive();
+    }, [markInteractive]);
 
     return (
         <SafeAreaView className="flex-1 bg-background" style={activeStyle} edges={["top", "bottom"]}>

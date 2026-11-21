@@ -24,6 +24,7 @@ import { WhatsNewModal } from "@/components/modals/WhatsNewModal";
 import { formatCoinBalance } from "@/features/stats/utils/stats_utils";
 import { useFeedbackTrigger } from "@/hooks/useFeedbackTrigger";
 import { FeedbackMilestoneModal } from "@/features/feedback/components/FeedbackMilestoneModal";
+import { useObserve } from "expo-observe";
 
 export default function Index() {
     const { width, height } = useWindowDimensions();
@@ -41,6 +42,7 @@ export default function Index() {
         checkMilestone: checkFeedbackMilestone,
         dismissPrompt: dismissFeedbackPrompt,
     } = useFeedbackTrigger();
+    const { markInteractive } = useObserve();
 
     const {
         engine,
@@ -77,6 +79,12 @@ export default function Index() {
         };
         checkFirstRun();
     }, []);
+
+    useEffect(() => {
+        if (!isCheckingOnboarding) {
+            markInteractive();
+        }
+    }, [isCheckingOnboarding, markInteractive]);
 
     useFocusEffect(
         useCallback(() => {
