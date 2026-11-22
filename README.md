@@ -27,16 +27,13 @@
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="./assets/screenshots/Screenshot_initial_black.png" width="31%" alt="Home" />
-  <img src="./assets/screenshots/Screenshot_timer_running_black.png" width="31%" alt="Active Session" />
+  <img src="./assets/screenshots/Screenshot_initial_black.png" width="31%" alt="Focus Session" />
   <img src="./assets/screenshots/ScreenShot_blocker.jpg" width="31%" alt="Distraction Blocker" />
+  <img src="./assets/screenshots/Screenshot_routines_black.png" width="31%" alt="Scheduled Routines" />
 </p>
 <p align="center">
-  <img src="./assets/screenshots/Screenshot_routines_black.png" width="31%" alt="Scheduled Routines" />
   <img src="./assets/screenshots/Screenshot_apps_black.png" width="31%" alt="Global Blocklist" />
   <img src="./assets/screenshots/Screenshot_progress_black.png" width="31%" alt="Statistics & Streaks" />
-</p>
-<p align="center">
   <img src="./assets/screenshots/Screenshot_shop_black.png" width="31%" alt="Customization Shop" />
 </p>
 
