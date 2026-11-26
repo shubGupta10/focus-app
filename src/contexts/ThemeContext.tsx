@@ -2,11 +2,12 @@ import { Colors } from "@/constants/Colors";
 import { SHOP_CATALOG } from "@/features/shop/data/shopCatalog";
 import { useSettings } from "@/hooks/useSettings";
 import { vars } from "nativewind";
-import { AppState, useColorScheme as useRNColorScheme } from "react-native";
+import { Appearance, AppState, View, useColorScheme as useRNColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import FocusBlocker, { DynamicPalette } from "../../modules/focus-blocker/src/FocusBlockerModule";
+import { useAppStore, setWidgetTheme, syncWidget } from "@/store/useAppStore";
 
 import {
     argbFromHex,
@@ -78,11 +79,69 @@ interface ThemeContextType {
 }
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
+function resolveThemeColors(
+    isDark: boolean,
+    useDynamicTheme: boolean,
+    dynamicPalette: DynamicPalette | null,
+    orbTheme: string
+): ThemeColors {
+    let resolved: ThemeColors = isDark ? Colors.dark : Colors.light;
+
+    if (useDynamicTheme && dynamicPalette) {
+        const dynamicAccent = isDark
+            ? (dynamicPalette.darkAccent ?? dynamicPalette.accent)
+            : (dynamicPalette.lightAccent ?? dynamicPalette.accent);
+        const dynamicAccentMuted = isDark
+            ? (dynamicPalette.darkAccentMuted ?? dynamicPalette.accentMuted ?? Colors.dark.accentMuted)
+            : (dynamicPalette.lightAccentMuted ?? dynamicPalette.accentMuted ?? Colors.light.accentMuted);
+
+        resolved = {
+            ...resolved,
+            ...buildLayersFromScheme(dynamicAccent, isDark),
+            accent: dynamicAccent,
+            accentMuted: dynamicAccentMuted,
+        };
+    }
+
+    if (orbTheme !== "theme_default") {
+        let customAccent = resolved.accent;
+        const shopTheme = SHOP_CATALOG.find(t => t.id === orbTheme);
+
+        if (shopTheme?.hexColor) {
+            customAccent = shopTheme.hexColor;
+        }
+
+        resolved = {
+            ...resolved,
+            accent: customAccent,
+            accentMuted: customAccent + "33",
+        };
+    }
+
+    const accentLuminance = getWCAGRelativeLuminance(resolved.accent);
+    const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
+    const darkLuminance = getWCAGRelativeLuminance('#0E141B');
+
+    const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
+    const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
+
+    const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#0E141B';
+
+    return {
+        ...resolved,
+        accentForeground: bestForeground,
+    };
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const { getSetting, setSetting } = useSettings();
-    const systemColorScheme = useRNColorScheme() ?? "light";
+    const rnColorScheme = useRNColorScheme();
+    const [osColorScheme, setOsColorScheme] = useState<"light" | "dark">(() =>
+        Appearance.getColorScheme() === "dark" ? "dark" : "light"
+    );
     const [orbTheme, setOrbTheme] = useState("theme_default");
     const [themeMode, setThemeModeState] = useState<"light" | "dark" | "system">("system");
+    const themeModeRef = useRef<"light" | "dark" | "system">("system");
     const [useDynamicTheme, setUseDynamicThemeState] = useState(false);
 
     const isDynamicColorSupported = typeof FocusBlocker?.isDynamicColorSupported === "function"
@@ -98,15 +157,59 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
 
     useEffect(() => {
-        const sub = AppState.addEventListener("change", (state) => {
+        themeModeRef.current = themeMode;
+        const targetOverride = themeMode === "system" ? "unspecified" : themeMode;
+        try {
+            Appearance.setColorScheme(targetOverride);
+        } catch { }
+        if (themeMode === "system") {
+            const liveScheme = Appearance.getColorScheme();
+            if (liveScheme === "dark" || liveScheme === "light") {
+                setOsColorScheme(liveScheme);
+            }
+        }
+    }, [themeMode]);
+
+    useEffect(() => {
+        if (themeMode === "system" && (rnColorScheme === "dark" || rnColorScheme === "light")) {
+            setOsColorScheme(rnColorScheme);
+        }
+    }, [rnColorScheme, themeMode]);
+
+    useEffect(() => {
+        const refreshFromSystem = () => {
+            if (themeModeRef.current === "system") {
+                const live = Appearance.getColorScheme();
+                if (live === "dark" || live === "light") {
+                    setOsColorScheme(live);
+                }
+            }
+            try {
+                const latest = FocusBlocker?.getDynamicColors?.();
+                if (latest) setDynamicPalette(latest);
+            } catch { }
+        };
+
+        const appearanceSub = Appearance.addChangeListener(({ colorScheme }) => {
+            if (themeModeRef.current === "system" && (colorScheme === "dark" || colorScheme === "light")) {
+                setOsColorScheme(colorScheme);
+            }
+            try {
+                const latest = FocusBlocker?.getDynamicColors?.();
+                if (latest) setDynamicPalette(latest);
+            } catch { }
+        });
+
+        const appStateSub = AppState.addEventListener("change", (state) => {
             if (state === "active") {
-                try {
-                    const latest = FocusBlocker?.getDynamicColors?.();
-                    if (latest) setDynamicPalette(latest);
-                } catch { }
+                refreshFromSystem();
             }
         });
-        return () => sub.remove();
+
+        return () => {
+            appearanceSub.remove();
+            appStateSub.remove();
+        };
     }, []);
 
     useEffect(() => {
@@ -142,56 +245,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
 
     const isDarkMode = themeMode === "system"
-        ? systemColorScheme === "dark"
+        ? osColorScheme === "dark"
         : themeMode === "dark";
 
-    const baseTheme = isDarkMode ? Colors.dark : Colors.light;
-    let colors: ThemeColors = baseTheme;
-
-    if (useDynamicTheme && dynamicPalette) {
-        const dynamicAccent = isDarkMode
-            ? (dynamicPalette.darkAccent ?? dynamicPalette.accent)
-            : (dynamicPalette.lightAccent ?? dynamicPalette.accent);
-        const dynamicAccentMuted = isDarkMode
-            ? (dynamicPalette.darkAccentMuted ?? dynamicPalette.accentMuted ?? Colors.dark.accentMuted)
-            : (dynamicPalette.lightAccentMuted ?? dynamicPalette.accentMuted ?? Colors.light.accentMuted);
-
-        colors = {
-            ...colors,
-            ...buildLayersFromScheme(dynamicAccent, isDarkMode),
-            accent: dynamicAccent,
-            accentMuted: dynamicAccentMuted,
-        };
-    }
-
-    if (orbTheme !== "theme_default") {
-        let customAccent = colors.accent;
-        const shopTheme = SHOP_CATALOG.find(t => t.id === orbTheme);
-
-        if (shopTheme?.hexColor) {
-            customAccent = shopTheme.hexColor;
-        }
-
-        colors = {
-            ...colors,
-            accent: customAccent,
-            accentMuted: customAccent + "33",
-        };
-    }
-
-    const accentLuminance = getWCAGRelativeLuminance(colors.accent);
-    const whiteLuminance = getWCAGRelativeLuminance('#FFFFFF');
-    const darkLuminance = getWCAGRelativeLuminance('#0E141B');
-
-    const contrastWithWhite = getContrastRatio(whiteLuminance, accentLuminance);
-    const contrastWithDark = getContrastRatio(accentLuminance, darkLuminance);
-
-    const bestForeground = contrastWithWhite >= contrastWithDark ? '#FFFFFF' : '#0E141B';
-
-    colors = {
-        ...colors,
-        accentForeground: bestForeground,
-    };
+    const lightColors = resolveThemeColors(false, useDynamicTheme, dynamicPalette, orbTheme);
+    const darkColors = resolveThemeColors(true, useDynamicTheme, dynamicPalette, orbTheme);
+    const colors = isDarkMode ? darkColors : lightColors;
 
     const activeStyle = vars({
         "--color-background": colors.background,
@@ -222,8 +281,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+        SystemUI.setBackgroundColorAsync(colors.background).catch(() => { });
     }, [colors.background]);
+
+    useEffect(() => {
+        try {
+            setWidgetTheme(colors, {
+                themeMode,
+                useDynamicTheme,
+                hasCustomOrbTheme: orbTheme !== "theme_default",
+                lightColors,
+                darkColors,
+            });
+            const store = useAppStore.getState();
+            syncWidget(
+                store.isSessionActive,
+                store.stats.current_streak,
+                store.todayStats.today_focus_seconds,
+                store.sessionEndTime,
+                store.sessionStartTime
+            );
+        } catch { }
+    }, [colors, lightColors, darkColors, themeMode, useDynamicTheme, orbTheme, isDarkMode]);
 
     return (
         <ThemeContext.Provider
@@ -233,7 +312,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 themeMode,
                 setThemeMode,
                 colorScheme: isDarkMode ? "dark" : "light",
-                setColorScheme: () => { },
+                setColorScheme: setThemeMode,
                 colors,
                 activeStyle,
                 switchColors,
@@ -244,8 +323,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 dynamicPalette,
             }}
         >
-            <StatusBar style={isDarkMode ? "light" : "dark"} />
-            {children}
+            <View className="flex-1" style={[{ backgroundColor: colors.background }, activeStyle]}>
+                <StatusBar style={isDarkMode ? "light" : "dark"} />
+                {children}
+            </View>
         </ThemeContext.Provider>
     );
 }

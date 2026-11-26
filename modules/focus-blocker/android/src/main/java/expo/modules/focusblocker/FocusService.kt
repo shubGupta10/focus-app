@@ -37,7 +37,9 @@ class FocusService : Service() {
         var activeStartTime: Long = -1L
         var activeEndTime: Long = -1L
         var isStrictActive: Boolean = false
+        var breakStartTime: Long = 0L
         var breakEndTime: Long = 0L
+        var breakDurationMs: Long = 0L
         var breaksRemaining: Int = 1
         var ignoreBlockingUntil: Long = 0L
         var totalBreakMs: Long = 0L
@@ -63,6 +65,12 @@ class FocusService : Service() {
 
     @Volatile
     private var currentForegroundPackage: String? = null
+
+    @Volatile
+    private var lastWidgetSyncTime: Long = 0L
+
+    @Volatile
+    private var widgetSessionFinishedSynced: Boolean = false
 
     private var cachedLauncherPackages: Set<String> = emptySet()
     private var lastLauncherCheckTime: Long = 0L
@@ -132,7 +140,9 @@ class FocusService : Service() {
             activeStartTime = prefs.getLong("activeStartTime", now)
             activeEndTime = prefs.getLong("activeEndTime", -1L)
             isStrictActive = prefs.getBoolean("isStrictActive", false)
+            breakStartTime = prefs.getLong("breakStartTime", 0L)
             breakEndTime = prefs.getLong("breakEndTime", 0L)
+            breakDurationMs = prefs.getLong("breakDurationMs", 0L)
             breaksRemaining = prefs.getInt("breaksRemaining", 1)
             totalBreakMs = prefs.getLong("totalBreakMs", 0L)
             if (breakEndTime > now) {
@@ -186,7 +196,9 @@ class FocusService : Service() {
             activeStartTime = now
             activeEndTime = endTime
             isStrictActive = isStrictParam ?: false
+            breakStartTime = 0L
             breakEndTime = 0L
+            breakDurationMs = 0L
             breaksRemaining = 1
             totalBreakMs = 0L
             ignoreBlockingUntil = 0L
@@ -196,7 +208,9 @@ class FocusService : Service() {
                 .putLong("activeStartTime", activeStartTime)
                 .putLong("activeEndTime", activeEndTime)
                 .putBoolean("isStrictActive", isStrictActive)
+                .putLong("breakStartTime", 0L)
                 .putLong("breakEndTime", 0L)
+                .putLong("breakDurationMs", 0L)
                 .putInt("breaksRemaining", 1)
                 .putLong("totalBreakMs", 0L)
                 .apply()
@@ -224,6 +238,9 @@ class FocusService : Service() {
         LockoutNotificationListener.updateSessionState(silenceNotification, customBlockedApps)
 
         isServiceActive = true
+        lastWidgetSyncTime = 0L
+        LockoutWidgetUpdater.resetSignatureCache()
+        widgetSessionFinishedSynced = false
 
         if (!isRunning) {
             isRunning = true
@@ -233,7 +250,12 @@ class FocusService : Service() {
             val notification = buildForegroundNotification(isInitialBreak, initialBreakMinutes)
 
             startForeground(1, notification)
+            syncWidgetsFromService(isFocusing = true)
+            lastWidgetSyncTime = System.currentTimeMillis()
             startMonitoringLoop()
+        } else {
+            syncWidgetsFromService(isFocusing = true)
+            lastWidgetSyncTime = System.currentTimeMillis()
         }
         return START_STICKY
     }
@@ -274,13 +296,23 @@ class FocusService : Service() {
 
                 val isBreakCurrentlyActive = breakEndTime > 0L && currentLoopTime < breakEndTime
                 if (wasBreakActive && !isBreakCurrentlyActive) {
+                    val expiredNaturally = breakEndTime > 0L
                     wasBreakActive = false
+                    breakStartTime = 0L
                     breakEndTime = 0L
+                    breakDurationMs = 0L
                     ignoreBlockingUntil = 0L
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
-                    prefs.edit().remove("breakEndTime").apply()
-                    updateForegroundNotification(isBreak = false)
-                    sendBreakEndedNotification()
+                    prefs.edit()
+                        .remove("breakStartTime")
+                        .remove("breakEndTime")
+                        .remove("breakDurationMs")
+                        .apply()
+                    if (expiredNaturally) {
+                        updateForegroundNotification(isBreak = false)
+                        sendBreakEndedNotification()
+                        syncWidgetsFromService(isFocusing = true)
+                    }
                 } else if (!wasBreakActive && isBreakCurrentlyActive) {
                     wasBreakActive = true
                 }
@@ -304,6 +336,8 @@ class FocusService : Service() {
                         .apply()
 
                     LockoutNotificationListener.clearSessionState();
+                    widgetSessionFinishedSynced = true
+                    syncWidgetsFromService(isFocusing = false, completedMinutesToAdd = (netSeconds / 60L).toInt())
                     stopSelf()
                     break
                 } else if (activeEndTime > 0 && currentLoopTime >= activeEndTime) {
@@ -326,8 +360,16 @@ class FocusService : Service() {
                         .apply()
 
                     LockoutNotificationListener.clearSessionState()
+                    widgetSessionFinishedSynced = true
+                    syncWidgetsFromService(isFocusing = false, completedMinutesToAdd = (durationSeconds / 60L).toInt())
                     stopSelf()
                     break
+                }
+
+                val isScreenAwake = powerManager?.isInteractive != false
+                if (isScreenAwake && currentLoopTime - lastWidgetSyncTime >= 15_000L) {
+                    lastWidgetSyncTime = currentLoopTime
+                    syncWidgetsFromService(isFocusing = true)
                 }
 
                 if (powerManager?.isInteractive == false || keyguardManager?.isKeyguardLocked == true) {
@@ -801,10 +843,13 @@ class FocusService : Service() {
     private fun triggerBreak(minutes: Int) {
         if (isStrictActive || breaksRemaining <= 0) return
         val breakMs = minutes * 60 * 1000L
+        val now = System.currentTimeMillis()
         // Guard: don't grant a break that would extend past the session end
-        if (endTime != -1L && (endTime - System.currentTimeMillis()) < breakMs) return
+        if (endTime != -1L && (endTime - now) < breakMs) return
         breaksRemaining = (breaksRemaining - 1).coerceAtLeast(0)
-        breakEndTime = System.currentTimeMillis() + breakMs
+        breakStartTime = now
+        breakEndTime = now + breakMs
+        breakDurationMs = breakMs
         ignoreBlockingUntil = breakEndTime
         totalBreakMs += breakMs
         if (endTime > 0) {
@@ -814,7 +859,9 @@ class FocusService : Service() {
 
         val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
         prefs.edit()
+            .putLong("breakStartTime", breakStartTime)
             .putLong("breakEndTime", breakEndTime)
+            .putLong("breakDurationMs", breakDurationMs)
             .putInt("breaksRemaining", breaksRemaining)
             .putLong("totalBreakMs", totalBreakMs)
             .putLong("activeEndTime", activeEndTime)
@@ -823,6 +870,7 @@ class FocusService : Service() {
         updateForegroundNotification(isBreak = true, breakMinutes = minutes)
 
         hideBlockOverlay()
+        syncWidgetsFromService(isFocusing = true)
     }
 
     private fun hideBlockOverlay() {
@@ -843,13 +891,33 @@ class FocusService : Service() {
         }
     }
 
+    internal fun syncWidgetsFromService(isFocusing: Boolean, completedMinutesToAdd: Int = 0) {
+        LockoutWidgetUpdater.syncFromService(
+            context = this,
+            isFocusing = isFocusing,
+            activeStartTime = activeStartTime,
+            activeEndTime = activeEndTime,
+            breakStartTime = breakStartTime,
+            breakEndTime = breakEndTime,
+            breakDurationMs = breakDurationMs,
+            totalBreakMs = totalBreakMs,
+            completedMinutesToAdd = completedMinutesToAdd
+        )
+    }
+
     override fun onDestroy() {
+        if (!widgetSessionFinishedSynced) {
+            widgetSessionFinishedSynced = true
+            syncWidgetsFromService(isFocusing = false)
+        }
         isRunning = false
         isServiceActive = false
         activeStartTime = -1L
         activeEndTime = -1L
         isStrictActive = false
+        breakStartTime = 0L
         breakEndTime = 0L
+        breakDurationMs = 0L
         breaksRemaining = 1
         totalBreakMs = 0L
         ignoreBlockingUntil = 0L

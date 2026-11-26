@@ -1,4 +1,4 @@
-import { requireNativeModule } from 'expo-modules-core';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 
 export type AppInfo = {
   name: string;
@@ -85,6 +85,8 @@ export declare class FocusBlockerModule {
   sendNotification(title: string, message: string, route?: string): void;
   isDynamicColorSupported(): boolean;
   getDynamicColors(): DynamicPalette | null;
+  syncWidgetState(snapshotJson: string): void;
+  refreshWidgets(): void;
 }
 
-export default requireNativeModule<FocusBlockerModule>('FocusBlocker');
+export default requireOptionalNativeModule<FocusBlockerModule>('FocusBlocker') ?? ({} as FocusBlockerModule);

@@ -19,7 +19,7 @@ export function useFeedbackController() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
-    const appVersion = Constants.expoConfig?.version || "1.8.1";
+    const appVersion = Constants.expoConfig?.version || "1.9.0";
     const osVersion = `Android ${Platform.Version}`;
     const deviceModel = Device.modelName || "";
 

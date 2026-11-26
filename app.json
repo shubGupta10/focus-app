@@ -3,7 +3,7 @@
     "name": "Lockout",
     "slug": "lockout",
     "owner": "shubham720",
-    "version": "1.8.1",
+    "version": "1.9.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lockout",
@@ -20,7 +20,7 @@
         "backgroundColor": "#161517"
       },
       "package": "com.shubham720.lockout",
-      "versionCode": 26,
+      "versionCode": 27,
       "permissions": [
         "android.permission.PACKAGE_USAGE_STATS",
         "android.permission.SYSTEM_ALERT_WINDOW",
@@ -69,7 +69,10 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-image",
+      "expo-status-bar",
+      "./plugins/withWidgetStartAction"
     ],
     "experiments": {
       "typedRoutes": true,

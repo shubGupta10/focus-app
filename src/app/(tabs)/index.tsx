@@ -8,7 +8,7 @@ import { SessionResultModal } from "@/features/session/components/modals/Session
 import TimerSelectionModal from "@/features/session/components/modals/TimerSelectionModal";
 import { useSettings } from "@/hooks/useSettings";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 
 import { useCallback, useEffect, useState } from "react";
 import { Text, View, useWindowDimensions } from "react-native";
@@ -44,6 +44,8 @@ export default function Index() {
     } = useFeedbackTrigger();
     const { markInteractive } = useObserve();
 
+    const { startTimer } = useLocalSearchParams<{ startTimer?: string }>();
+    const [pendingWidgetStart, setPendingWidgetStart] = useState(false);
     const {
         engine,
         hasAllPermissions,
@@ -59,14 +61,43 @@ export default function Index() {
         confirmEndSession,
         handleFocusPress,
         handleClosePermissionModal,
+        handleWidgetStartPress,
         skipsRemaining,
         resetCountdownText,
         todayStats
     } = useSessionController();
 
     useEffect(() => {
+        if (startTimer === "1") {
+            setPendingWidgetStart(true);
+            router.setParams({ startTimer: undefined });
+        }
+    }, [startTimer]);
+
+    useEffect(() => {
+        if (!pendingWidgetStart || isCheckingOnboarding) return;
+        let cancelled = false;
+        handleWidgetStartPress().then((handled) => {
+            if (!cancelled && handled) {
+                setPendingWidgetStart(false);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [pendingWidgetStart, isCheckingOnboarding, engine.selectedApps.length]);
+
+    useEffect(() => {
         getSetting("haptics_enabled").then((val) => {
             if (val !== null) useAppStore.getState().setHapticsEnabled(val === "true");
+        });
+        getSetting("default_timer").then((val) => {
+            if (val !== null) {
+                const parsed = parseInt(val, 10);
+                if (Number.isFinite(parsed) && (parsed > 0 || parsed === -1)) {
+                    useAppStore.getState().setDefaultDurationMinutes(parsed);
+                }
+            }
         });
 
         const checkFirstRun = async () => {
