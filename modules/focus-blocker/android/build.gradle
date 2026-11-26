@@ -1,7 +1,15 @@
-plugins {
-  id 'com.android.library'
-  id 'expo-module-gradle-plugin'
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath("org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${kotlinVersion}")
+  }
 }
+
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 group = 'expo.modules.focusblocker'
 version = '0.1.0'
@@ -12,7 +20,16 @@ android {
     versionCode 1
     versionName "0.1.0"
   }
+  buildFeatures {
+    compose true
+  }
   lintOptions {
     abortOnError false
   }
+}
+
+dependencies {
+  api "androidx.glance:glance:1.2.0"
+  api "androidx.glance:glance-appwidget:1.2.0"
+  implementation 'androidx.work:work-runtime-ktx:2.10.5'
 }

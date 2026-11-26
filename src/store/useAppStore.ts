@@ -10,14 +10,9 @@ import {
 } from '@/features/stats/db/statsRepository';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { create } from 'zustand';
-import { AppInfo } from '../../modules/focus-blocker/src/FocusBlockerModule';
+import FocusBlocker, { AppInfo } from '../../modules/focus-blocker/src/FocusBlockerModule';
 import { AppState as RNAppState, Platform, Appearance } from "react-native"
-import LockoutWidget4x2 from '@/widgets/LockoutWidget4x2';
-import LockoutWidget2x2 from '@/widgets/LockoutWidget2x2';
 import { Colors } from '@/constants/Colors';
-import { widgetsDirectory } from 'expo-widgets';
-import { Asset } from 'expo-asset';
-import * as FileSystem from 'expo-file-system/legacy';
 
 interface AppState {
     isSessionActive: boolean;
@@ -72,8 +67,6 @@ const defaultTodayStats: TodayStats = {
     today_sessions: 0,
     today_coins: 0,
 };
-
-let widgetIconUri: string | undefined = undefined;
 
 export interface WidgetThemePalette {
     bgColor: string;
@@ -160,33 +153,6 @@ export function setWidgetTheme(
     };
 }
 
-async function getWidgetIconUri(): Promise<string | undefined> {
-    if (widgetIconUri) return widgetIconUri;
-    try {
-        if (!widgetsDirectory) return undefined;
-        const base = widgetsDirectory.endsWith('/') ? widgetsDirectory : `${widgetsDirectory}/`;
-        const dest = `${base}app_icon.png`;
-        const existing = await FileSystem.getInfoAsync(dest);
-        if (existing.exists) {
-            widgetIconUri = dest;
-            return dest;
-        }
-        const iconAsset = Asset.fromModule(require('../../assets/images/icon.png'));
-        await iconAsset.downloadAsync();
-        if (!iconAsset.localUri) return undefined;
-        await FileSystem.copyAsync({ from: iconAsset.localUri, to: dest });
-        widgetIconUri = dest;
-        return dest;
-    } catch (error) {
-        console.warn('Widget icon copy failed:', error);
-    }
-    return undefined;
-}
-
-if (Platform.OS === 'android') {
-    getWidgetIconUri().catch(() => { });
-}
-
 let widgetTicker: ReturnType<typeof setInterval> | null = null;
 let lastWidgetSnapshotJson: string | null = null;
 
@@ -248,6 +214,7 @@ export function syncWidget(
         const now = Date.now();
         const storeState = useAppStore.getState();
         const todayMinutes = Math.floor(todaySeconds / 60);
+        const isInfinite = Boolean(isFocusing && sessionEndTime === -1);
         const isOnBreak = Boolean(
             isFocusing &&
             storeState.isBreakActive &&
@@ -273,24 +240,41 @@ export function syncWidget(
                         : sessionEndTime - now
                 )
                 : 0;
-        const remainingMinutes = focusRemainingMs > 0 ? Math.ceil(focusRemainingMs / 60000) : 0;
+        const remainingMinutes = isInfinite && sessionStartTime
+            ? Math.floor(
+                Math.max(
+                    0,
+                    now - sessionStartTime - (storeState.totalBreakMs ?? 0) -
+                    (isOnBreak && storeState.breakStartTime ? Math.max(0, now - storeState.breakStartTime) : 0)
+                ) / 60000
+            )
+            : focusRemainingMs > 0
+                ? Math.ceil(focusRemainingMs / 60000)
+                : 0;
 
         const totalFocusMs =
             isFocusing && sessionStartTime && sessionEndTime && sessionEndTime > 0
                 ? Math.max(1, sessionEndTime - sessionStartTime - (storeState.totalBreakMs ?? 0))
                 : 0;
-        const progress =
-            isFocusing && totalFocusMs > 0
+        const progress = isInfinite
+            ? 1
+            : isFocusing && totalFocusMs > 0
                 ? Math.min(1, Math.max(0, (totalFocusMs - focusRemainingMs) / totalFocusMs))
                 : 0;
 
         const defaultMinutes = storeState.defaultDurationMinutes ?? 25;
-        const sessionEndLabel = isFocusing && !isOnBreak ? formatWidgetEndLabel(sessionEndTime) : '';
+        const sessionEndLabel = isFocusing && !isOnBreak
+            ? isInfinite
+                ? 'Flow state'
+                : formatWidgetEndLabel(sessionEndTime)
+            : '';
         const breakPausedLabel =
             isOnBreak && storeState.breakEndTime
-                ? remainingMinutes > 0
-                    ? `${formatWidgetDuration(remainingMinutes)} paused`
-                    : `Resumes ${formatWidgetClockTime(storeState.breakEndTime)}`
+                ? isInfinite
+                    ? 'Flow paused'
+                    : remainingMinutes > 0
+                        ? `${formatWidgetDuration(remainingMinutes)} paused`
+                        : `Resumes ${formatWidgetClockTime(storeState.breakEndTime)}`
                 : '';
 
         const isDark = Appearance.getColorScheme() !== 'light';
@@ -309,6 +293,7 @@ export function syncWidget(
         const snapshot = {
             isFocusing,
             isOnBreak,
+            isInfinite,
             streak,
             todayMinutes,
             remainingMinutes,
@@ -318,28 +303,17 @@ export function syncWidget(
             defaultMinutes,
             sessionEndLabel,
             breakPausedLabel,
-            iconUri: widgetIconUri,
             themeMode: config.themeMode,
             useDynamicTheme: config.useDynamicTheme,
             hasCustomOrbTheme: config.hasCustomOrbTheme,
             lightPalette: config.lightPalette,
             darkPalette: config.darkPalette,
-            ...config.activePalette,
         };
 
         const serialized = JSON.stringify(snapshot);
         if (serialized !== lastWidgetSnapshotJson) {
             lastWidgetSnapshotJson = serialized;
-            LockoutWidget4x2.updateSnapshot(snapshot);
-            LockoutWidget2x2.updateSnapshot(snapshot);
-        }
-
-        if (!widgetIconUri) {
-            getWidgetIconUri().then((uri) => {
-                if (uri) {
-                    syncWidget(isFocusing, streak, todaySeconds, sessionEndTime, sessionStartTime);
-                }
-            });
+            FocusBlocker.syncWidgetState?.(serialized);
         }
     } catch (error) {
     }
@@ -458,7 +432,10 @@ export const useAppStore = create<AppState>((set) => ({
 
     clearSession: () => set((state) => {
         stopWidgetTicker();
-        syncWidget(false, state.stats.current_streak, state.todayStats.today_focus_seconds, null, null);
+        setTimeout(() => {
+            const latest = useAppStore.getState();
+            syncWidget(false, latest.stats.current_streak, latest.todayStats.today_focus_seconds, null, null);
+        }, 0);
         return {
             isSessionActive: false,
             sessionStartTime: null,

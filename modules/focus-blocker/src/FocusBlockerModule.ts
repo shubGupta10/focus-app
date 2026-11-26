@@ -85,6 +85,8 @@ export declare class FocusBlockerModule {
   sendNotification(title: string, message: string, route?: string): void;
   isDynamicColorSupported(): boolean;
   getDynamicColors(): DynamicPalette | null;
+  syncWidgetState(snapshotJson: string): void;
+  refreshWidgets(): void;
 }
 
 export default requireNativeModule<FocusBlockerModule>('FocusBlocker');

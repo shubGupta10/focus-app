@@ -630,5 +630,19 @@ class FocusBlockerModule : Module() {
             }
         }
 
+        Function("syncWidgetState") { snapshotJson: String ->
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                LockoutWidgetUpdater.updateFromJs(context, snapshotJson)
+            }
+        }
+
+        Function("refreshWidgets") {
+            val context = appContext.reactContext ?: appContext.currentActivity?.applicationContext
+            if (context != null) {
+                LockoutWidgetUpdater.refreshAll(context)
+            }
+        }
+
     }
 }

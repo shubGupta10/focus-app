@@ -73,38 +73,6 @@
       "expo-sharing",
       "expo-image",
       "expo-status-bar",
-      [
-        "expo-widgets",
-        {
-          "enableAndroid": true,
-          "widgets": [
-            {
-              "name": "LockoutWidget4x2",
-              "displayName": "Lockout",
-              "description": "View focus streak and active session",
-              "android": {
-                "targetCellWidth": 4,
-                "targetCellHeight": 2,
-                "minWidth": 245,
-                "minHeight": 115,
-                "initialLayout": "./src/widgets/LockoutWidget4x2.tsx"
-              }
-            },
-            {
-              "name": "LockoutWidget2x2",
-              "displayName": "Lockout (Small)",
-              "description": "Compact focus streak and timer",
-              "android": {
-                "targetCellWidth": 2,
-                "targetCellHeight": 2,
-                "minWidth": 110,
-                "minHeight": 110,
-                "initialLayout": "./src/widgets/LockoutWidget2x2.tsx"
-              }
-            }
-          ]
-        }
-      ],
       "./plugins/withWidgetStartAction"
     ],
     "experiments": {

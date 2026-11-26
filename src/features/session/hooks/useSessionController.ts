@@ -251,8 +251,7 @@ export function useSessionController() {
 
     const handleFocusPress = () => {
         if (engine.isSessionActive) {
-            const store = useAppStore.getState();
-            const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime + store.totalBreakMs : null;
+            const effectiveEndTime = engine.sessionEndTime && engine.sessionEndTime > 0 ? engine.sessionEndTime : null;
             if (effectiveEndTime && Date.now() >= effectiveEndTime) {
                 handleCompleteSession();
                 return;
