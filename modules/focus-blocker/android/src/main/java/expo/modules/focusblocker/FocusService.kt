@@ -7,9 +7,16 @@ import android.app.NotificationManager
 import android.app.Service
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.os.Build
@@ -37,7 +44,9 @@ class FocusService : Service() {
         var activeStartTime: Long = -1L
         var activeEndTime: Long = -1L
         var isStrictActive: Boolean = false
+        var breakStartTime: Long = 0L
         var breakEndTime: Long = 0L
+        var breakDurationMs: Long = 0L
         var breaksRemaining: Int = 1
         var ignoreBlockingUntil: Long = 0L
         var totalBreakMs: Long = 0L
@@ -63,6 +72,15 @@ class FocusService : Service() {
 
     @Volatile
     private var currentForegroundPackage: String? = null
+
+    @Volatile
+    private var lastWidgetSyncTime: Long = 0L
+
+    @Volatile
+    private var lastWidgetSyncSignature: String? = null
+
+    @Volatile
+    private var widgetSessionFinishedSynced: Boolean = false
 
     private var cachedLauncherPackages: Set<String> = emptySet()
     private var lastLauncherCheckTime: Long = 0L
@@ -132,7 +150,9 @@ class FocusService : Service() {
             activeStartTime = prefs.getLong("activeStartTime", now)
             activeEndTime = prefs.getLong("activeEndTime", -1L)
             isStrictActive = prefs.getBoolean("isStrictActive", false)
+            breakStartTime = prefs.getLong("breakStartTime", 0L)
             breakEndTime = prefs.getLong("breakEndTime", 0L)
+            breakDurationMs = prefs.getLong("breakDurationMs", 0L)
             breaksRemaining = prefs.getInt("breaksRemaining", 1)
             totalBreakMs = prefs.getLong("totalBreakMs", 0L)
             if (breakEndTime > now) {
@@ -186,7 +206,9 @@ class FocusService : Service() {
             activeStartTime = now
             activeEndTime = endTime
             isStrictActive = isStrictParam ?: false
+            breakStartTime = 0L
             breakEndTime = 0L
+            breakDurationMs = 0L
             breaksRemaining = 1
             totalBreakMs = 0L
             ignoreBlockingUntil = 0L
@@ -196,7 +218,9 @@ class FocusService : Service() {
                 .putLong("activeStartTime", activeStartTime)
                 .putLong("activeEndTime", activeEndTime)
                 .putBoolean("isStrictActive", isStrictActive)
+                .putLong("breakStartTime", 0L)
                 .putLong("breakEndTime", 0L)
+                .putLong("breakDurationMs", 0L)
                 .putInt("breaksRemaining", 1)
                 .putLong("totalBreakMs", 0L)
                 .apply()
@@ -224,6 +248,9 @@ class FocusService : Service() {
         LockoutNotificationListener.updateSessionState(silenceNotification, customBlockedApps)
 
         isServiceActive = true
+        lastWidgetSyncTime = 0L
+        lastWidgetSyncSignature = null
+        widgetSessionFinishedSynced = false
 
         if (!isRunning) {
             isRunning = true
@@ -275,12 +302,19 @@ class FocusService : Service() {
                 val isBreakCurrentlyActive = breakEndTime > 0L && currentLoopTime < breakEndTime
                 if (wasBreakActive && !isBreakCurrentlyActive) {
                     wasBreakActive = false
+                    breakStartTime = 0L
                     breakEndTime = 0L
+                    breakDurationMs = 0L
                     ignoreBlockingUntil = 0L
                     val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
-                    prefs.edit().remove("breakEndTime").apply()
+                    prefs.edit()
+                        .remove("breakStartTime")
+                        .remove("breakEndTime")
+                        .remove("breakDurationMs")
+                        .apply()
                     updateForegroundNotification(isBreak = false)
                     sendBreakEndedNotification()
+                    syncWidgetsFromService(isFocusing = true)
                 } else if (!wasBreakActive && isBreakCurrentlyActive) {
                     wasBreakActive = true
                 }
@@ -304,6 +338,8 @@ class FocusService : Service() {
                         .apply()
 
                     LockoutNotificationListener.clearSessionState();
+                    widgetSessionFinishedSynced = true
+                    syncWidgetsFromService(isFocusing = false, completedMinutesToAdd = (netSeconds / 60L).toInt())
                     stopSelf()
                     break
                 } else if (activeEndTime > 0 && currentLoopTime >= activeEndTime) {
@@ -326,8 +362,16 @@ class FocusService : Service() {
                         .apply()
 
                     LockoutNotificationListener.clearSessionState()
+                    widgetSessionFinishedSynced = true
+                    syncWidgetsFromService(isFocusing = false, completedMinutesToAdd = (durationSeconds / 60L).toInt())
                     stopSelf()
                     break
+                }
+
+                val isScreenAwake = powerManager?.isInteractive != false
+                if (isScreenAwake && currentLoopTime - lastWidgetSyncTime >= 15_000L) {
+                    lastWidgetSyncTime = currentLoopTime
+                    syncWidgetsFromService(isFocusing = true)
                 }
 
                 if (powerManager?.isInteractive == false || keyguardManager?.isKeyguardLocked == true) {
@@ -801,10 +845,13 @@ class FocusService : Service() {
     private fun triggerBreak(minutes: Int) {
         if (isStrictActive || breaksRemaining <= 0) return
         val breakMs = minutes * 60 * 1000L
+        val now = System.currentTimeMillis()
         // Guard: don't grant a break that would extend past the session end
-        if (endTime != -1L && (endTime - System.currentTimeMillis()) < breakMs) return
+        if (endTime != -1L && (endTime - now) < breakMs) return
         breaksRemaining = (breaksRemaining - 1).coerceAtLeast(0)
-        breakEndTime = System.currentTimeMillis() + breakMs
+        breakStartTime = now
+        breakEndTime = now + breakMs
+        breakDurationMs = breakMs
         ignoreBlockingUntil = breakEndTime
         totalBreakMs += breakMs
         if (endTime > 0) {
@@ -814,7 +861,9 @@ class FocusService : Service() {
 
         val prefs = getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
         prefs.edit()
+            .putLong("breakStartTime", breakStartTime)
             .putLong("breakEndTime", breakEndTime)
+            .putLong("breakDurationMs", breakDurationMs)
             .putInt("breaksRemaining", breaksRemaining)
             .putLong("totalBreakMs", totalBreakMs)
             .putLong("activeEndTime", activeEndTime)
@@ -823,6 +872,7 @@ class FocusService : Service() {
         updateForegroundNotification(isBreak = true, breakMinutes = minutes)
 
         hideBlockOverlay()
+        syncWidgetsFromService(isFocusing = true)
     }
 
     private fun hideBlockOverlay() {
@@ -843,13 +893,190 @@ class FocusService : Service() {
         }
     }
 
+    internal fun syncWidgetsFromService(isFocusing: Boolean, completedMinutesToAdd: Int = 0) {
+        try {
+            val widgetPrefs = getSharedPreferences("expo.modules.widgets", Context.MODE_PRIVATE)
+            val now = System.currentTimeMillis()
+            val isDark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_NO
+
+            val isOnBreak = isFocusing && breakEndTime > now
+            val breakRemainingMinutes = if (isOnBreak) {
+                Math.ceil(((breakEndTime - now).coerceAtLeast(0L)) / 60000.0).toInt().coerceAtLeast(1)
+            } else {
+                0
+            }
+            val breakProgress = if (isOnBreak && breakDurationMs > 0 && breakStartTime > 0) {
+                ((now - breakStartTime).toDouble() / breakDurationMs.toDouble()).coerceIn(0.0, 1.0)
+            } else {
+                0.0
+            }
+
+            // Exclude active/past breaks from the displayed focus countdown and progress.
+            val focusRemainingMs = if (isFocusing && activeEndTime > 0) {
+                if (isOnBreak) {
+                    (activeEndTime - breakEndTime).coerceAtLeast(0L)
+                } else {
+                    (activeEndTime - now).coerceAtLeast(0L)
+                }
+            } else {
+                0L
+            }
+
+            val remainingMinutes = if (focusRemainingMs > 0) {
+                Math.ceil(focusRemainingMs / 60000.0).toInt()
+            } else {
+                0
+            }
+
+            val totalFocusMs = if (isFocusing && activeEndTime > 0 && activeStartTime > 0) {
+                (activeEndTime - activeStartTime - totalBreakMs).coerceAtLeast(1L)
+            } else {
+                0L
+            }
+
+            val progress = if (isFocusing && totalFocusMs > 0) {
+                val elapsedFocusMs = (totalFocusMs - focusRemainingMs).coerceAtLeast(0L)
+                (elapsedFocusMs.toDouble() / totalFocusMs.toDouble()).coerceIn(0.0, 1.0)
+            } else {
+                0.0
+            }
+
+            val sessionEndLabel = if (isFocusing && !isOnBreak && activeEndTime > 0) {
+                val formatted = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(activeEndTime))
+                "Ends $formatted"
+            } else {
+                ""
+            }
+
+            val breakPausedLabel = if (isOnBreak) {
+                if (remainingMinutes > 0) {
+                    val pausedDuration = if (remainingMinutes >= 60) {
+                        "${remainingMinutes / 60}h ${remainingMinutes % 60}m"
+                    } else {
+                        "${remainingMinutes}m"
+                    }
+                    "$pausedDuration paused"
+                } else {
+                    val resumesAt = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(breakEndTime))
+                    "Resumes $resumesAt"
+                }
+            } else {
+                ""
+            }
+
+            val syncSignature = "$isFocusing|$isOnBreak|$remainingMinutes|$breakRemainingMinutes|${(progress * 50).toInt()}|${(breakProgress * 50).toInt()}|$sessionEndLabel|$breakPausedLabel|$isDark"
+            if (completedMinutesToAdd == 0 && syncSignature == lastWidgetSyncSignature) {
+                return
+            }
+            lastWidgetSyncSignature = syncSignature
+
+            val widgetNames = listOf("LockoutWidget4x2", "LockoutWidget2x2")
+            val editor = widgetPrefs.edit()
+
+            for (widgetName in widgetNames) {
+                val propsKey = "__expo_widgets_${widgetName}_props"
+                val initialKey = "__expo_widgets_${widgetName}_initial_props"
+                val raw = widgetPrefs.getString(propsKey, null)
+                    ?: widgetPrefs.getString(initialKey, null)
+                    ?: "{}"
+                val json = JSONObject(raw)
+
+                if (isFocusing) {
+                    json.put("isFocusing", true)
+                    json.put("isOnBreak", isOnBreak)
+                    json.put("remainingMinutes", remainingMinutes)
+                    json.put("progress", progress)
+                    json.put("breakRemainingMinutes", breakRemainingMinutes)
+                    json.put("breakProgress", breakProgress)
+                    json.put("sessionEndLabel", sessionEndLabel)
+                    json.put("breakPausedLabel", breakPausedLabel)
+                } else {
+                    if (completedMinutesToAdd > 0) {
+                        val prevToday = json.optInt("todayMinutes", 0)
+                        json.put("todayMinutes", prevToday + completedMinutesToAdd)
+                    }
+                    json.put("isFocusing", false)
+                    json.put("isOnBreak", false)
+                    json.put("remainingMinutes", 0)
+                    json.put("progress", 0.0)
+                    json.put("breakRemainingMinutes", 0)
+                    json.put("breakProgress", 0.0)
+                    json.put("sessionEndLabel", "")
+                    json.put("breakPausedLabel", "")
+                }
+
+                if (!json.has("bgColor")) {
+                    json.put("bgColor", if (isDark) "#1D2024" else "#ECEEF4")
+                }
+                if (!json.has("cardSurfaceColor")) {
+                    json.put("cardSurfaceColor", if (isDark) "#272A2F" else "#E6E8EE")
+                }
+                if (!json.has("textColor")) {
+                    json.put("textColor", if (isDark) "#E0E2E8" else "#181C20")
+                }
+                if (!json.has("subtextColor")) {
+                    json.put("subtextColor", if (isDark) "#C2C7CF" else "#42474E")
+                }
+                if (!json.has("badgeBg")) {
+                    json.put("badgeBg", if (isDark) "#294967" else "#CFE5FF")
+                }
+                if (!json.has("badgeTextColor")) {
+                    json.put("badgeTextColor", if (isDark) "#AACAEE" else "#416180")
+                }
+                if (widgetName == "LockoutWidget4x2") {
+                    if (!json.has("buttonBg")) {
+                        json.put("buttonBg", if (isDark) "#AACAEE" else "#416180")
+                    }
+                    if (!json.has("buttonTextColor")) {
+                        json.put("buttonTextColor", if (isDark) "#0E334F" else "#FFFFFF")
+                    }
+                }
+                if (!json.has("accentColor")) {
+                    json.put("accentColor", if (isDark) "#AACAEE" else "#416180")
+                }
+                if (!json.has("progressTrackColor")) {
+                    json.put("progressTrackColor", if (isDark) "#42474E" else "#C2C7CF")
+                }
+
+                editor.putString(propsKey, json.toString())
+            }
+
+            editor.commit()
+
+            val appWidgetManager = AppWidgetManager.getInstance(this)
+            val providers = listOf(
+                "$packageName.LockoutWidget4x2Provider",
+                "$packageName.LockoutWidget2x2Provider"
+            )
+            for (className in providers) {
+                val componentName = ComponentName(packageName, className)
+                val ids = appWidgetManager.getAppWidgetIds(componentName)
+                if (ids.isNotEmpty()) {
+                    val updateIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                        component = componentName
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                    }
+                    sendBroadcast(updateIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FocusBlocker", "Failed to sync widgets from service", e)
+        }
+    }
+
     override fun onDestroy() {
+        if (!widgetSessionFinishedSynced) {
+            widgetSessionFinishedSynced = true
+            syncWidgetsFromService(isFocusing = false)
+        }
         isRunning = false
         isServiceActive = false
         activeStartTime = -1L
         activeEndTime = -1L
         isStrictActive = false
+        breakStartTime = 0L
         breakEndTime = 0L
+        breakDurationMs = 0L
         breaksRemaining = 1
         totalBreakMs = 0L
         ignoreBlockingUntil = 0L

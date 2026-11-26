@@ -11,6 +11,13 @@ import {
 import { SQLiteDatabase } from 'expo-sqlite';
 import { create } from 'zustand';
 import { AppInfo } from '../../modules/focus-blocker/src/FocusBlockerModule';
+import { AppState as RNAppState, Platform, Appearance } from "react-native"
+import LockoutWidget4x2 from '@/widgets/LockoutWidget4x2';
+import LockoutWidget2x2 from '@/widgets/LockoutWidget2x2';
+import { Colors } from '@/constants/Colors';
+import { widgetsDirectory } from 'expo-widgets';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system/legacy';
 
 interface AppState {
     isSessionActive: boolean;
@@ -25,6 +32,8 @@ interface AppState {
     totalBreakMs: number;
     hapticsEnabled: boolean;
     setHapticsEnabled: (enabled: boolean) => void;
+    defaultDurationMinutes: number;
+    setDefaultDurationMinutes: (minutes: number) => void;
 
     setSessionState: (isActive: boolean, startTime: number | null, endTime: number | null, isStrict: boolean) => void;
     setBreakState: (isBreakActive: boolean, breakEndTime: number | null, breaksRemaining: number, totalBreakMs?: number) => void;
@@ -64,6 +73,293 @@ const defaultTodayStats: TodayStats = {
     today_coins: 0,
 };
 
+let widgetIconUri: string | undefined = undefined;
+
+export interface WidgetThemePalette {
+    bgColor: string;
+    textColor: string;
+    subtextColor: string;
+    badgeBg: string;
+    badgeTextColor: string;
+    buttonBg: string;
+    buttonTextColor: string;
+    accentColor: string;
+    progressTrackColor: string;
+}
+
+export interface WidgetThemeConfig {
+    themeMode: 'system' | 'light' | 'dark';
+    useDynamicTheme: boolean;
+    hasCustomOrbTheme: boolean;
+    activePalette: WidgetThemePalette;
+    lightPalette: WidgetThemePalette;
+    darkPalette: WidgetThemePalette;
+}
+
+let activeWidgetThemeConfig: WidgetThemeConfig | null = null;
+
+function blendHexOver(fgHex: string, bgHex: string, alpha: number): string {
+    const parse = (h: string) => {
+        const clean = h.replace('#', '');
+        const hex6 = clean.length >= 6 ? clean.slice(0, 6) : '000000';
+        const n = parseInt(hex6, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    };
+    const [fr, fg, fb] = parse(fgHex);
+    const [br, bg, bb] = parse(bgHex);
+    const r = Math.round(fr * alpha + br * (1 - alpha));
+    const g = Math.round(fg * alpha + bg * (1 - alpha));
+    const b = Math.round(fb * alpha + bb * (1 - alpha));
+    const toHex = (v: number) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+function normalizeAndroidHex(color: string, fallbackBg: string): string {
+    if (!color.startsWith('#')) return color;
+    const raw = color.slice(1);
+    if (raw.length === 6) return color;
+    if (raw.length === 8) {
+        const alpha = parseInt(raw.slice(6, 8), 16) / 255;
+        return blendHexOver(`#${raw.slice(0, 6)}`, fallbackBg, alpha);
+    }
+    return fallbackBg;
+}
+
+export function toWidgetPalette(colors: typeof Colors.dark): WidgetThemePalette {
+    const bg = normalizeAndroidHex(colors.surface, '#1D2024');
+    return {
+        bgColor: bg,
+        textColor: normalizeAndroidHex(colors.text, bg),
+        subtextColor: normalizeAndroidHex(colors.textSecondary, bg),
+        badgeBg: normalizeAndroidHex(colors.accentMuted, bg),
+        badgeTextColor: normalizeAndroidHex(colors.accent, bg),
+        buttonBg: normalizeAndroidHex(colors.accent, bg),
+        buttonTextColor: normalizeAndroidHex(colors.accentForeground, bg),
+        accentColor: normalizeAndroidHex(colors.accent, bg),
+        progressTrackColor: normalizeAndroidHex(colors.border, bg),
+    };
+}
+
+export function setWidgetTheme(
+    colors: typeof Colors.dark,
+    options?: {
+        themeMode?: 'system' | 'light' | 'dark';
+        useDynamicTheme?: boolean;
+        hasCustomOrbTheme?: boolean;
+        lightColors?: typeof Colors.dark;
+        darkColors?: typeof Colors.dark;
+    }
+) {
+    activeWidgetThemeConfig = {
+        themeMode: options?.themeMode ?? 'system',
+        useDynamicTheme: options?.useDynamicTheme ?? false,
+        hasCustomOrbTheme: options?.hasCustomOrbTheme ?? false,
+        activePalette: toWidgetPalette(colors),
+        lightPalette: toWidgetPalette(options?.lightColors ?? Colors.light),
+        darkPalette: toWidgetPalette(options?.darkColors ?? Colors.dark),
+    };
+}
+
+async function getWidgetIconUri(): Promise<string | undefined> {
+    if (widgetIconUri) return widgetIconUri;
+    try {
+        if (!widgetsDirectory) return undefined;
+        const base = widgetsDirectory.endsWith('/') ? widgetsDirectory : `${widgetsDirectory}/`;
+        const dest = `${base}app_icon.png`;
+        const existing = await FileSystem.getInfoAsync(dest);
+        if (existing.exists) {
+            widgetIconUri = dest;
+            return dest;
+        }
+        const iconAsset = Asset.fromModule(require('../../assets/images/icon.png'));
+        await iconAsset.downloadAsync();
+        if (!iconAsset.localUri) return undefined;
+        await FileSystem.copyAsync({ from: iconAsset.localUri, to: dest });
+        widgetIconUri = dest;
+        return dest;
+    } catch (error) {
+        console.warn('Widget icon copy failed:', error);
+    }
+    return undefined;
+}
+
+if (Platform.OS === 'android') {
+    getWidgetIconUri().catch(() => { });
+}
+
+let widgetTicker: ReturnType<typeof setInterval> | null = null;
+let lastWidgetSnapshotJson: string | null = null;
+
+function stopWidgetTicker() {
+    if (widgetTicker) {
+        clearInterval(widgetTicker);
+        widgetTicker = null;
+    }
+}
+
+function startWidgetTicker() {
+    if (Platform.OS !== 'android') return;
+    stopWidgetTicker();
+    widgetTicker = setInterval(() => {
+        const state = useAppStore.getState();
+        if (!state.isSessionActive) {
+            stopWidgetTicker();
+            return;
+        }
+        if (RNAppState.currentState !== 'active') return;
+        syncWidget(
+            state.isSessionActive,
+            state.stats.current_streak,
+            state.todayStats.today_focus_seconds,
+            state.sessionEndTime,
+            state.sessionStartTime
+        );
+    }, 20000);
+}
+
+function formatWidgetClockTime(timeMs: number): string {
+    const d = new Date(timeMs);
+    const hours24 = d.getHours();
+    const mins = d.getMinutes().toString().padStart(2, '0');
+    const suffix = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12;
+    return `${hours12}:${mins} ${suffix}`;
+}
+
+function formatWidgetEndLabel(endTimeMs: number | null): string {
+    if (!endTimeMs || endTimeMs <= 0) return '';
+    return `Ends ${formatWidgetClockTime(endTimeMs)}`;
+}
+
+function formatWidgetDuration(minutes: number): string {
+    return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
+}
+
+export function syncWidget(
+    isFocusing: boolean,
+    streak: number,
+    todaySeconds: number,
+    sessionEndTime: number | null,
+    sessionStartTime: number | null = null
+) {
+    if (Platform.OS !== 'android') return;
+
+    try {
+        const now = Date.now();
+        const storeState = useAppStore.getState();
+        const todayMinutes = Math.floor(todaySeconds / 60);
+        const isOnBreak = Boolean(
+            isFocusing &&
+            storeState.isBreakActive &&
+            storeState.breakEndTime &&
+            storeState.breakEndTime > now
+        );
+        const breakRemainingMinutes =
+            isOnBreak && storeState.breakEndTime
+                ? Math.max(1, Math.ceil((storeState.breakEndTime - now) / 60000))
+                : 0;
+        const breakProgress =
+            isOnBreak && storeState.breakStartTime && storeState.breakDurationMs && storeState.breakDurationMs > 0
+                ? Math.min(1, Math.max(0, (now - storeState.breakStartTime) / storeState.breakDurationMs))
+                : 0;
+
+        // Freeze focus countdown at endTime - breakEndTime while a break is active.
+        const focusRemainingMs =
+            isFocusing && sessionEndTime && sessionEndTime > 0
+                ? Math.max(
+                    0,
+                    isOnBreak && storeState.breakEndTime
+                        ? sessionEndTime - storeState.breakEndTime
+                        : sessionEndTime - now
+                )
+                : 0;
+        const remainingMinutes = focusRemainingMs > 0 ? Math.ceil(focusRemainingMs / 60000) : 0;
+
+        const totalFocusMs =
+            isFocusing && sessionStartTime && sessionEndTime && sessionEndTime > 0
+                ? Math.max(1, sessionEndTime - sessionStartTime - (storeState.totalBreakMs ?? 0))
+                : 0;
+        const progress =
+            isFocusing && totalFocusMs > 0
+                ? Math.min(1, Math.max(0, (totalFocusMs - focusRemainingMs) / totalFocusMs))
+                : 0;
+
+        const defaultMinutes = storeState.defaultDurationMinutes ?? 25;
+        const sessionEndLabel = isFocusing && !isOnBreak ? formatWidgetEndLabel(sessionEndTime) : '';
+        const breakPausedLabel =
+            isOnBreak && storeState.breakEndTime
+                ? remainingMinutes > 0
+                    ? `${formatWidgetDuration(remainingMinutes)} paused`
+                    : `Resumes ${formatWidgetClockTime(storeState.breakEndTime)}`
+                : '';
+
+        const isDark = Appearance.getColorScheme() !== 'light';
+        const fallbackTheme = isDark ? Colors.dark : Colors.light;
+        const defaultLight = toWidgetPalette(Colors.light);
+        const defaultDark = toWidgetPalette(Colors.dark);
+        const config: WidgetThemeConfig = activeWidgetThemeConfig ?? {
+            themeMode: 'system',
+            useDynamicTheme: false,
+            hasCustomOrbTheme: false,
+            activePalette: toWidgetPalette(fallbackTheme),
+            lightPalette: defaultLight,
+            darkPalette: defaultDark,
+        };
+
+        const snapshot = {
+            isFocusing,
+            isOnBreak,
+            streak,
+            todayMinutes,
+            remainingMinutes,
+            progress,
+            breakRemainingMinutes,
+            breakProgress,
+            defaultMinutes,
+            sessionEndLabel,
+            breakPausedLabel,
+            iconUri: widgetIconUri,
+            themeMode: config.themeMode,
+            useDynamicTheme: config.useDynamicTheme,
+            hasCustomOrbTheme: config.hasCustomOrbTheme,
+            lightPalette: config.lightPalette,
+            darkPalette: config.darkPalette,
+            ...config.activePalette,
+        };
+
+        const serialized = JSON.stringify(snapshot);
+        if (serialized !== lastWidgetSnapshotJson) {
+            lastWidgetSnapshotJson = serialized;
+            LockoutWidget4x2.updateSnapshot(snapshot);
+            LockoutWidget2x2.updateSnapshot(snapshot);
+        }
+
+        if (!widgetIconUri) {
+            getWidgetIconUri().then((uri) => {
+                if (uri) {
+                    syncWidget(isFocusing, streak, todaySeconds, sessionEndTime, sessionStartTime);
+                }
+            });
+        }
+    } catch (error) {
+    }
+}
+
+if (Platform.OS === 'android') {
+    Appearance.addChangeListener(() => {
+        try {
+            const state = useAppStore.getState();
+            syncWidget(
+                state.isSessionActive,
+                state.stats.current_streak,
+                state.todayStats.today_focus_seconds,
+                state.sessionEndTime,
+                state.sessionStartTime
+            );
+        } catch { }
+    });
+}
+
 export const useAppStore = create<AppState>((set) => ({
     isSessionActive: false,
     sessionStartTime: null,
@@ -77,20 +373,54 @@ export const useAppStore = create<AppState>((set) => ({
     totalBreakMs: 0,
     hapticsEnabled: true,
     setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
-    setSessionState: (isActive, startTime, endTime, isStrict) => set((state) => ({
-        isSessionActive: isActive,
-        sessionStartTime: startTime,
-        sessionEndTime: endTime,
-        isStrictSession: isStrict,
-        ...(isActive && !state.isSessionActive ? {
-            isBreakActive: false,
-            breakEndTime: null,
-            breakStartTime: null,
-            breakDurationMs: null,
-            breaksRemaining: 1,
-            totalBreakMs: 0
-        } : {})
-    })),
+    defaultDurationMinutes: 25,
+    setDefaultDurationMinutes: (minutes) => set((state) => {
+        const valid = Number.isFinite(minutes) && (minutes > 0 || minutes === -1) ? minutes : 25;
+        setTimeout(() => {
+            const latest = useAppStore.getState();
+            syncWidget(
+                latest.isSessionActive,
+                latest.stats.current_streak,
+                latest.todayStats.today_focus_seconds,
+                latest.sessionEndTime,
+                latest.sessionStartTime
+            );
+        }, 0);
+        return { defaultDurationMinutes: valid };
+    }),
+
+    setSessionState: (isActive, startTime, endTime, isStrict) => set((state) => {
+        if (isActive) {
+            startWidgetTicker();
+        } else {
+            stopWidgetTicker();
+        }
+        setTimeout(() => {
+            const latest = useAppStore.getState();
+            syncWidget(
+                latest.isSessionActive,
+                latest.stats.current_streak,
+                latest.todayStats.today_focus_seconds,
+                latest.sessionEndTime,
+                latest.sessionStartTime
+            );
+        }, 0);
+        return {
+            isSessionActive: isActive,
+            sessionStartTime: startTime,
+            sessionEndTime: endTime,
+            isStrictSession: isStrict,
+            ...(isActive && !state.isSessionActive ? {
+                isBreakActive: false,
+                breakEndTime: null,
+                breakStartTime: null,
+                breakDurationMs: null,
+                breaksRemaining: 1,
+                totalBreakMs: 0
+            } : {})
+        }
+    }),
+
     setBreakState: (isBreakActive, breakEndTime, breaksRemaining, totalBreakMs) => set((state) => {
         const now = Date.now();
         let newBreakStartTime = state.breakStartTime;
@@ -105,6 +435,17 @@ export const useAppStore = create<AppState>((set) => ({
             newBreakDurationMs = null;
         }
 
+        setTimeout(() => {
+            const latest = useAppStore.getState();
+            syncWidget(
+                latest.isSessionActive,
+                latest.stats.current_streak,
+                latest.todayStats.today_focus_seconds,
+                latest.sessionEndTime,
+                latest.sessionStartTime
+            );
+        }, 0);
+
         return {
             isBreakActive,
             breakEndTime,
@@ -114,17 +455,22 @@ export const useAppStore = create<AppState>((set) => ({
             totalBreakMs: newTotalBreakMs,
         };
     }),
-    clearSession: () => set({
-        isSessionActive: false,
-        sessionStartTime: null,
-        sessionEndTime: null,
-        isStrictSession: false,
-        isBreakActive: false,
-        breakEndTime: null,
-        breakStartTime: null,
-        breakDurationMs: null,
-        breaksRemaining: 1,
-        totalBreakMs: 0
+
+    clearSession: () => set((state) => {
+        stopWidgetTicker();
+        syncWidget(false, state.stats.current_streak, state.todayStats.today_focus_seconds, null, null);
+        return {
+            isSessionActive: false,
+            sessionStartTime: null,
+            sessionEndTime: null,
+            isStrictSession: false,
+            isBreakActive: false,
+            breakEndTime: null,
+            breakStartTime: null,
+            breakDurationMs: null,
+            breaksRemaining: 1,
+            totalBreakMs: 0
+        }
     }),
     stats: defaultStats,
     todayStats: defaultTodayStats,
@@ -148,12 +494,15 @@ export const useAppStore = create<AppState>((set) => ({
                 getTodaySessionList(db)
             ])
 
-            set({
-                stats,
-                todayStats,
-                recentSessions,
-                totalSessionsCount,
-                todaySessionList
+            set((state) => {
+                syncWidget(state.isSessionActive, stats.current_streak, todayStats.today_focus_seconds, state.sessionEndTime, state.sessionStartTime);
+                return {
+                    stats,
+                    todayStats,
+                    recentSessions,
+                    totalSessionsCount,
+                    todaySessionList
+                }
             });
         } catch (error) {
             console.error("Error refreshing stats from DB:", error);
@@ -161,21 +510,25 @@ export const useAppStore = create<AppState>((set) => ({
     },
 
     updateStatsLocally: (earnedCoins, durationSeconds, newStreak) => {
-        set((state) => ({
-            stats: {
-                ...state.stats,
-                total_coins: state.stats.total_coins + earnedCoins,
-                current_streak: newStreak,
-                longest_streak: Math.max(state.stats.longest_streak, newStreak),
-                total_focus_seconds: state.stats.total_focus_seconds + durationSeconds,
-            },
-            todayStats: {
-                ...state.todayStats,
-                today_focus_seconds: state.todayStats.today_focus_seconds + durationSeconds,
-                today_sessions: state.todayStats.today_sessions + 1,
-                today_coins: state.todayStats.today_coins + earnedCoins,
-            }
-        }));
+        set((state) => {
+            const newTodaySeconds = state.todayStats.today_focus_seconds + durationSeconds;
+            syncWidget(state.isSessionActive, newStreak, newTodaySeconds, state.sessionEndTime, state.sessionStartTime);
+            return {
+                stats: {
+                    ...state.stats,
+                    total_coins: state.stats.total_coins + earnedCoins,
+                    current_streak: newStreak,
+                    longest_streak: Math.max(state.stats.longest_streak, newStreak),
+                    total_focus_seconds: state.stats.total_focus_seconds + durationSeconds,
+                },
+                todayStats: {
+                    ...state.todayStats,
+                    today_focus_seconds: newTodaySeconds,
+                    today_sessions: state.todayStats.today_sessions + 1,
+                    today_coins: state.todayStats.today_coins + earnedCoins,
+                }
+            };
+        });
     },
     installedApps: [],
     selectedApps: [],

@@ -1,4 +1,5 @@
 import { useSettings } from "@/hooks/useSettings";
+import { useAppStore } from "@/store/useAppStore";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { DefaultTimerModal } from "./modals/DefaultTimerModal";
@@ -21,6 +22,7 @@ export function SettingsSessionCard() {
     const handleTimerSelect = (mins: number) => {
         setDefaultTimer(mins);
         setSetting("default_timer", mins.toString());
+        useAppStore.getState().setDefaultDurationMinutes(mins);
     };
 
     return (

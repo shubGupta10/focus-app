@@ -291,6 +291,47 @@ export function useSessionController() {
         }
     };
 
+    const handleWidgetStartPress = async (): Promise<boolean> => {
+        try {
+            const store = useAppStore.getState();
+            if (store.isSessionActive) return true;
+
+            const nativeSession = FocusBlocker.getActiveSession();
+            if (nativeSession && nativeSession.isActive) return true;
+
+            const rows = await db.getAllAsync<{ package_name: string }>("SELECT package_name FROM selected_apps");
+            if (rows.length === 0) {
+                router.push("/(tabs)/apps");
+                return true;
+            }
+
+            if (engine.selectedApps.length === 0) {
+                await engine.loadSelectedApps();
+                return false;
+            }
+
+            const granted =
+                FocusBlocker.hasUsagePermission() &&
+                FocusBlocker.hasOverlayPermission() &&
+                FocusBlocker.hasBatteryPermission();
+            if (!granted) {
+                setShowPermission(true);
+                return true;
+            }
+
+            const defaultTimerVal = await getSetting("default_timer");
+            const parsed = defaultTimerVal !== null ? parseInt(defaultTimerVal, 10) : 25;
+            const durationMinutes =
+                Number.isFinite(parsed) && (parsed > 0 || parsed === -1) ? parsed : 25;
+
+            await engine.startSession(durationMinutes, false);
+            return true;
+        } catch (error) {
+            console.error("Failed to auto-start session from widget", error);
+            return true;
+        }
+    };
+
     return {
         engine,
         hasAllPermissions,
@@ -307,6 +348,7 @@ export function useSessionController() {
         confirmEndSession,
         handleFocusPress,
         handleClosePermissionModal,
+        handleWidgetStartPress,
         skipsRemaining,
         resetCountdownText,
         todayStats,

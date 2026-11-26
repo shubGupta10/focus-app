@@ -20,7 +20,7 @@ export function SettingsAboutCard() {
     };
 
     const handleContactSupport = () => {
-        Linking.openURL("https://shubhamgupta.online");
+        Linking.openURL("https://shubgupta.vercel.app");
     };
 
     const handleFeedback = () => {

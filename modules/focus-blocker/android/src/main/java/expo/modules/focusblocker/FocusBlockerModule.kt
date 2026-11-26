@@ -223,7 +223,9 @@ class FocusBlockerModule : Module() {
                     return@Function
                 }
                 FocusService.breaksRemaining = 0
+                FocusService.breakStartTime = now
                 FocusService.breakEndTime = now + breakMs
+                FocusService.breakDurationMs = breakMs
                 FocusService.ignoreBlockingUntil = FocusService.breakEndTime
                 FocusService.totalBreakMs += breakMs
                 if (FocusService.activeEndTime > 0) {
@@ -232,7 +234,9 @@ class FocusBlockerModule : Module() {
                 if (context != null) {
                     val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                     prefs.edit()
+                        .putLong("breakStartTime", FocusService.breakStartTime)
                         .putLong("breakEndTime", FocusService.breakEndTime)
+                        .putLong("breakDurationMs", FocusService.breakDurationMs)
                         .putInt("breaksRemaining", 0)
                         .putLong("totalBreakMs", FocusService.totalBreakMs)
                         .putLong("activeEndTime", FocusService.activeEndTime)
@@ -242,6 +246,7 @@ class FocusBlockerModule : Module() {
                     isBreak = true,
                     breakMinutes = durationMinutes.toInt()
                 )
+                FocusService.instance?.syncWidgetsFromService(isFocusing = true)
             }
         }
 
@@ -255,12 +260,16 @@ class FocusBlockerModule : Module() {
                     FocusService.activeEndTime = (FocusService.activeEndTime - unusedBreakMs).coerceAtLeast(now)
                 }
             }
+            FocusService.breakStartTime = 0L
             FocusService.breakEndTime = 0L
+            FocusService.breakDurationMs = 0L
             FocusService.ignoreBlockingUntil = 0L
             if (context != null) {
                 val prefs = context.getSharedPreferences("FocusBlockerState", Context.MODE_PRIVATE)
                 prefs.edit()
+                    .remove("breakStartTime")
                     .remove("breakEndTime")
+                    .remove("breakDurationMs")
                     .putInt("breaksRemaining", FocusService.breaksRemaining)
                     .putLong("totalBreakMs", FocusService.totalBreakMs)
                     .putLong("activeEndTime", FocusService.activeEndTime)
@@ -268,6 +277,7 @@ class FocusBlockerModule : Module() {
             }
             FocusService.instance?.updateForegroundNotification(isBreak = false)
             FocusService.instance?.sendBreakEndedNotification()
+            FocusService.instance?.syncWidgetsFromService(isFocusing = true)
         }
 
         Function("getAvailableBreaks") {
