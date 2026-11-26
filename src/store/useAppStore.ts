@@ -334,6 +334,24 @@ if (Platform.OS === 'android') {
     });
 }
 
+let widgetSyncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleWidgetSync() {
+    if (Platform.OS !== 'android') return;
+    if (widgetSyncTimer) clearTimeout(widgetSyncTimer);
+    widgetSyncTimer = setTimeout(() => {
+        widgetSyncTimer = null;
+        const latest = useAppStore.getState();
+        syncWidget(
+            latest.isSessionActive,
+            latest.stats.current_streak,
+            latest.todayStats.today_focus_seconds,
+            latest.sessionEndTime,
+            latest.sessionStartTime
+        );
+    }, 0);
+}
+
 export const useAppStore = create<AppState>((set) => ({
     isSessionActive: false,
     sessionStartTime: null,
@@ -350,16 +368,7 @@ export const useAppStore = create<AppState>((set) => ({
     defaultDurationMinutes: 25,
     setDefaultDurationMinutes: (minutes) => set((state) => {
         const valid = Number.isFinite(minutes) && (minutes > 0 || minutes === -1) ? minutes : 25;
-        setTimeout(() => {
-            const latest = useAppStore.getState();
-            syncWidget(
-                latest.isSessionActive,
-                latest.stats.current_streak,
-                latest.todayStats.today_focus_seconds,
-                latest.sessionEndTime,
-                latest.sessionStartTime
-            );
-        }, 0);
+        scheduleWidgetSync();
         return { defaultDurationMinutes: valid };
     }),
 
@@ -369,16 +378,7 @@ export const useAppStore = create<AppState>((set) => ({
         } else {
             stopWidgetTicker();
         }
-        setTimeout(() => {
-            const latest = useAppStore.getState();
-            syncWidget(
-                latest.isSessionActive,
-                latest.stats.current_streak,
-                latest.todayStats.today_focus_seconds,
-                latest.sessionEndTime,
-                latest.sessionStartTime
-            );
-        }, 0);
+        scheduleWidgetSync();
         return {
             isSessionActive: isActive,
             sessionStartTime: startTime,
@@ -409,16 +409,7 @@ export const useAppStore = create<AppState>((set) => ({
             newBreakDurationMs = null;
         }
 
-        setTimeout(() => {
-            const latest = useAppStore.getState();
-            syncWidget(
-                latest.isSessionActive,
-                latest.stats.current_streak,
-                latest.todayStats.today_focus_seconds,
-                latest.sessionEndTime,
-                latest.sessionStartTime
-            );
-        }, 0);
+        scheduleWidgetSync();
 
         return {
             isBreakActive,
@@ -432,10 +423,7 @@ export const useAppStore = create<AppState>((set) => ({
 
     clearSession: () => set((state) => {
         stopWidgetTicker();
-        setTimeout(() => {
-            const latest = useAppStore.getState();
-            syncWidget(false, latest.stats.current_streak, latest.todayStats.today_focus_seconds, null, null);
-        }, 0);
+        scheduleWidgetSync();
         return {
             isSessionActive: false,
             sessionStartTime: null,

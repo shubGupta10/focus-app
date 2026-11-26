@@ -1,4 +1,4 @@
-import { requireNativeModule } from 'expo-modules-core';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 
 export type AppInfo = {
   name: string;
@@ -89,4 +89,4 @@ export declare class FocusBlockerModule {
   refreshWidgets(): void;
 }
 
-export default requireNativeModule<FocusBlockerModule>('FocusBlocker');
+export default requireOptionalNativeModule<FocusBlockerModule>('FocusBlocker') ?? ({} as FocusBlockerModule);
