@@ -76,6 +76,7 @@ export default function TabLayout() {
                 },
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {
+                    fontFamily: "Inter_700Bold",
                     fontSize: 11,
                     fontWeight: "700",
                     letterSpacing: 0.2,
