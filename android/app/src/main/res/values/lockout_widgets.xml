@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="lockout_widget4x2_display_name">Lockout</string>
+  <string name="lockout_widget4x2_description">View focus streak and active session</string>
+  <string name="lockout_widget2x2_display_name">Lockout (Small)</string>
+  <string name="lockout_widget2x2_description">Compact focus streak and timer</string>
+</resources>

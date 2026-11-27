@@ -15,7 +15,8 @@
         "buildType": "apk"
       },
       "channel": "preview",
-      "environment": "preview"
+      "environment": "preview",
+      "prebuildCommand": null
     },
     "release-candidate": {
       "distribution": "internal",
