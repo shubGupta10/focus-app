@@ -67,6 +67,12 @@ example
 # generated native folders
 /ios
 
+# Android build artifacts (machine-specific paths, never commit)
+/android/app/build/
+/android/app/.cxx/
+/android/build/
+/android/.gradle/
+
 # local modules
 modules/*/android/build
 modules/*/android/.cxx
