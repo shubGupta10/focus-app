@@ -72,7 +72,8 @@
       "expo-sharing",
       "expo-image",
       "expo-status-bar",
-      "./plugins/withWidgetStartAction"
+      "./plugins/withWidgetStartAction",
+      "./plugins/withReleaseSigning"
     ],
     "experiments": {
       "typedRoutes": true,
