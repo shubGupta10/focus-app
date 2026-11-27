@@ -1,4 +1,5 @@
 import {
+    DailyAnalytics,
     SessionHistoryItem,
     TodayStats,
     UserStats,
@@ -6,8 +7,10 @@ import {
     getTodaySessionList,
     getTodayStats,
     getTotalSessionsCount,
-    getUserStats
+    getUserStats,
+    getWeeklyAnalytics
 } from '@/features/stats/db/statsRepository';
+import { getTodayDateString } from '@/utils/timeUtils';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { create } from 'zustand';
 import FocusBlocker, { AppInfo } from '../../modules/focus-blocker/src/FocusBlockerModule';
@@ -36,6 +39,7 @@ interface AppState {
 
     stats: UserStats;
     todayStats: TodayStats;
+    weeklyData: DailyAnalytics[];
     recentSessions: SessionHistoryItem[];
     totalSessionsCount: number;
     todaySessionList: SessionHistoryItem[];
@@ -184,21 +188,66 @@ function startWidgetTicker() {
 }
 
 function formatWidgetClockTime(timeMs: number): string {
-    const d = new Date(timeMs);
-    const hours24 = d.getHours();
-    const mins = d.getMinutes().toString().padStart(2, '0');
-    const suffix = hours24 >= 12 ? 'PM' : 'AM';
-    const hours12 = hours24 % 12 || 12;
-    return `${hours12}:${mins} ${suffix}`;
+    try {
+        return new Date(timeMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    } catch {
+        const d = new Date(timeMs);
+        const hours24 = d.getHours();
+        const mins = d.getMinutes().toString().padStart(2, '0');
+        const suffix = hours24 >= 12 ? 'PM' : 'AM';
+        const hours12 = hours24 % 12 || 12;
+        return `${hours12}:${mins} ${suffix}`;
+    }
 }
 
 function formatWidgetEndLabel(endTimeMs: number | null): string {
     if (!endTimeMs || endTimeMs <= 0) return '';
-    return `Ends ${formatWidgetClockTime(endTimeMs)}`;
+    return `Ends at ${formatWidgetClockTime(endTimeMs)}`;
 }
 
 function formatWidgetDuration(minutes: number): string {
     return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
+}
+
+export interface WidgetWeeklyDay {
+    day: string;
+    dateStr: string;
+    focusSeconds: number;
+}
+
+export function buildWidgetWeeklyDays(
+    weeklyData: DailyAnalytics[],
+    todayFocusSeconds: number,
+    referenceDate: Date = new Date()
+): WidgetWeeklyDay[] {
+    if (weeklyData.length === 7) {
+        return weeklyData.map((entry, idx) => ({
+            day: entry.dayOfWeek,
+            dateStr: entry.dateStr,
+            focusSeconds: idx === 6
+                ? Math.max(0, Math.round(Math.max(entry.focusSeconds, todayFocusSeconds)))
+                : Math.max(0, Math.round(entry.focusSeconds)),
+        }));
+    }
+
+    const base = new Date(referenceDate);
+    base.setHours(0, 0, 0, 0);
+    const days: WidgetWeeklyDay[] = [];
+    for (let offset = -6; offset <= 0; offset++) {
+        const d = new Date(base);
+        d.setDate(base.getDate() + offset);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const dayNum = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${dayNum}`;
+        const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+        days.push({
+            day,
+            dateStr,
+            focusSeconds: offset === 0 ? Math.max(0, Math.round(todayFocusSeconds)) : 0,
+        });
+    }
+    return days;
 }
 
 export function syncWidget(
@@ -206,7 +255,8 @@ export function syncWidget(
     streak: number,
     todaySeconds: number,
     sessionEndTime: number | null,
-    sessionStartTime: number | null = null
+    sessionStartTime: number | null = null,
+    weeklyDataOverride?: DailyAnalytics[]
 ) {
     if (Platform.OS !== 'android') return;
 
@@ -263,6 +313,10 @@ export function syncWidget(
                 : 0;
 
         const defaultMinutes = storeState.defaultDurationMinutes ?? 25;
+        const sessionEndTimeMs =
+            isFocusing && !isOnBreak && !isInfinite && sessionEndTime && sessionEndTime > 0
+                ? sessionEndTime
+                : 0;
         const sessionEndLabel = isFocusing && !isOnBreak
             ? isInfinite
                 ? 'Flow state'
@@ -276,6 +330,11 @@ export function syncWidget(
                         ? `${formatWidgetDuration(remainingMinutes)} paused`
                         : `Resumes ${formatWidgetClockTime(storeState.breakEndTime)}`
                 : '';
+        const snapshotDate = getTodayDateString();
+        const weeklyDays = buildWidgetWeeklyDays(
+            weeklyDataOverride ?? storeState.weeklyData,
+            todaySeconds
+        );
 
         const isDark = Appearance.getColorScheme() !== 'light';
         const fallbackTheme = isDark ? Colors.dark : Colors.light;
@@ -301,8 +360,11 @@ export function syncWidget(
             breakRemainingMinutes,
             breakProgress,
             defaultMinutes,
+            sessionEndTimeMs,
             sessionEndLabel,
             breakPausedLabel,
+            snapshotDate,
+            weeklyDays,
             themeMode: config.themeMode,
             useDynamicTheme: config.useDynamicTheme,
             hasCustomOrbTheme: config.hasCustomOrbTheme,
@@ -439,6 +501,7 @@ export const useAppStore = create<AppState>((set) => ({
     }),
     stats: defaultStats,
     todayStats: defaultTodayStats,
+    weeklyData: [],
     recentSessions: [],
     totalSessionsCount: 0,
     todaySessionList: [],
@@ -448,22 +511,32 @@ export const useAppStore = create<AppState>((set) => ({
             const [
                 stats,
                 todayStats,
+                weeklyResult,
                 recentSessions,
                 totalSessionsCount,
                 todaySessionList
             ] = await Promise.all([
                 getUserStats(db),
                 getTodayStats(db),
+                getWeeklyAnalytics(db, 0),
                 getRecentSessions(db, 4),
                 getTotalSessionsCount(db),
                 getTodaySessionList(db)
             ])
 
             set((state) => {
-                syncWidget(state.isSessionActive, stats.current_streak, todayStats.today_focus_seconds, state.sessionEndTime, state.sessionStartTime);
+                syncWidget(
+                    state.isSessionActive,
+                    stats.current_streak,
+                    todayStats.today_focus_seconds,
+                    state.sessionEndTime,
+                    state.sessionStartTime,
+                    weeklyResult.weeklyData
+                );
                 return {
                     stats,
                     todayStats,
+                    weeklyData: weeklyResult.weeklyData,
                     recentSessions,
                     totalSessionsCount,
                     todaySessionList
@@ -477,7 +550,22 @@ export const useAppStore = create<AppState>((set) => ({
     updateStatsLocally: (earnedCoins, durationSeconds, newStreak) => {
         set((state) => {
             const newTodaySeconds = state.todayStats.today_focus_seconds + durationSeconds;
-            syncWidget(state.isSessionActive, newStreak, newTodaySeconds, state.sessionEndTime, state.sessionStartTime);
+            const todayStr = getTodayDateString();
+            const updatedWeekly = state.weeklyData.length === 7
+                ? state.weeklyData.map((item, idx) =>
+                    idx === 6 || item.dateStr === todayStr
+                        ? { ...item, focusSeconds: Math.max(item.focusSeconds + durationSeconds, newTodaySeconds) }
+                        : item
+                )
+                : state.weeklyData;
+            syncWidget(
+                state.isSessionActive,
+                newStreak,
+                newTodaySeconds,
+                state.sessionEndTime,
+                state.sessionStartTime,
+                updatedWeekly
+            );
             return {
                 stats: {
                     ...state.stats,
@@ -491,7 +579,8 @@ export const useAppStore = create<AppState>((set) => ({
                     today_focus_seconds: newTodaySeconds,
                     today_sessions: state.todayStats.today_sessions + 1,
                     today_coins: state.todayStats.today_coins + earnedCoins,
-                }
+                },
+                weeklyData: updatedWeekly,
             };
         });
     },

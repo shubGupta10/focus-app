@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lockout_widget_preview_bg">#ECEEF4</color>
+    <color name="lockout_widget_preview_text">#181C20</color>
+    <color name="lockout_widget_preview_subtext">#42474E</color>
+    <color name="lockout_widget_preview_badge_bg">#CFE5FF</color>
+    <color name="lockout_widget_preview_badge_text">#416180</color>
+    <color name="lockout_widget_preview_button_bg">#416180</color>
+    <color name="lockout_widget_preview_button_text">#FFFFFF</color>
+</resources>

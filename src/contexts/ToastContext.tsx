@@ -102,6 +102,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                         />
                         <Text
                             style={{
+                                fontFamily: "Inter_700Bold",
                                 color: colors.text,
                                 fontSize: 14,
                                 fontWeight: "700",

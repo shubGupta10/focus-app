@@ -7,12 +7,16 @@ const WIDGETS = [
     providerClass: 'LockoutWidget4x2Provider',
     receiverClass: 'LockoutWidget4x2GlanceReceiver',
     xmlName: 'lockout_widget4x2_info',
+    previewLayout: 'lockout_widget4x2_preview',
+    previewImage: 'lockout_widget4x2_preview_img',
     labelRes: '@string/lockout_widget4x2_display_name',
     descRes: '@string/lockout_widget4x2_description',
     displayName: 'Lockout',
     description: 'View focus streak and active session',
-    minWidth: '245dp',
-    minHeight: '115dp',
+    minWidth: '250dp',
+    minHeight: '110dp',
+    minResizeWidth: '200dp',
+    minResizeHeight: '110dp',
     targetCellWidth: 4,
     targetCellHeight: 2,
   },
@@ -20,12 +24,16 @@ const WIDGETS = [
     providerClass: 'LockoutWidget2x2Provider',
     receiverClass: 'LockoutWidget2x2GlanceReceiver',
     xmlName: 'lockout_widget2x2_info',
+    previewLayout: 'lockout_widget2x2_preview',
+    previewImage: 'lockout_widget2x2_preview_img',
     labelRes: '@string/lockout_widget2x2_display_name',
     descRes: '@string/lockout_widget2x2_description',
     displayName: 'Lockout (Small)',
     description: 'Compact focus streak and timer',
     minWidth: '110dp',
     minHeight: '110dp',
+    minResizeWidth: '110dp',
+    minResizeHeight: '110dp',
     targetCellWidth: 2,
     targetCellHeight: 2,
   },
@@ -45,10 +53,14 @@ function buildProviderInfoXml(widget) {
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
   android:minWidth="${widget.minWidth}"
   android:minHeight="${widget.minHeight}"
+  android:minResizeWidth="${widget.minResizeWidth}"
+  android:minResizeHeight="${widget.minResizeHeight}"
   android:targetCellWidth="${widget.targetCellWidth}"
   android:targetCellHeight="${widget.targetCellHeight}"
   android:updatePeriodMillis="0"
-  android:initialLayout="@layout/lockout_widget_initial_layout"
+  android:initialLayout="@layout/glance_default_loading_layout"
+  android:previewLayout="@layout/${widget.previewLayout}"
+  android:previewImage="@drawable/${widget.previewImage}"
   android:description="${widget.descRes}"
   android:resizeMode="horizontal|vertical"
   android:widgetCategory="home_screen" />
@@ -86,7 +98,12 @@ module.exports = function withWidgetStartAction(config) {
         },
         'intent-filter': [
           {
-            action: [{ $: { 'android:name': 'android.appwidget.action.APPWIDGET_UPDATE' } }],
+            action: [
+              { $: { 'android:name': 'android.appwidget.action.APPWIDGET_UPDATE' } },
+              { $: { 'android:name': 'android.intent.action.DATE_CHANGED' } },
+              { $: { 'android:name': 'android.intent.action.TIME_SET' } },
+              { $: { 'android:name': 'android.intent.action.TIMEZONE_CHANGED' } },
+            ],
           },
         ],
         'meta-data': [

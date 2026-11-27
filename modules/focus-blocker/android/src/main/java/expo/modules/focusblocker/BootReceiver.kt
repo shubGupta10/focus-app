@@ -18,6 +18,7 @@ class BootReceiver : BroadcastReceiver() {
         if (action != Intent.ACTION_BOOT_COMPLETED) {
             return
         }
+        LockoutWidgetUpdater.refreshAll(context)
 
         val expoDb = File(File(context.filesDir, "SQLite"), "focus.db")
         val dbFile = if (expoDb.exists()) expoDb else context.getDatabasePath("focus.db")

@@ -2,34 +2,28 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { migrateDbIfNeeded } from "@/store/database";
-import { Inter_400Regular, Inter_900Black } from "@expo-google-fonts/inter";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_900Black,
+} from "@expo-google-fonts/inter";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import { Stack, DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
-import { Text, TextInput, Alert, useColorScheme } from "react-native";
+import { Alert } from "react-native";
 import "../global.css";
 import * as Updates from "expo-updates";
 import { initAnalytics, analytics } from "@/utils/analytics";
+import { configureTextDefaults } from "@/utils/configureTextDefaults";
 import { ObserveRoot } from "expo-observe";
 
 initAnalytics();
-
-
-interface TextWithDefaultProps extends Function {
-  defaultProps?: { allowFontScaling?: boolean; style?: any };
-}
-const TextOverride = (Text as unknown) as TextWithDefaultProps;
-TextOverride.defaultProps = TextOverride.defaultProps || {};
-TextOverride.defaultProps.allowFontScaling = false;
-TextOverride.defaultProps.style = { includeFontPadding: false };
-
-const TextInputOverride = (TextInput as unknown) as TextWithDefaultProps;
-TextInputOverride.defaultProps = TextInputOverride.defaultProps || {};
-TextInputOverride.defaultProps.allowFontScaling = false;
-TextInputOverride.defaultProps.style = { includeFontPadding: false };
+configureTextDefaults();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -121,6 +115,9 @@ function Layout() {
   const [loaded, error] = useFonts({
     ...Ionicons.font,
     Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
     Inter_900Black,
   })
 

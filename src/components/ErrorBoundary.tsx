@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
   },
   title: {
+    fontFamily: 'Inter_700Bold',
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.dark.text,
@@ -79,6 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {
+    fontFamily: 'Inter_700Bold',
     color: Colors.dark.accentForeground,
     fontWeight: 'bold',
   },
