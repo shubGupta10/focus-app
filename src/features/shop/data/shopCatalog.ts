@@ -15,13 +15,13 @@ export type ShopItem = {
 export const SHOP_CATALOG: ShopItem[] = [
     {
         id: "theme_default",
-        name: "Classic Calm",
-        description: "The original Lockout aesthetic.",
+        name: "Classic Blue",
+        description: "The original Lockout blue aesthetic.",
         cost: 0,
         type: "theme",
         themeValue: "default",
         icon: "color-palette-outline",
-        hexColor: "#A35265",
+        hexColor: "#416180",
     },
     {
         id: "theme_ocean",

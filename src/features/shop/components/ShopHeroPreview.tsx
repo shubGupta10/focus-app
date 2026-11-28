@@ -11,6 +11,8 @@ import { formatCoinBalance } from "@/features/stats/utils/stats_utils";
 
 interface ShopHeroPreviewProps {
     selectedStyle: ShopItem;
+    animationThemeValue?: string;
+    accentColorOverride?: string;
     totalCoins: number;
     isFocused: boolean;
     onBack: () => void;
@@ -19,6 +21,8 @@ interface ShopHeroPreviewProps {
 
 export function ShopHeroPreview({
     selectedStyle,
+    animationThemeValue,
+    accentColorOverride,
     totalCoins,
     isFocused,
     onBack,
@@ -28,7 +32,8 @@ export function ShopHeroPreview({
     const insets = useSafeAreaInsets();
     const { width, height } = useWindowDimensions();
 
-    const PreviewComponent = getOrbBackground(selectedStyle?.themeValue || "solar");
+    const PreviewComponent = getOrbBackground(animationThemeValue || selectedStyle?.themeValue || "solar");
+    const previewAccent = accentColorOverride || colors.accent;
     const topLayoutHeight = Math.round(height * 0.49);
     const previewSize = Math.min(235, Math.round(width * 0.60));
     const previewScale = previewSize / 340;
@@ -89,9 +94,9 @@ export function ShopHeroPreview({
                     >
                         <PreviewComponent
                             isActive={isFocused}
-                            colorAccent={colors.accent}
+                            colorAccent={previewAccent}
                             colorTrack={colors.textSecondary}
-                            colorDotCenter={colors.accent}
+                            colorDotCenter={previewAccent}
                             outerRadius={156}
                             innerRadius={126}
                             sessionProgress={null}

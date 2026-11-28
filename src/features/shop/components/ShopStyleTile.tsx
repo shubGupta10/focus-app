@@ -1,4 +1,5 @@
 import { CoinIcon } from "@/components/CoinIcon";
+import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getOrbBackground } from "@/features/session/components/orb-themes";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -24,9 +25,15 @@ export const ShopStyleTile = memo(function ShopStyleTile({
     canAfford,
     onSelect,
 }: ShopStyleTileProps) {
-    const { colors } = useTheme();
+    const { colors, isDarkMode } = useTheme();
 
     const OrbBg = getOrbBackground(item.themeValue);
+    const swatchColor =
+        item.type === "theme"
+            ? item.id === "theme_default"
+                ? (isDarkMode ? Colors.dark.accent : Colors.light.accent)
+                : (item.hexColor ?? colors.accent)
+            : colors.accent;
 
     const accessibilityStatus = isEquipped
         ? "Equipped"
@@ -55,34 +62,52 @@ export const ShopStyleTile = memo(function ShopStyleTile({
                 className="w-full h-[74px] rounded-[10px] items-center justify-center overflow-hidden border border-border"
                 style={{ backgroundColor: colors.background }}
             >
-                <View
-                    pointerEvents="none"
-                    style={{
-                        position: "absolute",
-                        width: 340,
-                        height: 340,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transform: [{ scale: 0.22 }],
-                    }}
-                >
-                    <OrbBg
-                        isActive={false}
-                        colorAccent={colors.accent}
-                        colorTrack={colors.accent}
-                        colorDotCenter={colors.accent}
-                        outerRadius={156}
-                        innerRadius={126}
-                        sessionProgress={null}
-                        minuteProgress={null}
-                    />
-                </View>
+                {item.type === "theme" ? (
+                    <View
+                        className="w-12 h-12 rounded-full items-center justify-center"
+                        style={{ backgroundColor: swatchColor + "2E" }}
+                    >
+                        <View
+                            className="w-7 h-7 rounded-full"
+                            style={{
+                                backgroundColor: swatchColor,
+                                borderWidth: 1.5,
+                                borderColor: colors.border,
+                            }}
+                        />
+                    </View>
+                ) : (
+                    <View
+                        pointerEvents="none"
+                        style={{
+                            position: "absolute",
+                            width: 340,
+                            height: 340,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transform: [{ scale: 0.22 }],
+                        }}
+                    >
+                        <OrbBg
+                            isActive={false}
+                            colorAccent={colors.accent}
+                            colorTrack={colors.accent}
+                            colorDotCenter={colors.accent}
+                            outerRadius={156}
+                            innerRadius={126}
+                            sessionProgress={null}
+                            minuteProgress={null}
+                        />
+                    </View>
+                )}
             </View>
 
             <Text
-                className="font-bold text-[12.5px] text-center mt-1.5 tracking-tight"
+                className="font-bold text-[12px] text-center mt-1.5 tracking-tight px-0.5"
                 style={{ color: isEquipped ? colors.accentForeground : colors.text }}
                 numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
             >
                 {item.name}
             </Text>

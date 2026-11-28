@@ -21,19 +21,24 @@ export function useShopController() {
     const [purchasedItems, setPurchasedItems] = useState<Set<string>>(new Set(["theme_default", "animation_solar"]));
     const [equippedTheme, setEquippedTheme] = useState<string>("theme_default");
     const [equippedAnimation, setEquippedAnimation] = useState<string>("animation_solar");
+    const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
 
 
     const loadShopData = useCallback(async () => {
-        const items = await getPurchasedItems(db);
-        setPurchasedItems(new Set(["theme_default", "animation_solar", ...items]));
-        const currentTheme = await getSetting("equipped_orb_theme");
-        if (currentTheme) {
-            setEquippedTheme(currentTheme);
-        }
-        const currentAnimation = await getSetting("equipped_orb_animation");
-        if (currentAnimation) {
-            setEquippedAnimation(currentAnimation);
+        try {
+            const items = await getPurchasedItems(db);
+            setPurchasedItems(new Set(["theme_default", "animation_solar", ...items]));
+            const currentTheme = await getSetting("equipped_orb_theme");
+            if (currentTheme) {
+                setEquippedTheme(currentTheme);
+            }
+            const currentAnimation = await getSetting("equipped_orb_animation");
+            if (currentAnimation) {
+                setEquippedAnimation(currentAnimation);
+            }
+        } finally {
+            setIsLoading(false);
         }
     }, [db, getSetting]);
 
@@ -133,6 +138,7 @@ export function useShopController() {
         equippedTheme,
         equippedAnimation,
         totalCoins: stats.total_coins,
+        isLoading,
         isProcessing,
         handleBuyItem,
         handleEquipItem,
