@@ -84,13 +84,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 
     if (currentVersion < 4) {
         try {
-            await db.execAsync("ALTER TABLE active_session ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
-        } catch (error: any) {
-            if (!error.message.includes("duplicate column name")) {
-                console.error("Migration v4 failed for active_session:", error);
-            }
-        }
-        try {
             await db.execAsync("ALTER TABLE sessions ADD COLUMN is_strict INTEGER NOT NULL DEFAULT 0;");
         } catch (error: any) {
             if (!error.message.includes("duplicate column name")) {
