@@ -7,4 +7,5 @@
     <color name="lockout_widget_preview_badge_text">#AACAEE</color>
     <color name="lockout_widget_preview_button_bg">#AACAEE</color>
     <color name="lockout_widget_preview_button_text">#0E334F</color>
+    <color name="lockout_widget_preview_track">#42474E</color>
 </resources>

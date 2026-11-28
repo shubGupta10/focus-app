@@ -1,37 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:width="280dp" android:height="156dp">
+    <item android:width="280dp" android:height="202dp">
         <shape android:shape="rectangle">
             <solid android:color="@color/lockout_widget_preview_bg" />
             <corners android:radius="24dp" />
         </shape>
     </item>
-    <item android:width="22dp" android:height="22dp" android:left="16dp" android:top="16dp" android:drawable="@drawable/lockout_widget_preview_icon" />
-    <item android:width="56dp" android:height="11dp" android:left="46dp" android:top="21dp">
+    <item android:width="24dp" android:height="24dp" android:left="16dp" android:top="16dp" android:drawable="@drawable/lockout_widget_preview_icon" />
+    <item android:width="82dp" android:height="11dp" android:left="48dp" android:top="22dp">
         <shape android:shape="rectangle">
             <solid android:color="@color/lockout_widget_preview_text" />
             <corners android:radius="5dp" />
         </shape>
     </item>
-    <item android:width="82dp" android:height="20dp" android:right="16dp" android:top="17dp" android:gravity="top|end">
+    <item android:width="78dp" android:height="20dp" android:right="16dp" android:top="18dp" android:gravity="top|end">
         <shape android:shape="rectangle">
             <solid android:color="@color/lockout_widget_preview_badge_bg" />
             <corners android:radius="999dp" />
         </shape>
     </item>
-    <item android:width="76dp" android:height="28dp" android:left="16dp" android:bottom="36dp" android:gravity="bottom|start">
+    <item android:width="64dp" android:height="9dp" android:left="16dp" android:top="62dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/lockout_widget_preview_text" />
-            <corners android:radius="8dp" />
+            <solid android:color="@color/lockout_widget_preview_subtext" />
+            <corners android:radius="4dp" />
         </shape>
     </item>
-    <item android:width="82dp" android:height="10dp" android:left="16dp" android:bottom="18dp" android:gravity="bottom|start">
+    <item android:width="26dp" android:height="26dp" android:left="18dp" android:top="104dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_badge_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="14dp" android:left="54dp" android:top="116dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_badge_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="26dp" android:left="90dp" android:top="104dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_badge_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="3dp" android:left="126dp" android:top="127dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_track" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="44dp" android:left="162dp" android:top="86dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_badge_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="32dp" android:left="198dp" android:top="98dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_badge_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="26dp" android:height="16dp" android:left="234dp" android:top="114dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_button_bg" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="68dp" android:height="24dp" android:left="16dp" android:bottom="20dp" android:gravity="bottom|start">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lockout_widget_preview_text" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <item android:width="64dp" android:height="10dp" android:left="90dp" android:bottom="22dp" android:gravity="bottom|start">
         <shape android:shape="rectangle">
             <solid android:color="@color/lockout_widget_preview_subtext" />
             <corners android:radius="5dp" />
         </shape>
     </item>
-    <item android:width="92dp" android:height="40dp" android:right="16dp" android:bottom="16dp" android:gravity="bottom|end">
+    <item android:width="90dp" android:height="38dp" android:right="16dp" android:bottom="16dp" android:gravity="bottom|end">
         <shape android:shape="rectangle">
             <solid android:color="@color/lockout_widget_preview_button_bg" />
             <corners android:radius="999dp" />

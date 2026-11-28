@@ -22,6 +22,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -144,11 +145,10 @@ private fun LockoutWidget4x2Content(
 ) {
 
     val size = LocalSize.current
-    val rawHeight = size.height.value.takeIf { it.isFinite() && it > 0f }
-    val widgetHeight = if (isPreview && (rawHeight == null || rawHeight >= 140f)) null else rawHeight
-    val widgetWidth = if (isPreview) null else size.width.value.takeIf { it.isFinite() && it > 0f }
+    val widgetHeight = size.height.value.takeIf { it.isFinite() && it > 0f }
+    val widgetWidth = size.width.value.takeIf { it.isFinite() && it > 0f }
 
-    val isTall = !isPreview && widgetHeight != null && widgetHeight >= 200f
+    val isTall = isPreview || (widgetHeight != null && widgetHeight >= 200f)
     val isSingleRowBar = !isTall && widgetHeight != null && widgetHeight < 104f
     val isCompactShort = !isTall && !isSingleRowBar && widgetHeight != null && widgetHeight < 145f
 
@@ -157,6 +157,7 @@ private fun LockoutWidget4x2Content(
         widgetHeight != null && widgetHeight < 80f -> 8.dp
         isSingleRowBar -> 10.dp
         isCompactShort -> 12.dp
+        isPreview && widgetHeight != null && widgetHeight < 220f -> 12.dp
         else -> 16.dp
     }
     val cardRadius = if (isSingleRowBar) 22.dp else 24.dp
@@ -170,10 +171,15 @@ private fun LockoutWidget4x2Content(
     val startHeight = when {
         widgetHeight != null && widgetHeight < 80f -> 36.dp
         isCompactShort -> 40.dp
+        isPreview && widgetHeight != null && widgetHeight < 220f -> 34.dp
         else -> 44.dp
     }
-    val startPadH = if (isCompactShort) 16.dp else 18.dp
-    val startFontSize = 14f
+    val startPadH = when {
+        isCompactShort -> 16.dp
+        isPreview && widgetWidth != null && widgetWidth < 240f -> 14.dp
+        else -> 18.dp
+    }
+    val startFontSize = if (isPreview && widgetWidth != null && widgetWidth < 240f) 13f else 14f
     val barHeight = if (isTall) 7.dp else 6.dp
 
     val isNarrow = !isPreview && widgetWidth != null && widgetWidth < 240f
@@ -269,6 +275,7 @@ private fun LockoutWidget4x2Content(
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
+                .appWidgetBackground()
                 .cornerRadius(cardRadius)
                 .background(tallCardBg)
                 .clickable(openLockoutAction(context, startTimer = false))
@@ -323,6 +330,9 @@ private fun LockoutWidget4x2Content(
                 }
             }
 
+            if (isPreview) {
+                Spacer(modifier = GlanceModifier.height(14.dp))
+            }
             Spacer(modifier = GlanceModifier.defaultWeight())
 
             if (snapshot.isFocusing) {
@@ -387,13 +397,13 @@ private fun LockoutWidget4x2Content(
                 if (days.isNotEmpty()) {
                     val maxFocus = days.maxOf { it.focusSeconds }.coerceAtLeast(1)
                     val isTightTall = widgetHeight != null && widgetHeight < 230f
-                    val chartHeaderGap = if (isTightTall) 8.dp else 14.dp
+                    val chartHeaderGap = if (isPreview && isTightTall) 6.dp else if (isTightTall) 8.dp else 14.dp
                     val dayInitialGap = if (isTightTall) 4.dp else 6.dp
-                    val maxBarRangeDp = if (isTightTall) 24f else 38f
-                    val trackBoxHeight = if (isTightTall) 46.dp else 62.dp
+                    val maxBarRangeDp = if (isPreview && isTightTall) 18f else if (isTightTall) 24f else 38f
+                    val trackBoxHeight = if (isPreview && isTightTall) 28.dp else if (isTightTall) 46.dp else 62.dp
                     Column(modifier = GlanceModifier.fillMaxWidth().wrapContentHeight()) {
                         Text(
-                            text = "Last 7 days",
+                            text = if (isPreview) "LAST 7 DAYS" else "Last 7 days",
                             maxLines = 1,
                             style = TextStyle(
                                 color = palette.subtextColor,
@@ -439,7 +449,7 @@ private fun LockoutWidget4x2Content(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = GlanceModifier.fillMaxWidth().wrapContentHeight()
                                         ) {
-                                            if (dayMinutes > 0) {
+                                            if (!isPreview && dayMinutes > 0) {
                                                 Text(
                                                     text = barValueLabel,
                                                     maxLines = 1,
@@ -475,6 +485,9 @@ private fun LockoutWidget4x2Content(
                         }
                     }
 
+                    if (isPreview) {
+                        Spacer(modifier = GlanceModifier.height(14.dp))
+                    }
                     Spacer(modifier = GlanceModifier.defaultWeight())
                 }
 
@@ -482,6 +495,7 @@ private fun LockoutWidget4x2Content(
                 val tallIdleNumberSize = when {
                     valueChars >= 7 && stackBottomLabel -> 26f
                     valueChars >= 7 || isNarrow -> 28f
+                    isPreview && stackBottomLabel -> 28f
                     stackBottomLabel -> 32f
                     else -> 34f
                 }
@@ -585,6 +599,7 @@ private fun LockoutWidget4x2Content(
             verticalAlignment = Alignment.CenterVertically,
             modifier = GlanceModifier
                 .fillMaxSize()
+                .appWidgetBackground()
                 .cornerRadius(cardRadius)
                 .background(palette.bgColor)
                 .clickable(openLockoutAction(context, startTimer = false))
@@ -657,6 +672,7 @@ private fun LockoutWidget4x2Content(
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
+            .appWidgetBackground()
             .cornerRadius(cardRadius)
             .background(palette.bgColor)
             .clickable(openLockoutAction(context, startTimer = false))
@@ -836,17 +852,17 @@ private fun LockoutWidget2x2Content(
 ) {
 
     val size = LocalSize.current
-    val rawHeight = size.height.value.takeIf { it.isFinite() && it > 0f }
-    val widgetHeight = if (isPreview && (rawHeight == null || rawHeight >= 140f)) null else rawHeight
-    val widgetWidth = if (isPreview) null else size.width.value.takeIf { it.isFinite() && it > 0f }
+    val widgetHeight = size.height.value.takeIf { it.isFinite() && it > 0f }
+    val widgetWidth = size.width.value.takeIf { it.isFinite() && it > 0f }
 
-    val isTall = !isPreview && widgetHeight != null && widgetHeight >= 200f
+    val isTall = isPreview || (widgetHeight != null && widgetHeight >= 200f)
     val isCompact = !isTall && widgetHeight != null && widgetHeight < 156f
     val isVeryCompact = isCompact && widgetHeight != null && widgetHeight < 126f
 
     val outerPad = when {
         isVeryCompact -> 10.dp
         isCompact -> 12.dp
+        isPreview && widgetHeight != null && widgetHeight < 220f -> 12.dp
         isTall -> 14.dp
         else -> 16.dp
     }
@@ -908,7 +924,11 @@ private fun LockoutWidget2x2Content(
         }
         val tallCardBg = if (snapshot.isFocusing && !isOnBreak) palette.badgeBg else palette.bgColor
         val tallTrackBg = if (snapshot.isFocusing && !isOnBreak) palette.bgColor else palette.progressTrackColor
-        val tallButtonHeight = if (widgetHeight != null && widgetHeight < 220f) 40.dp else 44.dp
+        val tallButtonHeight = when {
+            isPreview && widgetHeight != null && widgetHeight < 220f -> 34.dp
+            widgetHeight != null && widgetHeight < 220f -> 40.dp
+            else -> 44.dp
+        }
         val formattedSessionEnd = if (snapshot.isFocusing && !isOnBreak) {
             when {
                 isInfinite -> "Flow state"
@@ -925,6 +945,7 @@ private fun LockoutWidget2x2Content(
         }
 
         val tallIdleNumberSize = when {
+            isPreview && widgetHeight != null && widgetHeight < 220f -> 26f
             valueChars >= 7 -> 36f
             valueChars >= 5 -> 44f
             else -> 48f
@@ -942,6 +963,7 @@ private fun LockoutWidget2x2Content(
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
+                .appWidgetBackground()
                 .cornerRadius(cardRadius)
                 .background(tallCardBg)
                 .clickable(openLockoutAction(context, startTimer = false))
@@ -955,7 +977,7 @@ private fun LockoutWidget2x2Content(
                     WidgetAppIcon(context, iconSize, iconRadius)
                 }
 
-                if (!snapshot.isFocusing && showStreak) {
+                if (!snapshot.isFocusing && showStreak && !isPreview) {
                     Box(
                         modifier = GlanceModifier.fillMaxWidth().wrapContentHeight(),
                         contentAlignment = Alignment.CenterEnd
@@ -981,6 +1003,9 @@ private fun LockoutWidget2x2Content(
                 }
             }
 
+            if (isPreview) {
+                Spacer(modifier = GlanceModifier.height(14.dp))
+            }
             Spacer(modifier = GlanceModifier.defaultWeight())
 
             if (snapshot.isFocusing) {
@@ -1075,8 +1100,31 @@ private fun LockoutWidget2x2Content(
                             fontWeight = FontWeight.Normal
                         )
                     )
+                    if (isPreview && showStreak) {
+                        Spacer(modifier = GlanceModifier.height(8.dp))
+                        Row(
+                            modifier = GlanceModifier
+                                .background(palette.badgeBg)
+                                .cornerRadius(999.dp)
+                                .padding(horizontal = tallBadgePadH, vertical = 4.dp)
+                                .wrapContentWidth()
+                        ) {
+                            Text(
+                                text = streakText,
+                                maxLines = 1,
+                                style = TextStyle(
+                                    color = palette.badgeTextColor,
+                                    fontSize = tallBadgeFontSize.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            )
+                        }
+                    }
                 }
 
+                if (isPreview) {
+                    Spacer(modifier = GlanceModifier.height(14.dp))
+                }
                 Spacer(modifier = GlanceModifier.defaultWeight())
 
                 Box(
@@ -1188,6 +1236,7 @@ private fun LockoutWidget2x2Content(
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
+            .appWidgetBackground()
             .cornerRadius(cardRadius)
             .background(palette.bgColor)
             .clickable(openLockoutAction(context, startTimer = false))

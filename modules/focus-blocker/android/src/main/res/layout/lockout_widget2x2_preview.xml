@@ -4,39 +4,23 @@
     android:layout_height="match_parent"
     android:background="@drawable/lockout_widget_preview_bg"
     android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
+    android:paddingLeft="14dp"
+    android:paddingTop="12dp"
+    android:paddingRight="14dp"
+    android:paddingBottom="12dp"
     android:theme="@android:style/Theme.DeviceDefault.DayNight">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Lockout"
-            android:src="@drawable/lockout_widget_preview_icon" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:text="Lockout"
-            android:textColor="@color/lockout_widget_preview_text"
-            android:textSize="13.5sp" />
-    </LinearLayout>
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="Lockout"
+        android:src="@drawable/lockout_widget_preview_icon" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:minHeight="14dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,38 +31,66 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
             android:maxLines="1"
-            android:text="25m"
+            android:text="TODAY"
+            android:textColor="@color/lockout_widget_preview_subtext"
+            android:textSize="10.5sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="4h 0m"
             android:textColor="@color/lockout_widget_preview_text"
-            android:textSize="32sp" />
+            android:textSize="26sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:includeFontPadding="false"
             android:maxLines="1"
             android:text="focused today"
             android:textColor="@color/lockout_widget_preview_subtext"
-            android:textSize="12.5sp" />
+            android:textSize="11.5sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/lockout_widget_preview_badge_bg"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingLeft="9dp"
+            android:paddingTop="3dp"
+            android:paddingRight="9dp"
+            android:paddingBottom="3dp"
+            android:text="8 day streak"
+            android:textColor="@color/lockout_widget_preview_badge_text"
+            android:textSize="10.5sp" />
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:minHeight="14dp" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/lockout_widget_preview_badge_bg"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:background="@drawable/lockout_widget_preview_button_bg"
         android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:includeFontPadding="false"
         android:maxLines="1"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="5dp"
-        android:text="4 day streak"
-        android:textColor="@color/lockout_widget_preview_badge_text"
-        android:textSize="11.5sp" />
+        android:text="Start 25m"
+        android:textColor="@color/lockout_widget_preview_button_text"
+        android:textSize="13sp" />
 
 </LinearLayout>

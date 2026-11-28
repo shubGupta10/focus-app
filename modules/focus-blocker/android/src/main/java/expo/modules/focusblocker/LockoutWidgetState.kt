@@ -197,8 +197,8 @@ internal object LockoutWidgetUpdater {
     internal const val ACTION_MIDNIGHT_REFRESH = "expo.modules.focusblocker.ACTION_MIDNIGHT_WIDGET_REFRESH"
     private const val PREFS_NAME = "LockoutWidgetPrefs"
     private const val KEY_SNAPSHOT = "snapshot_json"
-    private const val KEY_LAST_PREVIEW_TIME = "last_preview_time_v7_ms"
-    private const val KEY_LAST_PREVIEW_SIG = "last_preview_sig_v7"
+    private const val KEY_LAST_PREVIEW_TIME = "last_preview_time_v10_ms"
+    private const val KEY_LAST_PREVIEW_SIG = "last_preview_sig_v10"
     private const val PREVIEW_MIN_INTERVAL_MS = 35 * 60 * 1000L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -386,8 +386,6 @@ internal object LockoutWidgetUpdater {
     }
 
     fun buildPreviewSnapshot(context: Context): LockoutWidgetSnapshot {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val hasStoredSnapshot = !prefs.getString(KEY_SNAPSHOT, null).isNullOrBlank()
         val current = ensureLoaded(context)
         val hasRealIdleStats = current.todayMinutes > 0 || current.streak > 0
         val hasRealWeekly = current.weeklyDays.any { it.focusSeconds > 0 }
@@ -410,9 +408,9 @@ internal object LockoutWidgetUpdater {
             sessionEndTimeMs = 0L,
             sessionEndLabel = "",
             breakPausedLabel = "",
-            useDynamicTheme = if (hasStoredSnapshot) current.useDynamicTheme else Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-            todayMinutes = if (hasRealIdleStats) current.todayMinutes else 25,
-            streak = if (hasRealIdleStats) current.streak else 4,
+            useDynamicTheme = current.useDynamicTheme,
+            todayMinutes = if (hasRealIdleStats) current.todayMinutes else 240,
+            streak = if (hasRealIdleStats) current.streak else 8,
             defaultMinutes = if (current.defaultMinutes > 0) current.defaultMinutes else 25,
             weeklyDays = previewWeekly
         )
