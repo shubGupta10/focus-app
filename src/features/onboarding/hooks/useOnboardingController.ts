@@ -2,7 +2,7 @@ import { useFocusEngine } from "@/hooks/useFocusEngine";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSettings } from "@/hooks/useSettings";
 import { router } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { analytics } from "@/utils/analytics";
 
 export function useOnboardingController() {
@@ -13,16 +13,20 @@ export function useOnboardingController() {
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSet, setSelectedSet] = useState<Set<string>>(new Set(engine.selectedApps));
+    const hasRequestedAppsRef = useRef(false);
 
     useEffect(() => {
         analytics.track("onboarding_step_viewed", { step })
     }, [step]);
 
+    const { installedApps, loadApps } = engine;
+
     useEffect(() => {
-        if (engine.installedApps.length === 0) {
-            engine.loadApps();
+        if (installedApps.length === 0 && !hasRequestedAppsRef.current) {
+            hasRequestedAppsRef.current = true;
+            loadApps();
         }
-    }, [engine.installedApps.length, engine.loadApps]);
+    }, [installedApps.length, loadApps]);
 
     useEffect(() => {
         if (engine.selectedApps.length > 0 && selectedSet.size === 0) {

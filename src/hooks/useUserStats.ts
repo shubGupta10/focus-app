@@ -56,9 +56,11 @@ export function useUserStats() {
         }
     };
 
+    const refreshStatsCallback = useCallback(() => refreshStats(db), [refreshStats, db]);
+
     return {
         stats,
-        refreshStats: () => refreshStats(db),
+        refreshStats: refreshStatsCallback,
         savedCompletedSession,
         todayStats,
         recentSessions,

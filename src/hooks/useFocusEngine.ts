@@ -1,16 +1,33 @@
 import { useAppStore } from '@/store/useAppStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { AppState, PermissionsAndroid, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
-import FocusBlocker from "../../modules/focus-blocker/src/FocusBlockerModule";
+import FocusBlocker, { AppInfo } from '../../modules/focus-blocker/src/FocusBlockerModule';
 import { analytics } from "@/utils/analytics";
 
 
 
 const engineListeners = new Set<() => void>();
 let isStartingSession = false;
+let inFlightLoadApps: Promise<void> | null = null;
+let lastSyncedBlocklistKey: string | null = null;
+
+function stringArraysEqual(a: string[], b: string[]): boolean {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
+function syncNativeBlocklist(apps: string[]) {
+    const key = apps.join(",");
+    if (lastSyncedBlocklistKey === key) return;
+    lastSyncedBlocklistKey = key;
+    FocusBlocker.updateGlobalBlocklist(apps);
+}
 
 export function notifyEngineListeners() {
     engineListeners.forEach((listener) => {
@@ -48,7 +65,7 @@ export function useFocusEngine(isRoot: boolean = false) {
     const clearSession = useAppStore(state => state.clearSession);
 
 
-    const loadSelectedApps = async () => {
+    const loadSelectedApps = useCallback(async () => {
         try {
             const rows = await db.getAllAsync<{
                 package_name: string
@@ -59,6 +76,7 @@ export function useFocusEngine(isRoot: boolean = false) {
                 useAppStore.getState().installedApps.map(a => a.packageName)
             );
 
+            let nextApps = apps;
             if (installedPackages.size > 0) {
                 const staleApps = apps.filter(pkg => !installedPackages.has(pkg));
                 if (staleApps.length > 0) {
@@ -66,20 +84,19 @@ export function useFocusEngine(isRoot: boolean = false) {
                         await db.runAsync("DELETE FROM selected_apps WHERE package_name = ?", [pkg]);
                     }
                 }
-                const cleanApps = apps.filter(pkg => installedPackages.has(pkg));
-                setEngineState({ selectedApps: cleanApps });
-                FocusBlocker.updateGlobalBlocklist(cleanApps);
-                return;
+                nextApps = apps.filter(pkg => installedPackages.has(pkg));
             }
 
-            setEngineState({ selectedApps: apps });
-            FocusBlocker.updateGlobalBlocklist(apps);
+            if (!stringArraysEqual(useAppStore.getState().selectedApps, nextApps)) {
+                setEngineState({ selectedApps: nextApps });
+            }
+            syncNativeBlocklist(nextApps);
         } catch (error) {
             console.error("Error loading selected apps:", error);
         }
-    };
+    }, [db, setEngineState]);
 
-    const stopSession = async () => {
+    const stopSession = useCallback(async () => {
         try {
             await FocusBlocker.stopService();
             await AsyncStorage.removeItem('active_session');
@@ -88,9 +105,9 @@ export function useFocusEngine(isRoot: boolean = false) {
         } catch (error: any) {
             alert("Error, stopping:" + error.message);
         }
-    };
+    }, [clearSession]);
 
-    const startSession = async (durationMinutes: number, isStrict: boolean) => {
+    const startSession = useCallback(async (durationMinutes: number, isStrict: boolean) => {
         if (isStartingSession) return;
         isStartingSession = true;
         try {
@@ -108,7 +125,7 @@ export function useFocusEngine(isRoot: boolean = false) {
             }
             const durationMs = durationMinutes > 0 ? durationMinutes * 60 * 1000 : -1;
 
-            let appsToBlock = [...selectedApps];
+            let appsToBlock = [...useAppStore.getState().selectedApps];
 
             if (isStrict) {
                 const systemApps = [
@@ -165,9 +182,9 @@ export function useFocusEngine(isRoot: boolean = false) {
         } finally {
             isStartingSession = false;
         }
-    };
+    }, [db, setSessionState]);
 
-    const checkActiveSession = async () => {
+    const checkActiveSession = useCallback(async () => {
         try {
             let nativeSession = null;
             try {
@@ -207,10 +224,12 @@ export function useFocusEngine(isRoot: boolean = false) {
                     const parsed = JSON.parse(storedSession);
 
                     if (parsed.endTime !== -1 && now >= parsed.endTime) {
-                        setSessionState(false,
-                            parsed.startTime, parsed.endTime,
-                            parsed.isStrict
-                        );
+                        if (storeState.isSessionActive || storeState.sessionStartTime !== parsed.startTime || storeState.sessionEndTime !== parsed.endTime) {
+                            setSessionState(false,
+                                parsed.startTime, parsed.endTime,
+                                parsed.isStrict
+                            );
+                        }
                         return;
                     } else {
                         let appsToBlock: string[] = [];
@@ -249,30 +268,49 @@ export function useFocusEngine(isRoot: boolean = false) {
         } catch (error) {
             console.error("Error loading active session:", error);
         }
-    };
+    }, [db, setSessionState]);
 
-    const loadApps = async () => {
-        try {
-            const apps = await FocusBlocker.getInstalledApps();
-            setEngineState({ installedApps: apps.sort((a, b) => a.name.localeCompare(b.name)) });
-            loadSelectedApps();
-        } catch (error) {
-            console.error(error);
+    const loadApps = useCallback(async () => {
+        if (inFlightLoadApps) {
+            return inFlightLoadApps;
         }
-    };
+        inFlightLoadApps = (async () => {
+            try {
+                const apps = await FocusBlocker.getInstalledApps();
+                setEngineState({ installedApps: apps.sort((a, b) => a.name.localeCompare(b.name)) });
+                await loadSelectedApps();
+            } catch (error) {
+                console.error(error);
+            } finally {
+                inFlightLoadApps = null;
+            }
+        })();
+        return inFlightLoadApps;
+    }, [setEngineState, loadSelectedApps]);
 
-    const checkPermissions = () => {
-        setEngineState({
-            hasUsage: FocusBlocker.hasUsagePermission(),
-            hasOverlay: FocusBlocker.hasOverlayPermission(),
-            hasBattery: FocusBlocker.hasBatteryPermission()
-        })
-    };
+    const checkPermissions = useCallback(() => {
+        const usage = FocusBlocker.hasUsagePermission();
+        const overlay = FocusBlocker.hasOverlayPermission();
+        const battery = FocusBlocker.hasBatteryPermission();
+        const current = useAppStore.getState();
+
+        if (
+            current.hasUsage !== usage ||
+            current.hasOverlay !== overlay ||
+            current.hasBattery !== battery
+        ) {
+            setEngineState({
+                hasUsage: usage,
+                hasOverlay: overlay,
+                hasBattery: battery,
+            });
+        }
+    }, [setEngineState]);
 
     useEffect(() => {
         if (!isRoot) return;
 
-        setTimeout(() => {
+        const loadAppsTimer = setTimeout(() => {
             loadApps();
         }, 500);
 
@@ -301,13 +339,14 @@ export function useFocusEngine(isRoot: boolean = false) {
         }, 1500);
 
         return () => {
+            clearTimeout(loadAppsTimer);
             subscription.remove();
             clearInterval(syncInterval);
             engineListeners.delete(handleSync);
         };
-    }, [isRoot]);
+    }, [isRoot, loadApps, checkPermissions, loadSelectedApps, checkActiveSession]);
 
-    const setSelectedApps = async (apps: string[]) => {
+    const setSelectedApps = useCallback(async (apps: string[]) => {
         try {
             await db.withTransactionAsync(async () => {
                 await db.runAsync("DELETE FROM selected_apps");
@@ -316,14 +355,14 @@ export function useFocusEngine(isRoot: boolean = false) {
                 }
             });
             setEngineState({ selectedApps: apps });
-            FocusBlocker.updateGlobalBlocklist(apps);
+            syncNativeBlocklist(apps);
             notifyEngineListeners();
         } catch (error) {
             console.error("Error setting selected apps in DB:", error);
         }
-    };
+    }, [db, setEngineState]);
 
-    const toggleApp = async (packageName: string) => {
+    const toggleApp = useCallback(async (packageName: string) => {
         try {
             const currentSelected = useAppStore.getState().selectedApps;
             if (currentSelected.includes(packageName)) {
@@ -332,26 +371,26 @@ export function useFocusEngine(isRoot: boolean = false) {
                 });
                 const newApps = currentSelected.filter(p => p !== packageName);
                 setEngineState({ selectedApps: newApps });
-                FocusBlocker.updateGlobalBlocklist(newApps);
+                syncNativeBlocklist(newApps);
             } else {
                 await db.runAsync("INSERT INTO selected_apps (package_name) VALUES ($packageName)", {
                     $packageName: packageName
                 });
                 const newApps = [...currentSelected, packageName];
                 setEngineState({ selectedApps: newApps });
-                FocusBlocker.updateGlobalBlocklist(newApps);
+                syncNativeBlocklist(newApps);
             }
             notifyEngineListeners();
         } catch (error) {
             console.error("Error toggling app in DB:", error);
         }
-    };
+    }, [db, setEngineState]);
 
-    const goHome = () => {
+    const goHome = useCallback(() => {
         FocusBlocker.goHome();
-    };
+    }, []);
 
-    const startBreak = async (durationMinutes: number) => {
+    const startBreak = useCallback(async (durationMinutes: number) => {
         FocusBlocker.startBreak(durationMinutes);
         const breakDurationMs = durationMinutes * 60 * 1000;
         const breakEndTime = Date.now() + breakDurationMs;
@@ -370,13 +409,13 @@ export function useFocusEngine(isRoot: boolean = false) {
         }
 
         notifyEngineListeners();
-    };
+    }, []);
 
-    const endBreak = () => {
+    const endBreak = useCallback(() => {
         endFocusBreak();
-    };
+    }, []);
 
-    return {
+    return useMemo(() => ({
         installedApps,
         selectedApps,
         isSessionActive,
@@ -400,5 +439,29 @@ export function useFocusEngine(isRoot: boolean = false) {
         sessionStartTime,
         sessionEndTime,
         refreshSessionState: checkActiveSession,
-    };
+    }), [
+        installedApps,
+        selectedApps,
+        isSessionActive,
+        isStrictSession,
+        isBreakActive,
+        breakEndTime,
+        breaksRemaining,
+        hasUsage,
+        hasOverlay,
+        hasBattery,
+        checkPermissions,
+        toggleApp,
+        loadApps,
+        loadSelectedApps,
+        setSelectedApps,
+        startSession,
+        stopSession,
+        startBreak,
+        endBreak,
+        goHome,
+        sessionStartTime,
+        sessionEndTime,
+        checkActiveSession,
+    ]);
 }

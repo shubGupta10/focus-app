@@ -26,12 +26,20 @@ export function usePermissions() {
             }
         }
 
-        setEngineState({
-            hasUsage: usage,
-            hasOverlay: overlay,
-            hasBattery: battery,
-            hasNotification: notification,
-        });
+        const current = useAppStore.getState();
+        if (
+            current.hasUsage !== usage ||
+            current.hasOverlay !== overlay ||
+            current.hasBattery !== battery ||
+            current.hasNotification !== notification
+        ) {
+            setEngineState({
+                hasUsage: usage,
+                hasOverlay: overlay,
+                hasBattery: battery,
+                hasNotification: notification,
+            });
+        }
     }, [setEngineState]);
 
     const requestUsage = useCallback(() => {

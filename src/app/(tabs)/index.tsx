@@ -117,15 +117,17 @@ export default function Index() {
         }
     }, [isCheckingOnboarding, markInteractive]);
 
+    const { loadSelectedApps, checkPermissions: checkEnginePermissions, refreshSessionState } = engine;
+
     useFocusEffect(
         useCallback(() => {
             const frameId = requestAnimationFrame(() => {
-                engine.loadSelectedApps();
-                engine.checkPermissions();
-                engine.refreshSessionState();
+                loadSelectedApps();
+                checkEnginePermissions();
+                refreshSessionState();
             });
             return () => cancelAnimationFrame(frameId);
-        }, [engine])
+        }, [loadSelectedApps, checkEnginePermissions, refreshSessionState])
     );
 
     const { hours: todayHours, minutes: todayMinutes } = secondsToHoursAndMinutes(todayStats.today_focus_seconds);
