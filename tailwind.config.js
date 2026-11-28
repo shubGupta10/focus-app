@@ -8,9 +8,18 @@ module.exports = {
         sans: ['Inter_400Regular', 'sans-serif'],
         normal: ['Inter_400Regular', 'sans-serif'],
         medium: ['Inter_500Medium', 'sans-serif'],
-        semibold: ['Inter_600SemiBold', 'sans-serif'],
-        bold: ['Inter_700Bold', 'sans-serif'],
-        black: ['Inter_900Black', 'sans-serif'],
+        semibold: ['Inter_500Medium', 'sans-serif'],
+        bold: ['Inter_600SemiBold', 'sans-serif'],
+        black: ['Inter_700Bold', 'sans-serif'],
+      },
+      // Inter weights are baked into each discrete @expo-google-fonts TTF; keeping
+      // fontWeight at 400 prevents Android Typeface.create() from applying synthetic bold on top.
+      fontWeight: {
+        normal: '400',
+        medium: '400',
+        semibold: '400',
+        bold: '400',
+        black: '400',
       },
       colors: {
         background: 'var(--color-background)',
